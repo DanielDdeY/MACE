@@ -1,0 +1,83 @@
+# ==========================================
+# 1. Java y Apache Maven (app/)
+# ==========================================
+app/target/
+**/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+hs_err_pid*
+replay_pid*
+
+# ==========================================
+# 2. C y CMake / MSVC / Ninja (native/)
+# ==========================================
+# Carpetas de compilación
+native/build/
+**/build/
+**/cmake-build-*/
+native/out/
+**/out/
+
+# Archivos de caché y configuración local de CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.ninja
+.ninja_deps
+.ninja_log
+
+# Objetos y artefactos generados por MSVC
+*.obj
+*.o
+*.ilk
+*.pdb
+*.exp
+*.lib
+*.manifest
+
+# Binario nativo generado (debe compilarse vía CMake o CI, no versionarse)
+corepulse_native.dll
+**/corepulse_native.dll
+
+# ==========================================
+# 3. Empaquetado y Distribución (packaging/)
+# ==========================================
+packaging/dist/
+packaging/output/
+packaging/runtime/
+*.msi
+*.exe
+# Permitir scripts y manifiestos de packaging
+!packaging/package-windows.bat
+!packaging/app.manifest
+
+# ==========================================
+# 4. Entornos de Desarrollo (IDEs)
+# ==========================================
+# JetBrains (IntelliJ IDEA, CLion)
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Visual Studio / VS Code
+.vs/
+*.VC.db
+*.opendb
+.vscode/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# ==========================================
+# 5. Sistema Operativo y Logs
+# ==========================================
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.log

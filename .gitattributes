@@ -1,0 +1,22 @@
+# Manejo automático de saltos de línea
+* text=auto
+
+# Archivos de código fuente y configuración (estándar LF)
+*.c text eol=lf
+*.h text eol=lf
+*.java text eol=lf
+*.xml text eol=lf
+*.css text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+
+# Scripts de Windows que requieren CRLF estrictamente
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.manifest text eol=crlf
+
+# Binarios
+*.dll binary
+*.exe binary
+*.ico binary
+*.png binary
