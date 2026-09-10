@@ -1,1 +1,75 @@
-/* comentario */
+/*
+ * dark-theme.css
+ * Complementa el tema base AtlantaFX (PrimerDark), aplicado programaticamente
+ * en MaceApplication. Aqui solo van los ajustes especificos de MACE.
+ */
+
+.root-pane {
+    -fx-background-color: -color-bg-default;
+}
+
+/* ---------- Barra de metricas (tarjetas CPU/GPU) ---------- */
+
+.metrics-bar {
+    -fx-alignment: center-left;
+}
+
+.metric-card {
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 10;
+    -fx-padding: 14 18 14 18;
+    -fx-pref-width: 220;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+.metric-card-title {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-weight: bold;
+}
+
+.metric-card-value {
+    -fx-font-size: 22px;
+    -fx-text-fill: -color-fg-default;
+    -fx-font-weight: bold;
+}
+
+.metric-card-bar {
+    -fx-pref-height: 6;
+}
+
+.metric-card-bar.metric-warning .bar {
+    -fx-background-color: -color-warning-emphasis;
+}
+
+.metric-card-bar.metric-critical .bar {
+    -fx-background-color: -color-danger-emphasis;
+}
+
+/* ---------- Panel de procesos ---------- */
+
+.process-panel {
+    -fx-background-color: -color-bg-default;
+}
+
+.search-field {
+    -fx-pref-height: 34;
+}
+
+.process-table {
+    -fx-background-color: -color-bg-subtle;
+}
+
+.danger-button {
+    -fx-background-color: -color-danger-emphasis;
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 6;
+}
+
+.danger-button:hover {
+    -fx-opacity: 0.85;
+}
