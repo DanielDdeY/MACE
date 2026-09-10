@@ -1,1 +1,57 @@
-#comentario para subir
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  Manifiesto de aplicacion Windows para el launcher de MACE (MACE.exe).
+
+  package-windows.bat lo incrusta en el ejecutable generado por jpackage con la
+  herramienta mt.exe del Windows SDK:
+
+      mt.exe -nologo -manifest app.manifest -outputresource:"MACE.exe;#1"
+
+  requireAdministrator: la capa nativa necesita un token elevado para abrir
+  procesos de otros usuarios (OpenProcess / TerminateProcess), consultar su
+  memoria y leer los registros energeticos MSR/RAPL de la CPU.
+-->
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1"
+          xmlns:asmv3="urn:schemas-microsoft-com:asm.v3"
+          manifestVersion="1.0">
+
+  <assemblyIdentity type="win32"
+                    name="CorePulse.MACE"
+                    version="1.0.0.0"
+                    processorArchitecture="amd64"/>
+
+  <description>MACE (CorePulse) - Telemetria de hardware y gestor de procesos</description>
+
+  <!-- Elevacion UAC obligatoria: sin privilegios de administrador la app no arranca. -->
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+    <security>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <requestedExecutionLevel level="requireAdministrator" uiAccess="false"/>
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+
+  <!-- Declara compatibilidad para que Windows no aplique shims de versiones antiguas. -->
+  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+    <application>
+      <!-- Windows 10 y Windows 11 -->
+      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}"/>
+      <!-- Windows 8.1 -->
+      <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}"/>
+      <!-- Windows 8 -->
+      <supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}"/>
+      <!-- Windows 7 -->
+      <supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}"/>
+    </application>
+  </compatibility>
+
+  <asmv3:application>
+    <asmv3:windowsSettings>
+      <!-- Mismo valor que usa el launcher estandar del JDK; JavaFX gestiona el escalado. -->
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
+      <!-- Rutas de proceso mayores a MAX_PATH (QueryFullProcessImageNameW). -->
+      <longPathAware xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">true</longPathAware>
+    </asmv3:windowsSettings>
+  </asmv3:application>
+
+</assembly>
