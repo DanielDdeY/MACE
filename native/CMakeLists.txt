@@ -32,7 +32,7 @@ target_compile_definitions(mace_native PRIVATE MACE_EXPORTS)
 target_link_libraries(mace_native PRIVATE kernel32 psapi user32)
 
 # Propiedades del binario de salida
-set_target_properties(Mace_native PROPERTIES
+set_target_properties(mace_native PROPERTIES
     OUTPUT_NAME "mace_native"
     PREFIX ""
 )
