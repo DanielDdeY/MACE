@@ -3,6 +3,7 @@
 #include <tlhelp32.h>
 #include <psapi.h>
 #include <stdbool.h>
+#include <wchar.h>
 
 extern bool IsBlacklistedExecutable(const wchar_t* exe_name);
 extern bool IsSystemPath(const wchar_t* full_path);
@@ -26,7 +27,7 @@ int EnumerateProcesses(ProcessData* out_buffer, uint32_t max_count, uint32_t* ou
             if (entry.th32ProcessID <= 4) continue;
             if (IsBlacklistedExecutable(entry.szExeFile)) continue;
 
-            HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, entry.th32ProcessID);
+            HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, entry.th32ProcessID);
             if (!hProcess) continue;
 
             wchar_t path[520] = {0};

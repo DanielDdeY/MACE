@@ -14,7 +14,8 @@ int TerminateProcessByPid(uint32_t pid) {
 
     UINT exit_code = 1;
     BOOL result = TerminateProcess(hProcess, exit_code);
+    DWORD error_code = result ? ERROR_SUCCESS : GetLastError();
     CloseHandle(hProcess);
 
-    return result ? 0 : (int)GetLastError();
+    return result ? 0 : (int)error_code;
 }

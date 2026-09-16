@@ -1,4 +1,4 @@
-# MACE (CorePulse)
+# MACE
 
 Sistema de telemetría de hardware pasivo de alta precisión y gestor de procesos interactivo para Windows, construido con arquitectura hexagonal desacoplada.
 
