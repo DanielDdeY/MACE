@@ -16,11 +16,11 @@
           manifestVersion="1.0">
 
   <assemblyIdentity type="win32"
-                    name="CorePulse.MACE"
+                    name="MACE.App"
                     version="1.0.0.0"
                     processorArchitecture="amd64"/>
 
-  <description>MACE (CorePulse) - Telemetria de hardware y gestor de procesos</description>
+  <description>MACE - Telemetria de hardware y gestor de procesos</description>
 
   <!-- Elevacion UAC obligatoria: sin privilegios de administrador la app no arranca. -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">

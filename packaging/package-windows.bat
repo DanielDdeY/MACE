@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================================
-REM  MACE (CorePulse) - Empaquetado nativo para Windows x64
+REM  MACE - Empaquetado nativo para Windows x64
 REM ----------------------------------------------------------------------------
 REM  Uso:
 REM      package-windows.bat [app-image | msi | exe] [opciones]
@@ -49,7 +49,7 @@ set "DIST_DIR=%PACKAGING_DIR%\dist"
 set "APP_NAME=MACE"
 set "APP_VERSION=1.0.0"
 set "APP_VENDOR=MACE Team"
-set "APP_DESCRIPTION=MACE (CorePulse) - Telemetria de hardware y gestor de procesos"
+set "APP_DESCRIPTION=MACE - Telemetria de hardware y gestor de procesos"
 set "APP_UPGRADE_UUID=7f3c2a1e-9b4d-4c6e-8a1f-2d5e6b7c8d90"
 set "MAIN_CLASS=com.mace.presentation.MaceApplication"
 set "MAIN_JAR=mace-app-1.0.0-SNAPSHOT.jar"
@@ -203,7 +203,7 @@ if errorlevel 1 (
 set "NATIVE_DLL_PATH="
 if defined MACE_NATIVE_LIB if exist "%MACE_NATIVE_LIB%" set "NATIVE_DLL_PATH=%MACE_NATIVE_LIB%"
 for %%D in ("%NATIVE_DIR%\build\Release" "%NATIVE_DIR%\build" "%NATIVE_DIR%\out\build\x64-Release" "%NATIVE_DIR%") do (
-    for %%N in (mace_native.dll corepulse_native.dll) do (
+    for %%N in (mace_native.dll) do (
         if not defined NATIVE_DLL_PATH if exist "%%~D\%%N" set "NATIVE_DLL_PATH=%%~D\%%N"
     )
 )
