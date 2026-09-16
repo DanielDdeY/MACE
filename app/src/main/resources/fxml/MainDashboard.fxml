@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.mace.presentation.view.MainDashboardController"
+            stylesheets="@../styles/dark-theme.css"
+            styleClass="root-pane">
+
+    <top>
+        <HBox fx:id="metricsBar" styleClass="metrics-bar" spacing="16">
+            <padding>
+                <Insets top="16" right="16" bottom="8" left="16" />
+            </padding>
+            <!-- Las MetricCard (CPU/GPU) se agregan dinamicamente desde el controller -->
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="8" styleClass="process-panel">
+            <padding>
+                <Insets top="8" right="16" bottom="16" left="16" />
+            </padding>
+
+            <TextField fx:id="searchField" promptText="Buscar proceso por nombre o PID..."
+                       styleClass="search-field" />
+
+            <TableView fx:id="processTable" styleClass="process-table" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="pidColumn" text="PID" prefWidth="80" />
+                    <TableColumn fx:id="nameColumn" text="Proceso" prefWidth="260" />
+                    <TableColumn fx:id="memoryColumn" text="Memoria (Working Set)" prefWidth="180" />
+                    <TableColumn fx:id="actionColumn" text="Accion" prefWidth="180" />
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+
+</BorderPane>

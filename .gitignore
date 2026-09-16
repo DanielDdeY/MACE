@@ -39,8 +39,8 @@ Makefile
 *.manifest
 
 # Binario nativo generado (debe compilarse vía CMake o CI, no versionarse)
-corepulse_native.dll
-**/corepulse_native.dll
+mace_native.dll
+**/mace_native.dll
 
 # ==========================================
 # 3. Empaquetado y Distribución (packaging/)
