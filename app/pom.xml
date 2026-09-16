@@ -19,8 +19,6 @@
         <maven.compiler.release>22</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <enable.preview.arg>--enable-preview</enable.preview.arg>
-
         <javafx.version>22.0.2</javafx.version>
         <atlantafx.version>2.0.1</atlantafx.version>
         <junit.version>5.10.2</junit.version>
@@ -88,9 +86,6 @@
                 <version>3.13.0</version>
                 <configuration>
                     <release>22</release>
-                    <compilerArgs>
-                        <arg>${enable.preview.arg}</arg>
-                    </compilerArgs>
                 </configuration>
             </plugin>
 
@@ -99,7 +94,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <argLine>--enable-preview</argLine>
+                    <argLine>--enable-native-access=ALL-UNNAMED</argLine>
                 </configuration>
             </plugin>
 
@@ -110,7 +105,7 @@
                 <configuration>
                     <mainClass>${app.mainClass}</mainClass>
                     <options>
-                        <option>--enable-preview</option>
+                        <option>--enable-native-access=ALL-UNNAMED</option>
                     </options>
                 </configuration>
             </plugin>

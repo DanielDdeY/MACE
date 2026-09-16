@@ -15,10 +15,10 @@ replay_pid*
 # ==========================================
 # Carpetas de compilación
 native/build/
-**/build/
 **/cmake-build-*/
 native/out/
-**/out/
+# OJO: nunca usar patrones genericos como **/out/ o **/build/ aqui:
+# se tragan paquetes Java legitimos como app/src/main/java/com/mace/domain/port/out/
 
 # Archivos de caché y configuración local de CMake
 CMakeCache.txt
