@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
@@ -14,33 +20,151 @@
             stylesheets="@../styles/dark-theme.css"
             styleClass="root-pane">
 
-    <top>
-        <HBox fx:id="metricsBar" styleClass="metrics-bar" spacing="16">
+    <!-- ==================== MENU LATERAL ==================== -->
+    <left>
+        <VBox fx:id="sidebar" styleClass="sidebar" prefWidth="210" spacing="6">
             <padding>
-                <Insets top="16" right="16" bottom="8" left="16" />
-            </padding>
-            <!-- Las MetricCard (CPU/GPU) se agregan dinamicamente desde el controller -->
-        </HBox>
-    </top>
-
-    <center>
-        <VBox spacing="8" styleClass="process-panel">
-            <padding>
-                <Insets top="8" right="16" bottom="16" left="16" />
+                <Insets top="20" right="12" bottom="20" left="12" />
             </padding>
 
-            <TextField fx:id="searchField" promptText="Buscar proceso por nombre o PID..."
-                       styleClass="search-field" />
+            <Label text="MACE" styleClass="sidebar-brand" />
+            <Label text="Monitor de sistema" styleClass="sidebar-subtitle" />
 
-            <TableView fx:id="processTable" styleClass="process-table" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="pidColumn" text="PID" prefWidth="80" />
-                    <TableColumn fx:id="nameColumn" text="Proceso" prefWidth="260" />
-                    <TableColumn fx:id="memoryColumn" text="Memoria (Working Set)" prefWidth="180" />
-                    <TableColumn fx:id="actionColumn" text="Accion" prefWidth="180" />
-                </columns>
-            </TableView>
+            <VBox spacing="4" styleClass="sidebar-nav">
+                <padding>
+                    <Insets top="24" />
+                </padding>
+                <ToggleButton fx:id="navCpu" text="CPU" styleClass="nav-button" maxWidth="Infinity" />
+                <ToggleButton fx:id="navGpu" text="GPU" styleClass="nav-button" maxWidth="Infinity" />
+                <ToggleButton fx:id="navHistorial" text="Historial" styleClass="nav-button" maxWidth="Infinity" />
+                <ToggleButton fx:id="navProcesos" text="Procesos" styleClass="nav-button" maxWidth="Infinity" />
+            </VBox>
         </VBox>
+    </left>
+
+    <!-- ==================== CONTENIDO ==================== -->
+    <center>
+        <StackPane styleClass="content-area">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20" />
+            </padding>
+
+            <!-- ==================== APARTADO: CPU ==================== -->
+            <VBox fx:id="paneCpu" spacing="16" styleClass="section-pane">
+                <Label text="CPU" styleClass="section-title" />
+                <Label text="Temperatura y consumo del procesador en tiempo real" styleClass="section-subtitle" />
+                <HBox fx:id="cpuGaugesBox" spacing="20" styleClass="gauges-box" />
+
+                <HBox spacing="12" styleClass="stats-row">
+                    <VBox styleClass="stat-card">
+                        <Label text="Estado" styleClass="stat-title" />
+                        <Label fx:id="cpuStatusLabel" text="--" styleClass="stat-value" />
+                    </VBox>
+                    <VBox styleClass="stat-card">
+                        <Label text="Máximo (30s)" styleClass="stat-title" />
+                        <Label fx:id="cpuMaxLabel" text="--" styleClass="stat-value" />
+                    </VBox>
+                    <VBox styleClass="stat-card">
+                        <Label text="Promedio (30s)" styleClass="stat-title" />
+                        <Label fx:id="cpuAvgLabel" text="--" styleClass="stat-value" />
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- ==================== APARTADO: GPU ==================== -->
+            <VBox fx:id="paneGpu" spacing="16" styleClass="section-pane">
+                <Label text="GPU" styleClass="section-title" />
+                <Label text="Temperatura y consumo de la tarjeta gráfica en tiempo real" styleClass="section-subtitle" />
+                <HBox fx:id="gpuGaugesBox" spacing="20" styleClass="gauges-box" />
+
+                <HBox spacing="12" styleClass="stats-row">
+                    <VBox styleClass="stat-card">
+                        <Label text="Estado" styleClass="stat-title" />
+                        <Label fx:id="gpuStatusLabel" text="--" styleClass="stat-value" />
+                    </VBox>
+                    <VBox styleClass="stat-card">
+                        <Label text="Ventilador" styleClass="stat-title" />
+                        <Label fx:id="gpuFanLabel" text="--" styleClass="stat-value" />
+                    </VBox>
+                    <VBox styleClass="stat-card">
+                        <Label text="Disponibilidad" styleClass="stat-title" />
+                        <Label fx:id="gpuAvailableLabel" text="--" styleClass="stat-value" />
+                    </VBox>
+                    <VBox styleClass="stat-card">
+                        <Label text="Máximo (30s)" styleClass="stat-title" />
+                        <Label fx:id="gpuMaxLabel" text="--" styleClass="stat-value" />
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- ==================== APARTADO: HISTORIAL (graficos separados) ==================== -->
+            <VBox fx:id="paneHistorial" spacing="12" styleClass="section-pane">
+                <Label text="Historial de temperatura" styleClass="section-title" />
+                <Label text="Evolución de los últimos 30 segundos, por componente" styleClass="section-subtitle" />
+
+                <VBox styleClass="chart-card" VBox.vgrow="ALWAYS">
+                    <Label text="Temperatura CPU" styleClass="chart-card-title" />
+                    <LineChart fx:id="cpuTempChart" legendVisible="false" animated="false"
+                               createSymbols="false" VBox.vgrow="ALWAYS">
+                        <xAxis>
+                            <NumberAxis label="Tiempo (s)" forceZeroInRange="false" />
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis label="°C" lowerBound="0" upperBound="100" tickUnit="20" autoRanging="false" />
+                        </yAxis>
+                    </LineChart>
+                </VBox>
+
+                <VBox styleClass="chart-card" VBox.vgrow="ALWAYS">
+                    <Label text="Temperatura GPU" styleClass="chart-card-title" />
+                    <LineChart fx:id="gpuTempChart" legendVisible="false" animated="false"
+                               createSymbols="false" VBox.vgrow="ALWAYS">
+                        <xAxis>
+                            <NumberAxis label="Tiempo (s)" forceZeroInRange="false" />
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis label="°C" lowerBound="0" upperBound="100" tickUnit="20" autoRanging="false" />
+                        </yAxis>
+                    </LineChart>
+                </VBox>
+            </VBox>
+
+            <!-- ==================== APARTADO: PROCESOS ==================== -->
+            <VBox fx:id="paneProcesos" spacing="12" styleClass="section-pane">
+                <Label text="Procesos activos" styleClass="section-title" />
+                <Label text="Procesos de usuario, consumo de memoria y gestión manual" styleClass="section-subtitle" />
+
+                <!-- Se conservan las dos tarjetas visuales que antes vivían en RAM. -->
+                <HBox spacing="12" styleClass="ram-top">
+                    <VBox styleClass="chart-card" prefWidth="380">
+                        <Label text="Memoria por proceso" styleClass="chart-card-title" />
+                        <PieChart fx:id="memoryPieChart" legendVisible="true" labelsVisible="false" animated="false"
+                                  VBox.vgrow="ALWAYS" />
+                    </VBox>
+
+                    <VBox styleClass="chart-card" HBox.hgrow="ALWAYS" spacing="8">
+                        <Label text="Resumen" styleClass="chart-card-title" />
+                        <Label fx:id="ramCountLabel" text="--" styleClass="ram-count-value" />
+                        <Label text="Procesos en seguimiento" styleClass="section-subtitle" />
+                        <Label fx:id="ramTotalLabel" text="--" styleClass="ram-total-value" />
+                        <Label text="Memoria total usada por los procesos listados" styleClass="section-subtitle" />
+                    </VBox>
+                </HBox>
+
+                <TextField fx:id="searchProcesos" promptText="Buscar por nombre o PID..." styleClass="search-field" />
+
+                <TableView fx:id="tablaProcesos" styleClass="process-table" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="procPidColumn" text="PID" prefWidth="80" />
+                        <TableColumn fx:id="procNombreColumn" text="Proceso" prefWidth="190" />
+                        <TableColumn fx:id="procRutaColumn" text="Ruta del ejecutable" prefWidth="330" />
+                        <TableColumn fx:id="procMemoriaColumn" text="Memoria (Working Set)" prefWidth="160" />
+                        <TableColumn fx:id="procAccionColumn" text="Acción" prefWidth="160" />
+                    </columns>
+                </TableView>
+            </VBox>
+
+        </StackPane>
     </center>
 
 </BorderPane>

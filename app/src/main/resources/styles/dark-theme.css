@@ -8,51 +8,181 @@
     -fx-background-color: -color-bg-default;
 }
 
-/* ---------- Barra de metricas (tarjetas CPU/GPU) ---------- */
+/* ---------- Menu lateral ---------- */
 
-.metrics-bar {
+.sidebar {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: transparent -color-border-default transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.sidebar-brand {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-default;
+}
+
+.sidebar-subtitle {
+    -fx-font-size: 11px;
+    -fx-text-fill: -color-fg-muted;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-fg-muted;
+    -fx-alignment: center-left;
+    -fx-padding: 10 14 10 14;
+    -fx-background-radius: 8;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-background-color: -color-bg-inset;
+    -fx-text-fill: -color-fg-default;
+}
+
+.nav-button:selected {
+    -fx-background-color: -color-accent-subtle;
+    -fx-text-fill: -color-accent-fg;
+    -fx-font-weight: bold;
+}
+
+/* ---------- Area de contenido y apartados ---------- */
+
+.content-area {
+    -fx-background-color: -color-bg-default;
+}
+
+.section-pane {
+    -fx-background-color: transparent;
+}
+
+.section-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-default;
+}
+
+.section-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-fg-muted;
+}
+
+/* ---------- Gauges (CPU / GPU) ---------- */
+
+.gauges-box {
     -fx-alignment: center-left;
 }
 
-.metric-card {
+.gauge-dial {
     -fx-background-color: -color-bg-subtle;
-    -fx-background-radius: 10;
-    -fx-padding: 14 18 14 18;
-    -fx-pref-width: 220;
+    -fx-background-radius: 12;
+    -fx-padding: 16;
     -fx-border-color: -color-border-default;
-    -fx-border-radius: 10;
+    -fx-border-radius: 12;
     -fx-border-width: 1;
 }
 
-.metric-card-title {
+.gauge-title {
     -fx-font-size: 12px;
     -fx-text-fill: -color-fg-muted;
     -fx-font-weight: bold;
 }
 
-.metric-card-value {
-    -fx-font-size: 22px;
+.gauge-value {
     -fx-text-fill: -color-fg-default;
+}
+
+/* ---------- Estadisticas en vivo (CPU / GPU) ---------- */
+
+.stats-row {
+    -fx-alignment: center-left;
+}
+
+.stat-card {
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 10;
+    -fx-padding: 12 18 12 18;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-min-width: 140;
+}
+
+.stat-title {
+    -fx-font-size: 11px;
+    -fx-text-fill: -color-fg-muted;
     -fx-font-weight: bold;
 }
 
-.metric-card-bar {
-    -fx-pref-height: 6;
+.stat-value {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-default;
 }
 
-.metric-card-bar.metric-warning .bar {
-    -fx-background-color: -color-warning-emphasis;
+.stat-value.status-ok {
+    -fx-text-fill: #3fb950;
 }
 
-.metric-card-bar.metric-critical .bar {
-    -fx-background-color: -color-danger-emphasis;
+.stat-value.status-warning {
+    -fx-text-fill: #d29922;
 }
 
-/* ---------- Panel de procesos ---------- */
-
-.process-panel {
-    -fx-background-color: -color-bg-default;
+.stat-value.status-critical {
+    -fx-text-fill: #f85149;
 }
+
+/* ---------- Tarjetas de graficos ---------- */
+
+.chart-card {
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 10;
+    -fx-padding: 12;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-spacing: 4;
+}
+
+.chart-card-title {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-weight: bold;
+}
+
+.chart {
+    -fx-background-color: transparent;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.default-color0.chart-series-line {
+    -fx-stroke: #3fb950;
+}
+
+.axis {
+    -fx-tick-label-fill: -color-fg-muted;
+}
+
+/* ---------- Resumen de procesos ---------- */
+
+.ram-total-value {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #58a6ff;
+}
+
+.ram-count-value {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-default;
+}
+
+/* ---------- Tablas y busqueda ---------- */
 
 .search-field {
     -fx-pref-height: 34;
@@ -68,6 +198,7 @@
     -fx-font-size: 11px;
     -fx-padding: 4 10 4 10;
     -fx-background-radius: 6;
+    -fx-cursor: hand;
 }
 
 .danger-button:hover {
