@@ -17,6 +17,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.chart.XYChart;
 
 import java.util.List;
 import java.util.Objects;
@@ -29,8 +30,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * ViewModel del dashboard principal. Consume exclusivamente casos de uso y el flujo de
  * telemetría; no conoce FFM, Win32 ni implementaciones concretas de infraestructura.
+ *
+ * Ademas de las propiedades de telemetria "instantanea", mantiene un historial acotado
+ * (ultimos 30 segundos) por componente para alimentar el grafico de linea del apartado
+ * "Historial" de la UI.
  */
 public final class MainDashboardViewModel implements AutoCloseable {
+
+    private static final int HISTORY_SIZE = 30;
 
     private final DoubleProperty cpuTemp = new SimpleDoubleProperty(0);
     private final DoubleProperty cpuWatts = new SimpleDoubleProperty(0);
@@ -39,6 +46,10 @@ public final class MainDashboardViewModel implements AutoCloseable {
     private final IntegerProperty gpuFanRpm = new SimpleIntegerProperty(0);
     private final BooleanProperty gpuAvailable = new SimpleBooleanProperty(false);
     private final ObservableList<ProcessRow> processes = FXCollections.observableArrayList();
+
+    private final XYChart.Series<Number, Number> cpuTempHistory = new XYChart.Series<>();
+    private final XYChart.Series<Number, Number> gpuTempHistory = new XYChart.Series<>();
+    private int tick = 0;
 
     private final PollSystemMetricsService pollService;
     private final ListProcessesService listProcessesService;
@@ -62,6 +73,9 @@ public final class MainDashboardViewModel implements AutoCloseable {
             thread.setDaemon(true);
             return thread;
         });
+
+        cpuTempHistory.setName("Temp. CPU");
+        gpuTempHistory.setName("Temp. GPU");
     }
 
     /** Inicia el sondeo periódico a 1 Hz. Es idempotente. */
@@ -118,6 +132,17 @@ public final class MainDashboardViewModel implements AutoCloseable {
         gpuWatts.set(snapshot.gpuWatts());
         gpuFanRpm.set(snapshot.gpuFanRpm());
         gpuAvailable.set(snapshot.gpuAvailable());
+
+        pushHistoryPoint(cpuTempHistory, snapshot.cpuTemp());
+        pushHistoryPoint(gpuTempHistory, snapshot.gpuAvailable() ? snapshot.gpuTemp() : 0);
+        tick++;
+    }
+
+    private void pushHistoryPoint(XYChart.Series<Number, Number> series, double value) {
+        series.getData().add(new XYChart.Data<>(tick, value));
+        if (series.getData().size() > HISTORY_SIZE) {
+            series.getData().remove(0);
+        }
     }
 
     public DoubleProperty cpuTempProperty() { return cpuTemp; }
@@ -127,6 +152,8 @@ public final class MainDashboardViewModel implements AutoCloseable {
     public IntegerProperty gpuFanRpmProperty() { return gpuFanRpm; }
     public BooleanProperty gpuAvailableProperty() { return gpuAvailable; }
     public ObservableList<ProcessRow> getProcesses() { return processes; }
+    public XYChart.Series<Number, Number> getCpuTempHistory() { return cpuTempHistory; }
+    public XYChart.Series<Number, Number> getGpuTempHistory() { return gpuTempHistory; }
 
     @Override
     public void close() {
