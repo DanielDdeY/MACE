@@ -3,6 +3,7 @@ package com.mace.presentation.view;
 import com.mace.application.usecase.TerminationResult;
 import com.mace.application.usecase.TerminationStatus;
 import com.mace.presentation.view.component.GaugeDial;
+import com.mace.presentation.view.component.NavIcon;
 import com.mace.presentation.viewmodel.MainDashboardViewModel;
 import com.mace.presentation.viewmodel.ProcessRow;
 import com.mace.presentation.viewmodel.ProcessTableViewModel;
@@ -97,6 +98,7 @@ public final class MainDashboardController {
     @FXML
     public void initialize() {
         buildGauges();
+        buildNavIcons();
         configureNavigation();
         configureHistoryCharts();
         configureProcesosTable();
@@ -108,6 +110,13 @@ public final class MainDashboardController {
     }
 
     // ==================== NAVEGACION ====================
+
+    private void buildNavIcons() {
+        navCpu.setGraphic(NavIcon.cpu());
+        navGpu.setGraphic(NavIcon.gpu());
+        navHistorial.setGraphic(NavIcon.historial());
+        navProcesos.setGraphic(NavIcon.procesos());
+    }
 
     private void configureNavigation() {
         ToggleGroup group = new ToggleGroup();

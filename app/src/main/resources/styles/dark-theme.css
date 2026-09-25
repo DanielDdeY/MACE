@@ -35,6 +35,7 @@
     -fx-background-radius: 8;
     -fx-font-size: 13px;
     -fx-cursor: hand;
+    -fx-graphic-text-gap: 10;
 }
 
 .nav-button:hover {
@@ -46,6 +47,34 @@
     -fx-background-color: -color-accent-subtle;
     -fx-text-fill: -color-accent-fg;
     -fx-font-weight: bold;
+}
+
+/* Iconos del menu lateral: dibujados con formas JavaFX (ver NavIcon.java),
+   el color sigue el mismo estado (normal / hover / seleccionado) que el texto. */
+.nav-icon {
+    -fx-stroke: -color-fg-muted;
+    -fx-fill: transparent;
+}
+
+.nav-icon-dot {
+    -fx-fill: -color-fg-muted;
+    -fx-stroke: transparent;
+}
+
+.nav-button:hover .nav-icon {
+    -fx-stroke: -color-fg-default;
+}
+
+.nav-button:hover .nav-icon-dot {
+    -fx-fill: -color-fg-default;
+}
+
+.nav-button:selected .nav-icon {
+    -fx-stroke: -color-accent-fg;
+}
+
+.nav-button:selected .nav-icon-dot {
+    -fx-fill: -color-accent-fg;
 }
 
 /* ---------- Area de contenido y apartados ---------- */
