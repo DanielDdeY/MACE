@@ -4,7 +4,7 @@
 extern bool Nvml_Init(void);
 extern void Nvml_Shutdown(void);
 extern bool Nvml_PollMetrics(float* out_temp, float* out_watts, uint32_t* out_fan_rpm);
-extern void CpuSensors_Poll(float* out_temp, float* out_watts);
+extern void CpuSensors_Poll(float* out_temp, float* out_watts, float* out_usage);
 extern int  EnumerateProcesses(ProcessData* out_buffer, uint32_t max_count, uint32_t* out_count);
 extern int  TerminateProcessByPid(uint32_t pid);
 extern int  CheckWindowHung(uint32_t pid);
@@ -25,7 +25,7 @@ CP_API void CP_ShutdownTelemetry(void) {
 CP_API int CP_PollTelemetry(TelemetryData* out_data) {
     if (!out_data) return -1;
 
-    CpuSensors_Poll(&out_data->cpu_temp, &out_data->cpu_watts);
+    CpuSensors_Poll(&out_data->cpu_temp, &out_data->cpu_watts, &out_data->cpu_usage);
 
     if (g_telemetry_ready) {
         bool gpu_ok = Nvml_PollMetrics(&out_data->gpu_temp, &out_data->gpu_watts, &out_data->gpu_fan_rpm);

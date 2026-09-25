@@ -64,6 +64,7 @@ public final class MainDashboardController {
 
     // ---- Historial ----
     @FXML private LineChart<Number, Number> cpuTempChart;
+    @FXML private LineChart<Number, Number> cpuUsageChart;
     @FXML private LineChart<Number, Number> gpuTempChart;
 
     // ---- Procesos ----
@@ -85,6 +86,7 @@ public final class MainDashboardController {
 
     private GaugeDial cpuTempGauge;
     private GaugeDial cpuWattsGauge;
+    private GaugeDial cpuUsageGauge;
     private GaugeDial gpuTempGauge;
     private GaugeDial gpuWattsGauge;
 
@@ -145,7 +147,8 @@ public final class MainDashboardController {
     private void buildGauges() {
         cpuTempGauge = new GaugeDial("Temp. CPU", "°C", 100);
         cpuWattsGauge = new GaugeDial("Consumo CPU", "W", 65);
-        cpuGaugesBox.getChildren().addAll(cpuTempGauge, cpuWattsGauge);
+        cpuUsageGauge = new GaugeDial("Uso CPU", "%", 100);
+        cpuGaugesBox.getChildren().addAll(cpuUsageGauge, cpuTempGauge, cpuWattsGauge);
 
         gpuTempGauge = new GaugeDial("Temp. GPU", "°C", 100);
         gpuWattsGauge = new GaugeDial("Consumo GPU", "W", 200);
@@ -155,6 +158,7 @@ public final class MainDashboardController {
     private void bindTelemetry() {
         dashboardViewModel.cpuTempProperty().addListener((obs, o, n) -> cpuTempGauge.setValue(n.doubleValue()));
         dashboardViewModel.cpuWattsProperty().addListener((obs, o, n) -> cpuWattsGauge.setValue(n.doubleValue()));
+        dashboardViewModel.cpuUsageProperty().addListener((obs, o, n) -> cpuUsageGauge.setValue(n.doubleValue()));
         dashboardViewModel.gpuTempProperty().addListener((obs, o, n) -> gpuTempGauge.setValue(n.doubleValue()));
         dashboardViewModel.gpuWattsProperty().addListener((obs, o, n) -> gpuWattsGauge.setValue(n.doubleValue()));
 
@@ -180,6 +184,7 @@ public final class MainDashboardController {
 
     private void configureHistoryCharts() {
         cpuTempChart.getData().add(dashboardViewModel.getCpuTempHistory());
+        cpuUsageChart.getData().add(dashboardViewModel.getCpuUsageHistory());
         gpuTempChart.getData().add(dashboardViewModel.getGpuTempHistory());
     }
 

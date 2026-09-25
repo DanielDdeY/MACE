@@ -41,6 +41,7 @@ public final class MainDashboardViewModel implements AutoCloseable {
 
     private final DoubleProperty cpuTemp = new SimpleDoubleProperty(0);
     private final DoubleProperty cpuWatts = new SimpleDoubleProperty(0);
+    private final DoubleProperty cpuUsage = new SimpleDoubleProperty(0);
     private final DoubleProperty gpuTemp = new SimpleDoubleProperty(0);
     private final DoubleProperty gpuWatts = new SimpleDoubleProperty(0);
     private final IntegerProperty gpuFanRpm = new SimpleIntegerProperty(0);
@@ -48,6 +49,7 @@ public final class MainDashboardViewModel implements AutoCloseable {
     private final ObservableList<ProcessRow> processes = FXCollections.observableArrayList();
 
     private final XYChart.Series<Number, Number> cpuTempHistory = new XYChart.Series<>();
+    private final XYChart.Series<Number, Number> cpuUsageHistory = new XYChart.Series<>();
     private final XYChart.Series<Number, Number> gpuTempHistory = new XYChart.Series<>();
     private int tick = 0;
 
@@ -75,6 +77,7 @@ public final class MainDashboardViewModel implements AutoCloseable {
         });
 
         cpuTempHistory.setName("Temp. CPU");
+        cpuUsageHistory.setName("Uso CPU");
         gpuTempHistory.setName("Temp. GPU");
     }
 
@@ -128,12 +131,14 @@ public final class MainDashboardViewModel implements AutoCloseable {
     private void applyTelemetry(TelemetrySnapshot snapshot) {
         cpuTemp.set(snapshot.cpuTemp());
         cpuWatts.set(snapshot.cpuWatts());
+        cpuUsage.set(snapshot.cpuUsage());
         gpuTemp.set(snapshot.gpuTemp());
         gpuWatts.set(snapshot.gpuWatts());
         gpuFanRpm.set(snapshot.gpuFanRpm());
         gpuAvailable.set(snapshot.gpuAvailable());
 
         pushHistoryPoint(cpuTempHistory, snapshot.cpuTemp());
+        pushHistoryPoint(cpuUsageHistory, snapshot.cpuUsage());
         pushHistoryPoint(gpuTempHistory, snapshot.gpuAvailable() ? snapshot.gpuTemp() : 0);
         tick++;
     }
@@ -147,12 +152,14 @@ public final class MainDashboardViewModel implements AutoCloseable {
 
     public DoubleProperty cpuTempProperty() { return cpuTemp; }
     public DoubleProperty cpuWattsProperty() { return cpuWatts; }
+    public DoubleProperty cpuUsageProperty() { return cpuUsage; }
     public DoubleProperty gpuTempProperty() { return gpuTemp; }
     public DoubleProperty gpuWattsProperty() { return gpuWatts; }
     public IntegerProperty gpuFanRpmProperty() { return gpuFanRpm; }
     public BooleanProperty gpuAvailableProperty() { return gpuAvailable; }
     public ObservableList<ProcessRow> getProcesses() { return processes; }
     public XYChart.Series<Number, Number> getCpuTempHistory() { return cpuTempHistory; }
+    public XYChart.Series<Number, Number> getCpuUsageHistory() { return cpuUsageHistory; }
     public XYChart.Series<Number, Number> getGpuTempHistory() { return gpuTempHistory; }
 
     @Override

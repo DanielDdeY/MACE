@@ -99,8 +99,21 @@
 
             <!-- ==================== APARTADO: HISTORIAL (graficos separados) ==================== -->
             <VBox fx:id="paneHistorial" spacing="12" styleClass="section-pane">
-                <Label text="Historial de temperatura" styleClass="section-title" />
+                <Label text="Historial en tiempo real" styleClass="section-title" />
                 <Label text="Evolución de los últimos 30 segundos, por componente" styleClass="section-subtitle" />
+
+                <VBox styleClass="chart-card" VBox.vgrow="ALWAYS">
+                    <Label text="Uso de CPU" styleClass="chart-card-title" />
+                    <LineChart fx:id="cpuUsageChart" legendVisible="false" animated="false"
+                               createSymbols="false" VBox.vgrow="ALWAYS">
+                        <xAxis>
+                            <NumberAxis label="Tiempo (s)" forceZeroInRange="false" />
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis label="\%" lowerBound="0" upperBound="100" tickUnit="20" autoRanging="false" />
+                        </yAxis>
+                    </LineChart>
+                </VBox>
 
                 <VBox styleClass="chart-card" VBox.vgrow="ALWAYS">
                     <Label text="Temperatura CPU" styleClass="chart-card-title" />

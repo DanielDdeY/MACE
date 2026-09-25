@@ -110,10 +110,17 @@ if not exist "%JDK_BIN%\java.exe" (
     exit /b 1
 )
 
+REM La salida de "java -version" se vuelca a un archivo temporal y se parsea con
+REM findstr. Evita el fallo clasico de 'for /f' cuando JDK_BIN contiene espacios
+REM (p. ej. C:\Program Files\...): al ir la ruta entrecomillada como primer token
+REM del comando, el parser la partia en el espacio y la version salia vacia.
 set "JAVA_VERSION="
-for /f "tokens=3" %%V in ('"%JDK_BIN%\java.exe" -version 2^>^&1 ^| findstr /i "version"') do (
+set "JAVA_VER_TMP=%TEMP%\mace_javaver_%RANDOM%.txt"
+"%JDK_BIN%\java.exe" -version > "%JAVA_VER_TMP%" 2>&1
+for /f "tokens=3" %%V in ('findstr /i "version" "%JAVA_VER_TMP%"') do (
     if not defined JAVA_VERSION set "JAVA_VERSION=%%~V"
 )
+del "%JAVA_VER_TMP%" >nul 2>&1
 set "JAVA_MAJOR="
 for /f "tokens=1 delims=." %%M in ("%JAVA_VERSION%") do set "JAVA_MAJOR=%%M"
 if not defined JAVA_MAJOR set "JAVA_MAJOR=0"
