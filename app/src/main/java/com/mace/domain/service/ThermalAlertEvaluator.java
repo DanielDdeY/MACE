@@ -1,13 +1,13 @@
 package com.mace.domain.service;
 
-import com.mace.domain.model.AlertLevel;
-import com.mace.domain.model.TelemetrySnapshot;
-import com.mace.domain.model.ThermalAlert;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import com.mace.domain.model.AlertLevel;
+import com.mace.domain.model.TelemetrySnapshot;
+import com.mace.domain.model.ThermalAlert;
 
 /**
  * Servicio de dominio puro (sin dependencias de puertos) que evalúa
@@ -31,6 +31,7 @@ public final class ThermalAlertEvaluator {
     private static final String SOURCE_GPU = "GPU";
 
     /**
+     * Validación optimizada de umbrales térmicos para CPU y GPU.
      * Evalúa un snapshot y devuelve únicamente las alertas accionables
      * (nivel WARNING o CRITICAL). Si ninguna fuente supera el umbral,
      * devuelve una lista vacía.
