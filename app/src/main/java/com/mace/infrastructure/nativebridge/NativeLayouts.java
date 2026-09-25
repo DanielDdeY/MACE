@@ -30,7 +30,7 @@ import static java.lang.foreign.ValueLayout.JAVA_LONG;
  *   +1568  uint64_t working_set_bytes
  *   +1576  uint64_t private_bytes
  *
- * TelemetryData (24 bytes, alineación 4)
+ * TelemetryData (28 bytes, alineación 4)
  *   +0     float    cpu_temp
  *   +4     float    cpu_watts
  *   +8     float    gpu_temp
@@ -38,6 +38,7 @@ import static java.lang.foreign.ValueLayout.JAVA_LONG;
  *   +16    uint32_t gpu_fan_rpm
  *   +20    uint8_t  is_gpu_available
  *   +21    uint8_t  _padding[3]
+ *   +24    float    cpu_usage        (uso de CPU 0-100 %, real vía GetSystemTimes)
  *
  * BlackboxSharedHeader (16 bytes, alineación 4)
  *   +0     uint32_t magic_header
@@ -102,10 +103,11 @@ public final class NativeLayouts {
             JAVA_FLOAT.withName("gpu_watts"),
             JAVA_INT.withName("gpu_fan_rpm"),
             JAVA_BYTE.withName("is_gpu_available"),
-            MemoryLayout.paddingLayout(3)
+            MemoryLayout.paddingLayout(3),
+            JAVA_FLOAT.withName("cpu_usage")
     ).withName("TelemetryData");
 
-    /** {@code sizeof(TelemetryData)} = 24. */
+    /** {@code sizeof(TelemetryData)} = 28. */
     public static final long TELEMETRY_DATA_SIZE = TELEMETRY_DATA.byteSize();
 
     public static final long TELEMETRY_CPU_TEMP_OFFSET = TELEMETRY_DATA.byteOffset(PathElement.groupElement("cpu_temp"));
@@ -116,6 +118,8 @@ public final class NativeLayouts {
             TELEMETRY_DATA.byteOffset(PathElement.groupElement("gpu_fan_rpm"));
     public static final long TELEMETRY_GPU_AVAILABLE_OFFSET =
             TELEMETRY_DATA.byteOffset(PathElement.groupElement("is_gpu_available"));
+    public static final long TELEMETRY_CPU_USAGE_OFFSET =
+            TELEMETRY_DATA.byteOffset(PathElement.groupElement("cpu_usage"));
 
     // ------------------------------------------------------------------
     // BlackboxSharedHeader (extensión futura: caja negra en memoria compartida)

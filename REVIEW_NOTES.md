@@ -28,7 +28,7 @@ Esta versión corrige los problemas estructurales detectados al comparar el repo
 
 ## Puntos todavía incompletos o técnicamente problemáticos
 
-1. `native/src/telemetry/cpu_sensors.c` sigue devolviendo valores constantes (`42.0 °C` y `25.5 W`). Eso no constituye telemetría real. La lectura directa de MSR/RAPL desde una aplicación Windows de user-space requiere un mecanismo adicional con privilegios/controlador; no debe presentarse como una lectura real hasta implementar ese acceso.
+1. `native/src/telemetry/cpu_sensors.c` ya expone el **uso de CPU real** de todo el sistema (campo `cpu_usage`, porcentaje 0-100) calculado por diferencia de tiempos con `GetSystemTimes()`. En cambio, la **temperatura** (`42.0 °C`) y el **consumo** (`25.5 W`) siguen siendo valores constantes: la lectura directa de MSR/RAPL desde una aplicación Windows de user-space requiere un mecanismo adicional con privilegios/controlador y no debe presentarse como lectura real hasta implementar ese acceso.
 2. `nvmlDeviceGetFanSpeed()` devuelve porcentaje de velocidad, no RPM. El campo actual del contrato se llama `gpu_fan_rpm`. Para obtener RPM reales debe migrarse al API `nvmlDeviceGetFanSpeedRPM` cuando la versión de NVML instalada lo soporte, o cambiar explícitamente el contrato a porcentaje.
 3. El módulo de memoria compartida de caja negra sigue siendo un hook futuro. `SetupSharedTelemetryBuffer()` crea un mapping pero todavía no existe un API de liberación/unmap, por lo que no debe activarse en producción hasta completar su ciclo de vida.
 4. Los cuatro módulos futuros indicados en la arquitectura (detector de fugas/cuelgues, panel móvil, caja negra completa y Micro-HUD) permanecen como puntos de extensión, tal como define el MVP.

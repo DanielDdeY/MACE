@@ -25,7 +25,7 @@ class NativeLayoutsTest {
 
     @Test
     void telemetryDataCoincideConSizeofYOffsetofDeC() {
-        assertEquals(24L, NativeLayouts.TELEMETRY_DATA_SIZE, "sizeof(TelemetryData)");
+        assertEquals(28L, NativeLayouts.TELEMETRY_DATA_SIZE, "sizeof(TelemetryData)");
         assertEquals(4L, NativeLayouts.TELEMETRY_DATA.byteAlignment(), "alignof(TelemetryData)");
 
         assertEquals(0L, NativeLayouts.TELEMETRY_CPU_TEMP_OFFSET);
@@ -34,6 +34,7 @@ class NativeLayoutsTest {
         assertEquals(12L, NativeLayouts.TELEMETRY_GPU_WATTS_OFFSET);
         assertEquals(16L, NativeLayouts.TELEMETRY_GPU_FAN_RPM_OFFSET);
         assertEquals(20L, NativeLayouts.TELEMETRY_GPU_AVAILABLE_OFFSET);
+        assertEquals(24L, NativeLayouts.TELEMETRY_CPU_USAGE_OFFSET);
     }
 
     @Test

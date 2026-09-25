@@ -97,10 +97,17 @@ class NativeTelemetryIntegrationTest {
                                 NativeLayouts.TELEMETRY_GPU_AVAILABLE_OFFSET
                         );
 
+                float cpuUsage =
+                        telemetry.get(
+                                JAVA_FLOAT,
+                                NativeLayouts.TELEMETRY_CPU_USAGE_OFFSET
+                        );
+
                 System.out.println();
                 System.out.println("=== DATOS RECIBIDOS DIRECTAMENTE DE C ===");
                 System.out.println("CPU temperatura : " + cpuTemp);
                 System.out.println("CPU watts       : " + cpuWatts);
+                System.out.println("CPU uso (%)     : " + cpuUsage);
                 System.out.println("GPU temperatura : " + gpuTemp);
                 System.out.println("GPU watts       : " + gpuWatts);
                 System.out.println("GPU fan         : " + gpuFan);
@@ -110,6 +117,9 @@ class NativeTelemetryIntegrationTest {
                 assertFalse(Float.isNaN(cpuWatts));
                 assertFalse(Float.isNaN(gpuTemp));
                 assertFalse(Float.isNaN(gpuWatts));
+                assertFalse(Float.isNaN(cpuUsage));
+                assertTrue(cpuUsage >= 0.0f && cpuUsage <= 100.0f,
+                        "El uso de CPU debe estar en [0, 100], fue: " + cpuUsage);
             }
 
             /*

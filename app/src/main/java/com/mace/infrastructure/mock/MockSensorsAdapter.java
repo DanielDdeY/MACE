@@ -108,9 +108,11 @@ public final class MockSensorsAdapter implements HardwareSensorsPort {
     public synchronized TelemetrySnapshot fetchCurrentTelemetry() {
         cpuTemp = step(cpuTemp, profile.cpuMean, CPU_TEMP_MIN, CPU_TEMP_MAX);
         float cpuWatts = clamp(8f + (cpuTemp - CPU_TEMP_MIN) * 1.8f + gaussian(2.5f), 5f, CPU_WATTS_MAX);
+        // Uso de CPU simulado: correlacionado con la temperatura para que la demo sea coherente.
+        float cpuUsage = clamp((cpuTemp - CPU_TEMP_MIN) / (CPU_TEMP_MAX - CPU_TEMP_MIN) * 100f + gaussian(4f), 0f, 100f);
 
         if (!gpuAvailable) {
-            return new TelemetrySnapshot(round1(cpuTemp), round1(cpuWatts), 0f, 0f, 0, false, clock.instant());
+            return new TelemetrySnapshot(round1(cpuTemp), round1(cpuWatts), round1(cpuUsage), 0f, 0f, 0, false, clock.instant());
         }
 
         gpuTemp = step(gpuTemp, profile.gpuMean, GPU_TEMP_MIN, GPU_TEMP_MAX);
@@ -120,7 +122,7 @@ public final class MockSensorsAdapter implements HardwareSensorsPort {
                 : (int) clamp(650f + (gpuTemp - FAN_STOP_BELOW_CELSIUS) * 48f + gaussian(60f), 0f, GPU_FAN_RPM_MAX);
 
         return new TelemetrySnapshot(
-                round1(cpuTemp), round1(cpuWatts),
+                round1(cpuTemp), round1(cpuWatts), round1(cpuUsage),
                 round1(gpuTemp), round1(gpuWatts),
                 gpuFanRpm, true, clock.instant());
     }

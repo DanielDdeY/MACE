@@ -76,6 +76,7 @@ public final class FfmSensorsAdapter implements HardwareSensorsPort {
         Objects.requireNonNull(telemetry, "telemetry no puede ser null");
         float cpuTemp = telemetry.get(JAVA_FLOAT, NativeLayouts.TELEMETRY_CPU_TEMP_OFFSET);
         float cpuWatts = telemetry.get(JAVA_FLOAT, NativeLayouts.TELEMETRY_CPU_WATTS_OFFSET);
+        float cpuUsage = telemetry.get(JAVA_FLOAT, NativeLayouts.TELEMETRY_CPU_USAGE_OFFSET);
         boolean gpuAvailable = telemetry.get(JAVA_BYTE, NativeLayouts.TELEMETRY_GPU_AVAILABLE_OFFSET) != 0;
 
         float gpuTemp = 0f;
@@ -86,7 +87,7 @@ public final class FfmSensorsAdapter implements HardwareSensorsPort {
             gpuWatts = telemetry.get(JAVA_FLOAT, NativeLayouts.TELEMETRY_GPU_WATTS_OFFSET);
             gpuFanRpm = toNonNegativeInt(telemetry.get(JAVA_INT, NativeLayouts.TELEMETRY_GPU_FAN_RPM_OFFSET));
         }
-        return new TelemetrySnapshot(cpuTemp, cpuWatts, gpuTemp, gpuWatts, gpuFanRpm, gpuAvailable, timestamp);
+        return new TelemetrySnapshot(cpuTemp, cpuWatts, cpuUsage, gpuTemp, gpuWatts, gpuFanRpm, gpuAvailable, timestamp);
     }
 
     /** Un {@code uint32_t} mayor que {@code Integer.MAX_VALUE} se satura en lugar de volverse negativo. */
