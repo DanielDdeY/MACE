@@ -1,8 +1,8 @@
 package com.mace.domain.service;
 
-import com.mace.domain.model.ProcessId;
-
 import java.util.Set;
+
+import com.mace.domain.model.ProcessId;
 
 /**
  * Servicio de dominio que identifica procesos protegidos del sistema
