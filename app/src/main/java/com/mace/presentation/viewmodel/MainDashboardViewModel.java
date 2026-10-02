@@ -42,6 +42,7 @@ public final class MainDashboardViewModel implements AutoCloseable {
     private final DoubleProperty cpuTemp = new SimpleDoubleProperty(0);
     private final DoubleProperty cpuWatts = new SimpleDoubleProperty(0);
     private final DoubleProperty cpuUsage = new SimpleDoubleProperty(0);
+    private final BooleanProperty cpuSensorAvailable = new SimpleBooleanProperty(true);
     private final DoubleProperty gpuTemp = new SimpleDoubleProperty(0);
     private final DoubleProperty gpuWatts = new SimpleDoubleProperty(0);
     private final IntegerProperty gpuFanRpm = new SimpleIntegerProperty(0);
@@ -132,6 +133,7 @@ public final class MainDashboardViewModel implements AutoCloseable {
         cpuTemp.set(snapshot.cpuTemp());
         cpuWatts.set(snapshot.cpuWatts());
         cpuUsage.set(snapshot.cpuUsage());
+        cpuSensorAvailable.set(snapshot.cpuSensorAvailable());
         gpuTemp.set(snapshot.gpuTemp());
         gpuWatts.set(snapshot.gpuWatts());
         gpuFanRpm.set(snapshot.gpuFanRpm());
@@ -153,6 +155,7 @@ public final class MainDashboardViewModel implements AutoCloseable {
     public DoubleProperty cpuTempProperty() { return cpuTemp; }
     public DoubleProperty cpuWattsProperty() { return cpuWatts; }
     public DoubleProperty cpuUsageProperty() { return cpuUsage; }
+    public BooleanProperty cpuSensorAvailableProperty() { return cpuSensorAvailable; }
     public DoubleProperty gpuTempProperty() { return gpuTemp; }
     public DoubleProperty gpuWattsProperty() { return gpuWatts; }
     public IntegerProperty gpuFanRpmProperty() { return gpuFanRpm; }

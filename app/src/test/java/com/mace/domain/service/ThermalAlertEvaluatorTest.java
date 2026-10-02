@@ -57,6 +57,16 @@ class ThermalAlertEvaluatorTest {
     }
 
     @Test
+    void noEvaluaCpuCuandoSuSensorNoEstaDisponible() {
+        // Sin sensor real la temperatura de CPU no es una lectura: no debe disparar alertas.
+        TelemetrySnapshot snapshot = new TelemetrySnapshot(99f, 0f, 50f, false, 50f, 100f, 1500, true, now);
+
+        List<ThermalAlert> alerts = evaluator.evaluate(snapshot);
+
+        assertTrue(alerts.isEmpty());
+    }
+
+    @Test
     void temperaturaExactamenteEnElUmbralNoEsAccionable() {
         // El umbral es estrictamente mayor a 75.0, no >=.
         TelemetrySnapshot snapshot = new TelemetrySnapshot(75.0f, 65f, 68f, 50f, 100f, 1500, true, now);
