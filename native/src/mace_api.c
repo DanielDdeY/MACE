@@ -1,10 +1,18 @@
+#ifndef MACE_EXPORTS
+#define MACE_EXPORTS
+#endif
+
+#ifndef COREPULSE_EXPORTS
+#define COREPULSE_EXPORTS
+#endif
+
 #include "mace_api.h"
 
 // Prototipos internos de módulos
 extern bool Nvml_Init(void);
 extern void Nvml_Shutdown(void);
 extern bool Nvml_PollMetrics(float* out_temp, float* out_watts, uint32_t* out_fan_rpm);
-extern void CpuSensors_Poll(float* out_temp, float* out_watts, float* out_usage);
+extern void CpuSensors_Poll(float* out_temp, float* out_watts);
 extern int  EnumerateProcesses(ProcessData* out_buffer, uint32_t max_count, uint32_t* out_count);
 extern int  TerminateProcessByPid(uint32_t pid);
 extern int  CheckWindowHung(uint32_t pid);
@@ -25,8 +33,9 @@ CP_API void CP_ShutdownTelemetry(void) {
 CP_API int CP_PollTelemetry(TelemetryData* out_data) {
     if (!out_data) return -1;
 
-    CpuSensors_Poll(&out_data->cpu_temp, &out_data->cpu_watts, &out_data->cpu_usage);
+    CpuSensors_Poll(&out_data->cpu_temp, &out_data->cpu_watts);
 
+    // Lectura de GPU (NVIDIA NVML con fallback)
     if (g_telemetry_ready) {
         bool gpu_ok = Nvml_PollMetrics(&out_data->gpu_temp, &out_data->gpu_watts, &out_data->gpu_fan_rpm);
         out_data->is_gpu_available = gpu_ok ? 1 : 0;
