@@ -165,8 +165,16 @@ public final class MainDashboardController {
     }
 
     private void bindTelemetry() {
-        dashboardViewModel.cpuTempProperty().addListener((obs, o, n) -> cpuTempGauge.setValue(n.doubleValue()));
-        dashboardViewModel.cpuWattsProperty().addListener((obs, o, n) -> cpuWattsGauge.setValue(n.doubleValue()));
+        dashboardViewModel.cpuTempProperty().addListener((obs, o, n) -> {
+            if (dashboardViewModel.cpuSensorAvailableProperty().get()) {
+                cpuTempGauge.setValue(n.doubleValue());
+            }
+        });
+        dashboardViewModel.cpuWattsProperty().addListener((obs, o, n) -> {
+            if (dashboardViewModel.cpuSensorAvailableProperty().get()) {
+                cpuWattsGauge.setValue(n.doubleValue());
+            }
+        });
         dashboardViewModel.cpuUsageProperty().addListener((obs, o, n) -> cpuUsageGauge.setValue(n.doubleValue()));
         dashboardViewModel.gpuTempProperty().addListener((obs, o, n) -> gpuTempGauge.setValue(n.doubleValue()));
         dashboardViewModel.gpuWattsProperty().addListener((obs, o, n) -> gpuWattsGauge.setValue(n.doubleValue()));
@@ -179,6 +187,19 @@ public final class MainDashboardController {
                 gpuTempGauge.setValue(dashboardViewModel.gpuTempProperty().get());
                 gpuWattsGauge.setValue(dashboardViewModel.gpuWattsProperty().get());
             }
+        });
+
+        // Sin WinRing0 (o en CPU no Intel) la temperatura y el consumo de CPU no son
+        // legibles: se muestra N/D en lugar de un 0 que parecería una lectura real.
+        dashboardViewModel.cpuSensorAvailableProperty().addListener((obs, o, available) -> {
+            if (!available) {
+                cpuTempGauge.setUnavailable();
+                cpuWattsGauge.setUnavailable();
+            } else {
+                cpuTempGauge.setValue(dashboardViewModel.cpuTempProperty().get());
+                cpuWattsGauge.setValue(dashboardViewModel.cpuWattsProperty().get());
+            }
+            updateCpuStats();
         });
 
         // En una Radeon/AMD gpuAvailable empieza y permanece en false; inicializamos
@@ -230,6 +251,13 @@ public final class MainDashboardController {
 
     private void updateCpuStats() {
         List<XYChart.Data<Number, Number>> points = dashboardViewModel.getCpuTempHistory().getData();
+        if (!dashboardViewModel.cpuSensorAvailableProperty().get()) {
+            cpuStatusLabel.getStyleClass().removeAll("status-ok", "status-warning", "status-critical");
+            cpuStatusLabel.setText("N/D");
+            cpuMaxLabel.setText("N/D");
+            cpuAvgLabel.setText("N/D");
+            return;
+        }
         if (points.isEmpty()) {
             return;
         }

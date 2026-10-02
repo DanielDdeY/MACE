@@ -33,6 +33,7 @@ class FfmSensorsAdapterTest {
             assertEquals(61.5f, snapshot.cpuTemp());
             assertEquals(45.25f, snapshot.cpuWatts());
             assertEquals(33.5f, snapshot.cpuUsage());
+            assertTrue(snapshot.cpuSensorAvailable());
             assertEquals(70.0f, snapshot.gpuTemp());
             assertEquals(180.5f, snapshot.gpuWatts());
             assertEquals(1500, snapshot.gpuFanRpm());
@@ -56,6 +57,22 @@ class FfmSensorsAdapterTest {
             assertEquals(0f, snapshot.gpuWatts());
             assertEquals(0, snapshot.gpuFanRpm());
             assertFalse(snapshot.gpuAvailable());
+        }
+    }
+
+    @Test
+    void sinSensorDeCpuNormalizaTemperaturaYConsumoPeroConservaElUso() {
+        try (Arena arena = Arena.ofConfined()) {
+            // Valores residuales de temperatura/consumo: sin sensor real no deben llegar al dominio.
+            MemorySegment telemetry = newTelemetry(arena, 999f, 999f, 41.5f, 50f, 100f, 800, true);
+            telemetry.set(JAVA_BYTE, NativeLayouts.TELEMETRY_CPU_SENSOR_AVAILABLE_OFFSET, (byte) 0);
+
+            TelemetrySnapshot snapshot = FfmSensorsAdapter.toSnapshot(telemetry, NOW);
+
+            assertFalse(snapshot.cpuSensorAvailable());
+            assertEquals(0f, snapshot.cpuTemp());
+            assertEquals(0f, snapshot.cpuWatts());
+            assertEquals(41.5f, snapshot.cpuUsage());
         }
     }
 
@@ -98,6 +115,7 @@ class FfmSensorsAdapterTest {
         telemetry.set(JAVA_FLOAT, NativeLayouts.TELEMETRY_GPU_WATTS_OFFSET, gpuWatts);
         telemetry.set(JAVA_INT, NativeLayouts.TELEMETRY_GPU_FAN_RPM_OFFSET, fanRpm);
         telemetry.set(JAVA_BYTE, NativeLayouts.TELEMETRY_GPU_AVAILABLE_OFFSET, (byte) (gpuAvailable ? 1 : 0));
+        telemetry.set(JAVA_BYTE, NativeLayouts.TELEMETRY_CPU_SENSOR_AVAILABLE_OFFSET, (byte) 1);
         return telemetry;
     }
 }

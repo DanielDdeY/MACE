@@ -34,6 +34,7 @@ class NativeLayoutsTest {
         assertEquals(12L, NativeLayouts.TELEMETRY_GPU_WATTS_OFFSET);
         assertEquals(16L, NativeLayouts.TELEMETRY_GPU_FAN_RPM_OFFSET);
         assertEquals(20L, NativeLayouts.TELEMETRY_GPU_AVAILABLE_OFFSET);
+        assertEquals(21L, NativeLayouts.TELEMETRY_CPU_SENSOR_AVAILABLE_OFFSET);
         assertEquals(24L, NativeLayouts.TELEMETRY_CPU_USAGE_OFFSET);
     }
 

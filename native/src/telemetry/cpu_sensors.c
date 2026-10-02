@@ -1,6 +1,10 @@
 #include <windows.h>
+#include <intrin.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
+
+#include "cpu_sensors.h"
 
 /* =========================================================================
  * 1. USO DE CPU REAL (%) VÍA GetSystemTimes()
@@ -13,11 +17,20 @@ static unsigned long long filetime_to_u64(const FILETIME* ft) {
     return u.QuadPart;
 }
 
+/*
+ * Estado entre sondeos para calcular el uso por diferencia de tiempos. El sondeo
+ * de MACE es de un solo hilo ("mace-monitoring" a 1 Hz), asi que no se sincroniza.
+ */
 static unsigned long long g_prev_idle = 0;
 static unsigned long long g_prev_kernel = 0;
 static unsigned long long g_prev_user = 0;
 static bool g_have_prev = false;
 
+/*
+ * GetSystemTimes entrega tiempo ocioso, de kernel y de usuario acumulados. El de
+ * kernel INCLUYE el ocioso, asi que el trabajo util del intervalo es
+ * (dKernel + dUser) - dIdle sobre (dKernel + dUser). La primera llamada informa 0 %.
+ */
 static float ReadCpuUsagePercent(void) {
     FILETIME idle_ft, kernel_ft, user_ft;
     if (!GetSystemTimes(&idle_ft, &kernel_ft, &user_ft)) {
@@ -52,14 +65,21 @@ static float ReadCpuUsagePercent(void) {
 }
 
 /* =========================================================================
- * 2. TELEMETRÍA DE HARDWARE REAL VÍA REGISTROS MSR (WINRING0)
+ * 2. TELEMETRÍA DE HARDWARE REAL VÍA REGISTROS MSR (WINRING0, OPCIONAL)
+ *
+ * WinRing0x64.dll NO se distribuye con MACE: se carga solo si el usuario la
+ * instala junto a la DLL y ejecuta como administrador. Su driver tiene una
+ * vulnerabilidad conocida (CVE-2020-14979) y Windows 11 lo bloquea con la
+ * integridad de memoria activa. Sin ella, temperatura y energia se reportan
+ * como no disponibles (la UI muestra "N/D") en lugar de inventar valores.
  * ========================================================================= */
 
-// Registros MSR de Energía (Intel Core y AMD Zen con soporte RAPL)
+// Registros MSR de energia RAPL (Intel Core). AMD Zen usa otros MSR
+// (0xC0010299 / 0xC001029B) que este modulo no implementa.
 #define MSR_RAPL_POWER_UNIT       0x00000606
 #define MSR_PKG_ENERGY_STATUS     0x00000611
 
-// Registros MSR de Temperatura (Intel Digital Thermal Sensor)
+// Registros MSR de temperatura (Intel Digital Thermal Sensor). Solo Intel.
 #define MSR_IA32_THERM_STATUS     0x0000019C
 #define MSR_TEMPERATURE_TARGET    0x000001A2
 
@@ -72,6 +92,7 @@ static fn_InitializeOls p_InitializeOls = NULL;
 static fn_DeinitializeOls p_DeinitializeOls = NULL;
 static fn_Rdmsr p_Rdmsr = NULL;
 
+static bool g_init_attempted = false;
 static bool g_sensors_ready = false;
 static double g_energy_unit_joules = 0.0;
 static uint32_t g_last_energy_raw = 0;
@@ -79,8 +100,25 @@ static LARGE_INTEGER g_last_power_time = {0};
 static LARGE_INTEGER g_timer_freq = {0};
 static float g_cached_watts = 0.0f;
 
+/* Los MSR que se leen aqui son de Intel: en otro fabricante no se intenta. */
+static bool IsIntelCpu(void) {
+    int regs[4] = {0};
+    char vendor[13] = {0};
+    __cpuid(regs, 0);
+    memcpy(vendor + 0, &regs[1], 4); // EBX
+    memcpy(vendor + 4, &regs[3], 4); // EDX
+    memcpy(vendor + 8, &regs[2], 4); // ECX
+    return strcmp(vendor, "GenuineIntel") == 0;
+}
+
 bool CpuSensors_Init(void) {
-    if (g_sensors_ready) return true;
+    // Un solo intento: si WinRing0 no esta, no se reintenta en cada sondeo.
+    if (g_init_attempted) return g_sensors_ready;
+    g_init_attempted = true;
+
+    if (!IsIntelCpu()) {
+        return false;
+    }
 
     QueryPerformanceFrequency(&g_timer_freq);
 
@@ -94,7 +132,7 @@ bool CpuSensors_Init(void) {
     p_Rdmsr = (fn_Rdmsr)GetProcAddress(g_winring0_mod, "Rdmsr");
 
     if (!p_InitializeOls || !p_DeinitializeOls || !p_Rdmsr || !p_InitializeOls()) {
-        if (g_winring0_mod) FreeLibrary(g_winring0_mod);
+        FreeLibrary(g_winring0_mod);
         g_winring0_mod = NULL;
         return false;
     }
@@ -108,10 +146,11 @@ bool CpuSensors_Init(void) {
         g_energy_unit_joules = 0.0;
     }
 
-    // 2. Primera lectura de energía de referencia
+    // 2. Primera lectura de energía de referencia (el reloj se toma siempre para
+    //    que el primer intervalo no se calcule desde el instante 0)
+    QueryPerformanceCounter(&g_last_power_time);
     if (p_Rdmsr(MSR_PKG_ENERGY_STATUS, &eax, &edx)) {
         g_last_energy_raw = eax;
-        QueryPerformanceCounter(&g_last_power_time);
     }
 
     g_sensors_ready = true;
@@ -127,6 +166,11 @@ void CpuSensors_Shutdown(void) {
         g_winring0_mod = NULL;
     }
     g_sensors_ready = false;
+    g_init_attempted = false;
+}
+
+bool CpuSensors_HardwareAvailable(void) {
+    return g_sensors_ready;
 }
 
 /**
@@ -134,9 +178,7 @@ void CpuSensors_Shutdown(void) {
  * Devuelve 0.0f si no se puede leer el registro (sin inventar datos).
  */
 static float ReadCpuTemperature(void) {
-    if (!g_sensors_ready) {
-        if (!CpuSensors_Init()) return 0.0f;
-    }
+    if (!g_sensors_ready) return 0.0f;
 
     DWORD eax = 0, edx = 0;
 
@@ -168,9 +210,7 @@ static float ReadCpuTemperature(void) {
  * Devuelve 0.0f si el controlador no responde.
  */
 static float ReadCpuPowerWatts(void) {
-    if (!g_sensors_ready) {
-        if (!CpuSensors_Init()) return 0.0f;
-    }
+    if (!g_sensors_ready) return 0.0f;
 
     if (g_energy_unit_joules <= 0.0) return 0.0f;
 
@@ -186,6 +226,7 @@ static float ReadCpuPowerWatts(void) {
     double delta_sec = (double)(current_time.QuadPart - g_last_power_time.QuadPart) / (double)g_timer_freq.QuadPart;
 
     if (delta_sec >= 0.2) {
+        // Resta sin signo: soporta el desborde del contador de 32 bits
         uint32_t delta_energy_raw = current_raw - g_last_energy_raw;
         double joules = (double)delta_energy_raw * g_energy_unit_joules;
 
@@ -198,7 +239,7 @@ static float ReadCpuPowerWatts(void) {
 }
 
 /* =========================================================================
- * 3. FUNCIÓN DE SONDEO UNIFICADA (100% DATOS REALES)
+ * 3. FUNCIÓN DE SONDEO UNIFICADA
  * ========================================================================= */
 void CpuSensors_Poll(float* out_temp, float* out_watts, float* out_usage) {
     // 1. Temperatura: lectura DTS real de MSR (0.0f si no es accesible)

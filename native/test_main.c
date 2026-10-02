@@ -26,6 +26,8 @@ int main(void) {
         printf(" -> CPU Temp  : %.1f C\n",  telemetry.cpu_temp);
         printf(" -> CPU Power : %.1f W\n",  telemetry.cpu_watts);
         printf(" -> CPU Usage : %.1f %%\n", telemetry.cpu_usage); // <-- Tercer dato visible
+        printf(" -> CPU Sensor: %s\n", telemetry.is_cpu_sensor_available
+                   ? "SI (MSR via WinRing0)" : "NO (temp/energia no disponibles)");
         printf(" -> GPU Disp. : %s\n", telemetry.is_gpu_available ? "SI (NVIDIA detectada)" : "NO (Fallback)");
         if (telemetry.is_gpu_available) {
             printf(" -> GPU Temp  : %.1f C\n",  telemetry.gpu_temp);
