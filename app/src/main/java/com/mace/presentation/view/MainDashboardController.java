@@ -22,16 +22,16 @@ import java.util.Objects;
 /**
  * Controlador del dashboard principal.
  *
- * La interfaz se organiza en apartados independientes (CPU, GPU, Historial,
- * Procesos y RAM) navegables desde el menu lateral. Solo un apartado esta
+ * La interfaz se organiza en apartados independientes (CPU, GPU, Energía, Historial,
+ * Procesos y RAM) navegables desde el menú lateral. Solo un apartado está
  * visible a la vez.
  *
  * El ViewModel se inyecta por constructor (ver controllerFactory en
  * MaceApplication) y ya viene conectado a los servicios reales de dominio;
- * este controlador no crea ningun dato, solo lo muestra.
+ * este controlador no crea ningún dato, solo lo muestra.
  *
- * Regla de seguridad del proyecto: la accion de finalizar un proceso vive
- * unicamente en el apartado RAM y siempre exige confirmacion explicita.
+ * Regla de seguridad del proyecto: la acción de finalizar un proceso vive
+ * únicamente en el apartado RAM y siempre exige confirmación explícita.
  */
 public final class MainDashboardController {
 
@@ -39,9 +39,10 @@ public final class MainDashboardController {
     private static final float WARNING_THRESHOLD = 75.0f;
     private static final float CRITICAL_THRESHOLD = 85.0f;
 
-    // ---- Navegacion ----
+    // ---- Navegación ----
     @FXML private ToggleButton navCpu;
     @FXML private ToggleButton navGpu;
+    @FXML private ToggleButton navEnergia;
     @FXML private ToggleButton navHistorial;
     @FXML private ToggleButton navProcesos;
     @FXML private ToggleButton navRam;
@@ -49,20 +50,28 @@ public final class MainDashboardController {
     // ---- Apartados ----
     @FXML private VBox paneCpu;
     @FXML private VBox paneGpu;
+    @FXML private VBox paneEnergia;
     @FXML private VBox paneHistorial;
     @FXML private VBox paneProcesos;
     @FXML private VBox paneRam;
 
-    // ---- CPU / GPU ----
+    // ---- CPU / GPU / ENERGÍA ----
     @FXML private HBox cpuGaugesBox;
     @FXML private HBox gpuGaugesBox;
+    @FXML private HBox energiaGaugesBox;
+    
     @FXML private Label cpuStatusLabel;
     @FXML private Label cpuMaxLabel;
     @FXML private Label cpuAvgLabel;
+    
     @FXML private Label gpuStatusLabel;
     @FXML private Label gpuFanLabel;
     @FXML private Label gpuAvailableLabel;
     @FXML private Label gpuMaxLabel;
+
+    @FXML private Label energiaStatusLabel;
+    @FXML private Label energiaMaxLabel;
+    @FXML private Label energiaAvgLabel;
 
     // ---- Historial ----
     @FXML private LineChart<Number, Number> cpuTempChart;
@@ -94,6 +103,11 @@ public final class MainDashboardController {
     private GaugeDial cpuWattsGauge;
     private GaugeDial gpuTempGauge;
     private GaugeDial gpuWattsGauge;
+    private GaugeDial totalWattsGauge;
+
+    private double maxEnergiaValue = 0;
+    private double sumEnergiaValue = 0;
+    private int countEnergiaSamples = 0;
 
     public MainDashboardController(MainDashboardViewModel dashboardViewModel) {
         this.dashboardViewModel = Objects.requireNonNull(dashboardViewModel, "dashboardViewModel no puede ser null");
@@ -113,23 +127,25 @@ public final class MainDashboardController {
         dashboardViewModel.start();
     }
 
-    // ==================== NAVEGACION ====================
+    // ==================== NAVEGACIÓN ====================
 
     private void configureNavigation() {
         ToggleGroup group = new ToggleGroup();
         navCpu.setToggleGroup(group);
         navGpu.setToggleGroup(group);
+        navEnergia.setToggleGroup(group);
         navHistorial.setToggleGroup(group);
         navProcesos.setToggleGroup(group);
         navRam.setToggleGroup(group);
 
         navCpu.setOnAction(e -> showSection(paneCpu));
         navGpu.setOnAction(e -> showSection(paneGpu));
+        navEnergia.setOnAction(e -> showSection(paneEnergia));
         navHistorial.setOnAction(e -> showSection(paneHistorial));
         navProcesos.setOnAction(e -> showSection(paneProcesos));
         navRam.setOnAction(e -> showSection(paneRam));
 
-        // Evita que el usuario pueda dejar los 5 botones sin seleccionar.
+        // Evita que el usuario pueda dejar los botones sin seleccionar.
         group.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
             if (newToggle == null && oldToggle != null) {
                 oldToggle.setSelected(true);
@@ -140,9 +156,9 @@ public final class MainDashboardController {
         showSection(paneCpu);
     }
 
-    /** Muestra un unico apartado y oculta el resto (sin dejar espacio en blanco). */
+    /** Muestra un único apartado y oculta el resto (sin dejar espacio en blanco). */
     private void showSection(Region target) {
-        List<Region> sections = List.of(paneCpu, paneGpu, paneHistorial, paneProcesos, paneRam);
+        List<Region> sections = List.of(paneCpu, paneGpu, paneEnergia, paneHistorial, paneProcesos, paneRam);
         for (Region section : sections) {
             boolean visible = section == target;
             section.setVisible(visible);
@@ -150,7 +166,7 @@ public final class MainDashboardController {
         }
     }
 
-    // ==================== CPU / GPU ====================
+    // ==================== CPU / GPU / ENERGÍA ====================
 
     private void buildGauges() {
         cpuTempGauge = new GaugeDial("Temp. CPU", "°C", 100);
@@ -160,13 +176,23 @@ public final class MainDashboardController {
         gpuTempGauge = new GaugeDial("Temp. GPU", "°C", 100);
         gpuWattsGauge = new GaugeDial("Consumo GPU", "W", 200);
         gpuGaugesBox.getChildren().addAll(gpuTempGauge, gpuWattsGauge);
+
+        totalWattsGauge = new GaugeDial("Consumo Total (CPU+GPU)", "W", 300);
+        energiaGaugesBox.getChildren().add(totalWattsGauge);
     }
 
     private void bindTelemetry() {
         dashboardViewModel.cpuTempProperty().addListener((obs, o, n) -> cpuTempGauge.setValue(n.doubleValue()));
-        dashboardViewModel.cpuWattsProperty().addListener((obs, o, n) -> cpuWattsGauge.setValue(n.doubleValue()));
+        dashboardViewModel.cpuWattsProperty().addListener((obs, o, n) -> {
+            cpuWattsGauge.setValue(n.doubleValue());
+            updateTotalWatts();
+        });
+
         dashboardViewModel.gpuTempProperty().addListener((obs, o, n) -> gpuTempGauge.setValue(n.doubleValue()));
-        dashboardViewModel.gpuWattsProperty().addListener((obs, o, n) -> gpuWattsGauge.setValue(n.doubleValue()));
+        dashboardViewModel.gpuWattsProperty().addListener((obs, o, n) -> {
+            gpuWattsGauge.setValue(n.doubleValue());
+            updateTotalWatts();
+        });
 
         dashboardViewModel.gpuAvailableProperty().addListener((obs, o, available) -> {
             if (!available) {
@@ -176,19 +202,47 @@ public final class MainDashboardController {
         });
     }
 
-    // ==================== HISTORIAL (graficos separados) ====================
+    private void updateTotalWatts() {
+        double cpuW = dashboardViewModel.cpuWattsProperty().get();
+        double gpuW = dashboardViewModel.gpuAvailableProperty().get() ? dashboardViewModel.gpuWattsProperty().get() : 0.0;
+        double total = cpuW + gpuW;
+
+        totalWattsGauge.setValue(total);
+        updateEnergiaStats(total);
+    }
+
+    private void updateEnergiaStats(double totalWatts) {
+        maxEnergiaValue = Math.max(maxEnergiaValue, totalWatts);
+        sumEnergiaValue += totalWatts;
+        countEnergiaSamples++;
+
+        energiaMaxLabel.setText(String.format("%.0f W", maxEnergiaValue));
+        energiaAvgLabel.setText(String.format("%.0f W", sumEnergiaValue / countEnergiaSamples));
+
+        if (totalWatts > 180) {
+            energiaStatusLabel.setText("Alto Consumo");
+            energiaStatusLabel.getStyleClass().removeAll("status-ok", "status-warning", "status-critical");
+            energiaStatusLabel.getStyleClass().add("status-critical");
+        } else if (totalWatts > 100) {
+            energiaStatusLabel.setText("Moderado");
+            energiaStatusLabel.getStyleClass().removeAll("status-ok", "status-warning", "status-critical");
+            energiaStatusLabel.getStyleClass().add("status-warning");
+        } else {
+            energiaStatusLabel.setText("Eficiente");
+            energiaStatusLabel.getStyleClass().removeAll("status-ok", "status-warning", "status-critical");
+            energiaStatusLabel.getStyleClass().add("status-ok");
+        }
+    }
+
+    // ==================== HISTORIAL (gráficos separados) ====================
 
     private void configureHistoryCharts() {
         cpuTempChart.getData().add(dashboardViewModel.getCpuTempHistory());
         gpuTempChart.getData().add(dashboardViewModel.getGpuTempHistory());
     }
 
-    // ==================== ESTADISTICAS EN VIVO (CPU / GPU) ====================
+    // ==================== ESTADÍSTICAS EN VIVO (CPU / GPU) ====================
 
-    /**
-     * Se apoya en el mismo historial que alimenta los graficos de linea, asi que
-     * no pide nada nuevo al backend: solo calcula sobre datos reales ya recibidos.
-     */
     private void bindStatsPanels() {
         dashboardViewModel.getCpuTempHistory().getData()
                 .addListener((ListChangeListener<XYChart.Data<Number, Number>>) change -> updateCpuStats());
@@ -228,7 +282,6 @@ public final class MainDashboardController {
         applyMinMaxAvg(points, gpuMaxLabel, null);
     }
 
-    /** Mismo criterio que domain/service/ThermalAlertEvaluator: NONE / WARNING / CRITICAL. */
     private void applyStatusLabel(Label label, double temperature) {
         label.getStyleClass().removeAll("status-ok", "status-warning", "status-critical");
         if (temperature > CRITICAL_THRESHOLD) {
@@ -276,7 +329,7 @@ public final class MainDashboardController {
         procesosViewModel.getSortedProcesses().comparatorProperty().bind(tablaProcesos.comparatorProperty());
     }
 
-    // ==================== RAM (pie + lista + boton Finalizar) ====================
+    // ==================== RAM (pie + lista + botón Finalizar) ====================
 
     private void configureRamTable() {
         ramViewModel = new ProcessTableViewModel(dashboardViewModel.getProcesses());
@@ -342,11 +395,6 @@ public final class MainDashboardController {
         ramCountLabel.setText(String.valueOf(dashboardViewModel.getProcesses().size()));
     }
 
-    /**
-     * Regla de seguridad del proyecto: NUNCA terminar un proceso sin confirmacion
-     * explicita del usuario (nada de auto-kill). Si el caso de uso real rechaza o
-     * falla la terminacion, se informa al usuario en vez de fallar en silencio.
-     */
     private void confirmAndTerminate(ProcessRow row) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirmar finalización");

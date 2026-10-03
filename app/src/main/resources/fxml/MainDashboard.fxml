@@ -36,6 +36,7 @@
                 </padding>
                 <ToggleButton fx:id="navCpu" text="CPU" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navGpu" text="GPU" styleClass="nav-button" maxWidth="Infinity" />
+                <ToggleButton fx:id="navEnergia" text="Energía" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navHistorial" text="Historial" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navProcesos" text="Procesos" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navRam" text="RAM" styleClass="nav-button" maxWidth="Infinity" />
@@ -94,6 +95,30 @@
                     <VBox styleClass="stat-card">
                         <Label text="Máximo (30s)" styleClass="stat-title" />
                         <Label fx:id="gpuMaxLabel" text="--" styleClass="stat-value" />
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- ==================== APARTADO: ENERGÍA ==================== -->
+            <VBox fx:id="paneEnergia" spacing="16" styleClass="section-pane">
+                <Label text="Energía" styleClass="section-title" />
+                <Label text="Consumo estimado de potencia en tiempo real (CPU + GPU)" styleClass="section-subtitle" />
+                
+                <!-- Contenedor donde instanciarás dinámicamente los Gauges de energía desde el Controller -->
+                <HBox fx:id="energiaGaugesBox" spacing="20" styleClass="gauges-box" />
+
+                <HBox spacing="12" styleClass="stats-row">
+                    <VBox styleClass="stat-card">
+                        <Label text="Estado" styleClass="stat-title" />
+                        <Label fx:id="energiaStatusLabel" text="--" styleClass="stat-value" />
+                    </VBox>
+                    <VBox styleClass="stat-card">
+                        <Label text="Máximo (30s)" styleClass="stat-title" />
+                        <Label fx:id="energiaMaxLabel" text="--" styleClass="stat-value" />
+                    </VBox>
+                    <VBox styleClass="stat-card">
+                        <Label text="Promedio (30s)" styleClass="stat-title" />
+                        <Label fx:id="energiaAvgLabel" text="--" styleClass="stat-value" />
                     </VBox>
                 </HBox>
             </VBox>
