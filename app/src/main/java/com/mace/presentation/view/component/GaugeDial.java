@@ -41,7 +41,6 @@ public class GaugeDial extends VBox {
 
     private Color trackColor = Color.web("#30363d");
     private Color fillColor = Color.web("#3fb950");
-    private boolean available = true;
 
     public GaugeDial(String title, String unit, double maxValue) {
         this.unit = unit;
@@ -67,7 +66,6 @@ public class GaugeDial extends VBox {
 
     /** Actualiza el valor con una animacion suave (evita saltos bruscos visualmente). */
     public void setValue(double newValue) {
-        available = true;
         double clamped = Math.max(0, Math.min(maxValue, newValue));
 
         updateFillColorForRatio(clamped / maxValue);
@@ -81,7 +79,7 @@ public class GaugeDial extends VBox {
     }
 
     public void setUnavailable() {
-        available = false;
+        valueLabel.setText("N/D");
         if (animation != null) animation.stop();
         animatedValue.set(0);
         draw(0);
@@ -120,7 +118,7 @@ public class GaugeDial extends VBox {
         gc.strokeArc(pad, pad, w - pad * 2, h - pad * 2,
                 -START_ANGLE + 180, sweep, javafx.scene.shape.ArcType.OPEN);
 
-        valueLabel.setText(available ? String.format("%.0f%s", value, unit) : "N/D");
+        valueLabel.setText(String.format("%.0f%s", value, unit));
         valueLabel.setFont(Font.font("System", FontWeight.BOLD, 20));
     }
 }

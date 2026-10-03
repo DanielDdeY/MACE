@@ -183,6 +183,8 @@
 
 .chart {
     -fx-background-color: transparent;
+.chart {
+    -fx-background-color: transparent;
 }
 
 .chart-plot-background {
@@ -232,4 +234,5 @@
 
 .danger-button:hover {
     -fx-opacity: 0.85;
+}
 }

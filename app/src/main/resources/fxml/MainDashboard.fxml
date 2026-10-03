@@ -36,8 +36,10 @@
                 </padding>
                 <ToggleButton fx:id="navCpu" text="CPU" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navGpu" text="GPU" styleClass="nav-button" maxWidth="Infinity" />
+                <ToggleButton fx:id="navEnergia" text="Energía" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navHistorial" text="Historial" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navProcesos" text="Procesos" styleClass="nav-button" maxWidth="Infinity" />
+                <ToggleButton fx:id="navRam" text="RAM" styleClass="nav-button" maxWidth="Infinity" />
             </VBox>
         </VBox>
     </left>
@@ -97,6 +99,30 @@
                 </HBox>
             </VBox>
 
+            <!-- ==================== APARTADO: ENERGÍA ==================== -->
+            <VBox fx:id="paneEnergia" spacing="16" styleClass="section-pane">
+                <Label text="Energía" styleClass="section-title" />
+                <Label text="Consumo estimado de potencia en tiempo real (CPU + GPU)" styleClass="section-subtitle" />
+                
+                <!-- Contenedor donde instanciarás dinámicamente los Gauges de energía desde el Controller -->
+                <HBox fx:id="energiaGaugesBox" spacing="20" styleClass="gauges-box" />
+
+                <HBox spacing="12" styleClass="stats-row">
+                    <VBox styleClass="stat-card">
+                        <Label text="Estado" styleClass="stat-title" />
+                        <Label fx:id="energiaStatusLabel" text="--" styleClass="stat-value" />
+                    </VBox>
+                    <VBox styleClass="stat-card">
+                        <Label text="Máximo (30s)" styleClass="stat-title" />
+                        <Label fx:id="energiaMaxLabel" text="--" styleClass="stat-value" />
+                    </VBox>
+                    <VBox styleClass="stat-card">
+                        <Label text="Promedio (30s)" styleClass="stat-title" />
+                        <Label fx:id="energiaAvgLabel" text="--" styleClass="stat-value" />
+                    </VBox>
+                </HBox>
+            </VBox>
+
             <!-- ==================== APARTADO: HISTORIAL (graficos separados) ==================== -->
             <VBox fx:id="paneHistorial" spacing="12" styleClass="section-pane">
                 <Label text="Historial en tiempo real" styleClass="section-title" />
@@ -142,37 +168,51 @@
                 </VBox>
             </VBox>
 
-            <!-- ==================== APARTADO: PROCESOS ==================== -->
+            <!-- ==================== APARTADO: PROCESOS (sin boton de accion) ==================== -->
             <VBox fx:id="paneProcesos" spacing="12" styleClass="section-pane">
                 <Label text="Procesos activos" styleClass="section-title" />
-                <Label text="Procesos de usuario, consumo de memoria y gestión manual" styleClass="section-subtitle" />
-
-                <!-- Se conservan las dos tarjetas visuales que antes vivían en RAM. -->
-                <HBox spacing="12" styleClass="ram-top">
-                    <VBox styleClass="chart-card" prefWidth="380">
-                        <Label text="Memoria por proceso" styleClass="chart-card-title" />
-                        <PieChart fx:id="memoryPieChart" legendVisible="true" labelsVisible="false" animated="false"
-                                  VBox.vgrow="ALWAYS" />
-                    </VBox>
-
-                    <VBox styleClass="chart-card" HBox.hgrow="ALWAYS" spacing="8">
-                        <Label text="Resumen" styleClass="chart-card-title" />
-                        <Label fx:id="ramCountLabel" text="--" styleClass="ram-count-value" />
-                        <Label text="Procesos en seguimiento" styleClass="section-subtitle" />
-                        <Label fx:id="ramTotalLabel" text="--" styleClass="ram-total-value" />
-                        <Label text="Memoria total usada por los procesos listados" styleClass="section-subtitle" />
-                    </VBox>
-                </HBox>
+                <Label text="Listado de procesos de usuario en ejecución" styleClass="section-subtitle" />
 
                 <TextField fx:id="searchProcesos" promptText="Buscar por nombre o PID..." styleClass="search-field" />
 
                 <TableView fx:id="tablaProcesos" styleClass="process-table" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="procPidColumn" text="PID" prefWidth="80" />
-                        <TableColumn fx:id="procNombreColumn" text="Proceso" prefWidth="190" />
-                        <TableColumn fx:id="procRutaColumn" text="Ruta del ejecutable" prefWidth="330" />
-                        <TableColumn fx:id="procMemoriaColumn" text="Memoria (Working Set)" prefWidth="160" />
-                        <TableColumn fx:id="procAccionColumn" text="Acción" prefWidth="160" />
+                        <TableColumn fx:id="procPidColumn" text="PID" prefWidth="90" />
+                        <TableColumn fx:id="procNombreColumn" text="Proceso" prefWidth="240" />
+                        <TableColumn fx:id="procRutaColumn" text="Ruta del ejecutable" prefWidth="420" />
+                    </columns>
+                </TableView>
+            </VBox>
+
+            <!-- ==================== APARTADO: RAM (pie + lista + boton Finalizar) ==================== -->
+            <VBox fx:id="paneRam" spacing="12" styleClass="section-pane">
+                <Label text="Memoria RAM" styleClass="section-title" />
+                <Label text="Distribución de memoria por proceso y gestión manual" styleClass="section-subtitle" />
+
+                <HBox spacing="12" styleClass="ram-top">
+                    <VBox styleClass="chart-card" prefWidth="380">
+                        <Label text="Memoria por proceso" styleClass="chart-card-title" />
+                        <PieChart fx:id="memoryPieChart" legendVisible="true" labelsVisible="false"
+                                  VBox.vgrow="ALWAYS" />
+                    </VBox>
+
+                    <VBox styleClass="chart-card" HBox.hgrow="ALWAYS" spacing="8">
+                        <Label text="Resumen" styleClass="chart-card-title" />
+                        <Label fx:id="ramTotalLabel" text="--" styleClass="ram-total-value" />
+                        <Label text="Memoria total usada por los procesos listados" styleClass="section-subtitle" />
+                        <Label fx:id="ramCountLabel" text="--" styleClass="ram-count-value" />
+                        <Label text="Procesos en seguimiento" styleClass="section-subtitle" />
+                    </VBox>
+                </HBox>
+
+                <TextField fx:id="searchRam" promptText="Buscar por nombre o PID..." styleClass="search-field" />
+
+                <TableView fx:id="tablaRam" styleClass="process-table" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="ramPidColumn" text="PID" prefWidth="80" />
+                        <TableColumn fx:id="ramNombreColumn" text="Proceso" prefWidth="220" />
+                        <TableColumn fx:id="ramMemoriaColumn" text="Memoria (Working Set)" prefWidth="180" />
+                        <TableColumn fx:id="ramAccionColumn" text="Acción" prefWidth="180" />
                     </columns>
                 </TableView>
             </VBox>
