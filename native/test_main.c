@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <locale.h>
-#include "mace_api.h"
+#include "include/mace_api.h"
 
 int main(void) {
     // Configurar la consola para imprimir caracteres Unicode correctamente

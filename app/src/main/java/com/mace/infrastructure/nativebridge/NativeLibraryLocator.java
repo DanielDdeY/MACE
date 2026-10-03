@@ -40,6 +40,8 @@ public final class NativeLibraryLocator {
 
     private static final List<String> RELATIVE_BUILD_DIRS = List.of(
             "",
+            "lib",
+            "app/lib",
             "native",
             "native/build",
             "native/build/Release",
