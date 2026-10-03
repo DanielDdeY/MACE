@@ -75,6 +75,7 @@ public final class MainDashboardController {
 
     // ---- Historial ----
     @FXML private LineChart<Number, Number> cpuTempChart;
+    @FXML private LineChart<Number, Number> cpuUsageChart;
     @FXML private LineChart<Number, Number> gpuTempChart;
 
     // ---- Procesos ----
@@ -101,6 +102,7 @@ public final class MainDashboardController {
 
     private GaugeDial cpuTempGauge;
     private GaugeDial cpuWattsGauge;
+    private GaugeDial cpuUsageGauge;
     private GaugeDial gpuTempGauge;
     private GaugeDial gpuWattsGauge;
     private GaugeDial totalWattsGauge;
@@ -171,7 +173,8 @@ public final class MainDashboardController {
     private void buildGauges() {
         cpuTempGauge = new GaugeDial("Temp. CPU", "°C", 100);
         cpuWattsGauge = new GaugeDial("Consumo CPU", "W", 65);
-        cpuGaugesBox.getChildren().addAll(cpuTempGauge, cpuWattsGauge);
+        cpuUsageGauge = new GaugeDial("Uso CPU", "%", 100);
+        cpuGaugesBox.getChildren().addAll(cpuUsageGauge, cpuTempGauge, cpuWattsGauge);
 
         gpuTempGauge = new GaugeDial("Temp. GPU", "°C", 100);
         gpuWattsGauge = new GaugeDial("Consumo GPU", "W", 200);
@@ -238,6 +241,7 @@ public final class MainDashboardController {
 
     private void configureHistoryCharts() {
         cpuTempChart.getData().add(dashboardViewModel.getCpuTempHistory());
+        cpuUsageChart.getData().add(dashboardViewModel.getCpuUsageHistory());
         gpuTempChart.getData().add(dashboardViewModel.getGpuTempHistory());
     }
 
@@ -259,6 +263,13 @@ public final class MainDashboardController {
 
     private void updateCpuStats() {
         List<XYChart.Data<Number, Number>> points = dashboardViewModel.getCpuTempHistory().getData();
+        if (!dashboardViewModel.cpuSensorAvailableProperty().get()) {
+            cpuStatusLabel.getStyleClass().removeAll("status-ok", "status-warning", "status-critical");
+            cpuStatusLabel.setText("N/D");
+            cpuMaxLabel.setText("N/D");
+            cpuAvgLabel.setText("N/D");
+            return;
+        }
         if (points.isEmpty()) {
             return;
         }

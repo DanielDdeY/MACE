@@ -14,7 +14,6 @@ import javafx.scene.shape.*;
  */
 public final class NavIcon {
 
-    private static final double SIZE = 18;
     private static final double STROKE_WIDTH = 1.6;
 
     private NavIcon() {
@@ -69,11 +68,13 @@ public final class NavIcon {
 
     // ---- helpers ----
 
+    /*
+     * El Group debe quedar "managed": el skin de los botones (LabeledSkinBase) ignora
+     * un graphic con setManaged(false) y ni siquiera lo agrega a la escena, por lo
+     * que el icono no se veia. Su tamano sale de las formas (caja de ~18x18).
+     */
     private static Node icon(Shape... shapes) {
-        Group group = new Group(shapes);
-        group.setManaged(false);
-        group.resize(SIZE, SIZE);
-        return group;
+        return new Group(shapes);
     }
 
     private static Rectangle square(double x, double y, double side) {

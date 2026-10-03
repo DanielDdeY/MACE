@@ -45,7 +45,7 @@ class PollSystemMetricsServiceTest {
     @Test
     void publicaElSnapshotYVuelcaACajaNegraCuandoHayAlertaCritica() {
         TelemetrySnapshot criticalSnapshot = new TelemetrySnapshot(
-                90f, 200f, 50f, 100f, 1500, true, Instant.now());
+                90f, 200f, 95f, 50f, 100f, 1500, true, Instant.now());
         when(hardwareSensorsPort.fetchCurrentTelemetry()).thenReturn(criticalSnapshot);
 
         List<ThermalAlert> alerts = service.pollOnce();
@@ -58,7 +58,7 @@ class PollSystemMetricsServiceTest {
     @Test
     void noVuelcaACajaNegraCuandoNoHayAlertaCritica() {
         TelemetrySnapshot safeSnapshot = new TelemetrySnapshot(
-                60f, 100f, 55f, 120f, 1500, true, Instant.now());
+                60f, 100f, 40f, 55f, 120f, 1500, true, Instant.now());
         when(hardwareSensorsPort.fetchCurrentTelemetry()).thenReturn(safeSnapshot);
 
         List<ThermalAlert> alerts = service.pollOnce();

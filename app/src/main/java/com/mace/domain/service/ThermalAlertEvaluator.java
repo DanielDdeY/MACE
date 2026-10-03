@@ -43,9 +43,11 @@ public final class ThermalAlertEvaluator {
 
         List<ThermalAlert> alerts = new ArrayList<>(2);
 
-        ThermalAlert cpuAlert = evaluateSource(SOURCE_CPU, snapshot.cpuTemp(), snapshot.timestamp());
-        if (cpuAlert.isActionable()) {
-            alerts.add(cpuAlert);
+        if (snapshot.cpuSensorAvailable()) {
+            ThermalAlert cpuAlert = evaluateSource(SOURCE_CPU, snapshot.cpuTemp(), snapshot.timestamp());
+            if (cpuAlert.isActionable()) {
+                alerts.add(cpuAlert);
+            }
         }
 
         if (snapshot.gpuAvailable()) {

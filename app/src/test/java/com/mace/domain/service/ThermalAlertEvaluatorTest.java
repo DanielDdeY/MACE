@@ -18,7 +18,7 @@ class ThermalAlertEvaluatorTest {
 
     @Test
     void noEmiteAlertasCuandoTemperaturasEstanEnRangoSeguro() {
-        TelemetrySnapshot snapshot = new TelemetrySnapshot(60f, 65f, 55f, 120f, 1800, true, now);
+        TelemetrySnapshot snapshot = new TelemetrySnapshot(60f, 65f, 45f, 55f, 120f, 1800, true, now);
 
         List<ThermalAlert> alerts = evaluator.evaluate(snapshot);
 
@@ -27,7 +27,7 @@ class ThermalAlertEvaluatorTest {
 
     @Test
     void emiteWarningCuandoCpuSuperaSetentaYCincoGrados() {
-        TelemetrySnapshot snapshot = new TelemetrySnapshot(76f, 65f, 50f, 100f, 1500, true, now);
+        TelemetrySnapshot snapshot = new TelemetrySnapshot(76f, 65f, 70f, 50f, 100f, 1500, true, now);
 
         List<ThermalAlert> alerts = evaluator.evaluate(snapshot);
 
@@ -38,7 +38,7 @@ class ThermalAlertEvaluatorTest {
 
     @Test
     void emiteCriticalCuandoGpuSuperaOchentaYCincoGrados() {
-        TelemetrySnapshot snapshot = new TelemetrySnapshot(70f, 65f, 86f, 250f, 3000, true, now);
+        TelemetrySnapshot snapshot = new TelemetrySnapshot(70f, 65f, 60f, 86f, 250f, 3000, true, now);
 
         List<ThermalAlert> alerts = evaluator.evaluate(snapshot);
 
@@ -49,7 +49,17 @@ class ThermalAlertEvaluatorTest {
 
     @Test
     void noEvaluaGpuCuandoNoEstaDisponible() {
-        TelemetrySnapshot snapshot = new TelemetrySnapshot(70f, 65f, 999f, 999f, 0, false, now);
+        TelemetrySnapshot snapshot = new TelemetrySnapshot(70f, 65f, 60f, 999f, 999f, 0, false, now);
+
+        List<ThermalAlert> alerts = evaluator.evaluate(snapshot);
+
+        assertTrue(alerts.isEmpty());
+    }
+
+    @Test
+    void noEvaluaCpuCuandoSuSensorNoEstaDisponible() {
+        // Sin sensor real la temperatura de CPU no es una lectura: no debe disparar alertas.
+        TelemetrySnapshot snapshot = new TelemetrySnapshot(99f, 0f, 50f, false, 50f, 100f, 1500, true, now);
 
         List<ThermalAlert> alerts = evaluator.evaluate(snapshot);
 
@@ -59,7 +69,7 @@ class ThermalAlertEvaluatorTest {
     @Test
     void temperaturaExactamenteEnElUmbralNoEsAccionable() {
         // El umbral es estrictamente mayor a 75.0, no >=.
-        TelemetrySnapshot snapshot = new TelemetrySnapshot(75.0f, 65f, 50f, 100f, 1500, true, now);
+        TelemetrySnapshot snapshot = new TelemetrySnapshot(75.0f, 65f, 68f, 50f, 100f, 1500, true, now);
 
         List<ThermalAlert> alerts = evaluator.evaluate(snapshot);
 
@@ -68,7 +78,7 @@ class ThermalAlertEvaluatorTest {
 
     @Test
     void emiteAmbasAlertasCuandoCpuYGpuSuperanElUmbral() {
-        TelemetrySnapshot snapshot = new TelemetrySnapshot(90f, 200f, 88f, 300f, 3500, true, now);
+        TelemetrySnapshot snapshot = new TelemetrySnapshot(90f, 200f, 95f, 88f, 300f, 3500, true, now);
 
         List<ThermalAlert> alerts = evaluator.evaluate(snapshot);
 
