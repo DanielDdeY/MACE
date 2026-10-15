@@ -14,7 +14,7 @@ Estado al 15-10-2026: implementación y prueba local de Radeon completadas; la v
 
 ## Pruebas ejecutadas en este equipo
 
-Windows 10 x64, Ryzen 5 3600 y Radeon RX 5500 XT (`1002:7340`). Compilación MSVC 2026 Release con SDK ADLX 2.0 externo: 3/3 pruebas CTest pasaron (`abi_layouts`, `abi_exports`, `telemetry_v2`). El test V2 detectó automáticamente una GPU Radeon y midió aproximadamente 33 °C, 3–7 W, 0–32 % de uso, 1290 RPM y 1175 MB de VRAM usada; las lecturas varían con la carga. DXGI reportó ~4,25 GB de memoria dedicada. CPU AMD se detectó; su uso Windows fue válido, temperatura/potencia quedaron `NO_PROVIDER`.
+Windows 10 x64, Ryzen 5 3600 y Radeon RX 5500 XT (`1002:7340`). Compilación MSVC 2026 Release con SDK ADLX 2.0 externo: 4/4 pruebas CTest pasaron (`abi_layouts`, `abi_exports`, `telemetry_v2`, `gpu_provider_dispatch`). Esta última inyecta tres proveedores simulados por enlace y comprueba la selección por fabricante sin depender de hardware. El test V2 detectó automáticamente una GPU Radeon y midió aproximadamente 33 °C, 3–7 W, 0–32 % de uso, 1290 RPM y 1175 MB de VRAM usada; las lecturas varían con la carga. DXGI reportó ~4,25 GB de memoria dedicada. CPU AMD se detectó; su uso Windows fue válido, temperatura/potencia quedaron `NO_PROVIDER`.
 
 La prueba confirma el camino AMD/ADLX para **esta** Radeon y este controlador. No valida todavía CPU Intel DTS/RAPL, GPU Intel/IGCL, GPU NVIDIA/NVML, portátiles con iGPU/dGPU o suspensión de GPU. Tampoco prueba la integración Java V2: `app/` sigue usando el ABI heredado.
 

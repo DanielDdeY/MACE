@@ -83,7 +83,7 @@ $metadata = [ordered]@{
     dllSha256 = $sourceDllHash
     importLibrarySha256 = $sourceLibHash
     amdAdlxCompiled = -not [string]::IsNullOrWhiteSpace($AdlxSdkDirectory)
-    tests = @('CTest abi_layouts', 'CTest abi_exports', 'CTest telemetry_v2', 'C exports on distributed DLL', 'JDK 22 FFM on distributed DLL')
+    tests = @('CTest abi_layouts', 'CTest abi_exports', 'CTest telemetry_v2', 'CTest gpu_provider_dispatch', 'C exports on distributed DLL', 'JDK 22 FFM on distributed DLL')
 }
 $metadata | ConvertTo-Json -Depth 5 |
     Set-Content -LiteralPath (Join-Path $package 'build-info.json') -Encoding utf8

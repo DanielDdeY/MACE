@@ -10,6 +10,7 @@
 typedef int NvmlResult;
 typedef void* NvmlDevice;
 enum { NVML_OK = 0, NVML_NOT_SUPPORTED = 3, NVML_NO_PERMISSION = 4,
+       NVML_NOT_FOUND = 6, NVML_GPU_LOST = 15,
        NVML_GPU_TEMPERATURE = 0, NVML_FAN_SPEED_RPM = 1 };
 typedef struct {
     char bus_id_legacy[16];
@@ -38,6 +39,8 @@ static MaceMetricState result_state(NvmlResult result) {
     if (result == NVML_OK) return MACE_METRIC_VALID;
     if (result == NVML_NOT_SUPPORTED) return MACE_METRIC_UNSUPPORTED;
     if (result == NVML_NO_PERMISSION) return MACE_METRIC_ACCESS_DENIED;
+    if (result == NVML_NOT_FOUND) return MACE_METRIC_NO_DEVICE;
+    if (result == NVML_GPU_LOST) return MACE_METRIC_DEVICE_INACTIVE;
     return MACE_METRIC_READ_FAILED;
 }
 
@@ -115,6 +118,13 @@ bool Nvml_PollAdapter(const MaceGpuAdapterInfoV2* adapter,
     if (!matched) return false;
     out->provider_id = MACE_PROVIDER_NVIDIA_NVML;
     out->power_scope = MACE_POWER_SCOPE_GPU_BOARD;
+    out->temperature_c.state = MACE_METRIC_UNSUPPORTED;
+    out->power_w.state = MACE_METRIC_UNSUPPORTED;
+    out->usage_percent.state = MACE_METRIC_UNSUPPORTED;
+    out->fan_rpm.state = MACE_METRIC_UNSUPPORTED;
+    out->fan_percent.state = MACE_METRIC_UNSUPPORTED;
+    out->video_memory_used_bytes.state = MACE_METRIC_UNSUPPORTED;
+    out->video_memory_total_bytes.state = MACE_METRIC_UNSUPPORTED;
     unsigned int value = 0;
     NvmlResult result;
     if (temperature_fn) {

@@ -91,6 +91,16 @@ if (BUILD_TESTING)
     set_target_properties(test_telemetry_v2 PROPERTIES
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     add_test(NAME telemetry_v2 COMMAND test_telemetry_v2)
+
+    add_executable(test_gpu_provider_dispatch tests/test_gpu_provider_dispatch.c
+        src/telemetry/gpu_providers.c)
+    target_include_directories(test_gpu_provider_dispatch PRIVATE include src/telemetry)
+    target_compile_definitions(test_gpu_provider_dispatch PRIVATE MACE_HAS_ADLX=1)
+    target_compile_options(test_gpu_provider_dispatch PRIVATE /W4 /WX /utf-8)
+    target_link_libraries(test_gpu_provider_dispatch PRIVATE dxgi dxguid)
+    set_target_properties(test_gpu_provider_dispatch PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    add_test(NAME gpu_provider_dispatch COMMAND test_gpu_provider_dispatch)
 endif()
 
 # Prueba técnica opcional de detección automática; no se ejecuta en CI.

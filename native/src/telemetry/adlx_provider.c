@@ -14,6 +14,13 @@ static IADLXSystem* system_api;
 static IADLXPerformanceMonitoringServices* performance;
 static ADLXTerminate_Fn terminate_fn;
 
+static MaceMetricState adlx_state(ADLX_RESULT result) {
+    if (result == ADLX_GPU_INACTIVE || result == ADLX_NOT_ACTIVE)
+        return MACE_METRIC_DEVICE_INACTIVE;
+    if (result == ADLX_NOT_SUPPORTED) return MACE_METRIC_UNSUPPORTED;
+    return MACE_METRIC_READ_FAILED;
+}
+
 bool Adlx_Init(void) {
     if (performance) return true;
     module = LoadLibraryExW(L"amdadlx64.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
@@ -76,12 +83,13 @@ static IADLXGPU* find_gpu(const MaceAdapterLuidV2* wanted) {
 
 #define READ_DOUBLE(support_method, read_method, field) do { \
     adlx_bool supported = false; \
-    if (ADLX_SUCCEEDED(support->pVtbl->support_method(support, &supported)) && supported) { \
+    ADLX_RESULT support_result = support->pVtbl->support_method(support, &supported); \
+    if (ADLX_SUCCEEDED(support_result) && supported) { \
         adlx_double value = 0; \
         ADLX_RESULT result = metrics->pVtbl->read_method(metrics, &value); \
-        out->field.state = ADLX_SUCCEEDED(result) ? MACE_METRIC_VALID : MACE_METRIC_READ_FAILED; \
+        out->field.state = ADLX_SUCCEEDED(result) ? MACE_METRIC_VALID : adlx_state(result); \
         if (ADLX_SUCCEEDED(result)) out->field.value = (float)value; \
-    } else out->field.state = MACE_METRIC_UNSUPPORTED; \
+    } else out->field.state = ADLX_SUCCEEDED(support_result) ? MACE_METRIC_UNSUPPORTED : adlx_state(support_result); \
 } while (0)
 
 bool Adlx_PollAdapter(const MaceGpuAdapterInfoV2* adapter,
@@ -97,6 +105,15 @@ bool Adlx_PollAdapter(const MaceGpuAdapterInfoV2* adapter,
     if (ADLX_FAILED(sr) || !support || ADLX_FAILED(mr) || !metrics) {
         if (support) support->pVtbl->Release(support);
         if (metrics) metrics->pVtbl->Release(metrics);
+        if (mr == ADLX_GPU_INACTIVE || sr == ADLX_GPU_INACTIVE) {
+            out->provider_id = MACE_PROVIDER_AMD_ADLX;
+            out->temperature_c.state = MACE_METRIC_DEVICE_INACTIVE;
+            out->power_w.state = MACE_METRIC_DEVICE_INACTIVE;
+            out->usage_percent.state = MACE_METRIC_DEVICE_INACTIVE;
+            out->fan_rpm.state = MACE_METRIC_DEVICE_INACTIVE;
+            out->video_memory_used_bytes.state = MACE_METRIC_DEVICE_INACTIVE;
+            return true;
+        }
         return false;
     }
     out->provider_id = MACE_PROVIDER_AMD_ADLX;
@@ -105,21 +122,24 @@ bool Adlx_PollAdapter(const MaceGpuAdapterInfoV2* adapter,
     READ_DOUBLE(IsSupportedGPUPower, GPUPower, power_w);
     READ_DOUBLE(IsSupportedGPUUsage, GPUUsage, usage_percent);
     adlx_bool supported = false;
-    if (ADLX_SUCCEEDED(support->pVtbl->IsSupportedGPUFanSpeed(support, &supported)) && supported) {
+    ADLX_RESULT fan_support = support->pVtbl->IsSupportedGPUFanSpeed(support, &supported);
+    if (ADLX_SUCCEEDED(fan_support) && supported) {
         adlx_int rpm = 0;
         ADLX_RESULT result = metrics->pVtbl->GPUFanSpeed(metrics, &rpm);
-        out->fan_rpm.state = ADLX_SUCCEEDED(result) ? MACE_METRIC_VALID : MACE_METRIC_READ_FAILED;
+        out->fan_rpm.state = ADLX_SUCCEEDED(result) ? MACE_METRIC_VALID : adlx_state(result);
         if (ADLX_SUCCEEDED(result) && rpm >= 0) out->fan_rpm.value = (uint32_t)rpm;
-    } else out->fan_rpm.state = MACE_METRIC_UNSUPPORTED;
+    } else out->fan_rpm.state = ADLX_SUCCEEDED(fan_support) ? MACE_METRIC_UNSUPPORTED : adlx_state(fan_support);
     supported = false;
-    if (ADLX_SUCCEEDED(support->pVtbl->IsSupportedGPUVRAM(support, &supported)) && supported) {
+    ADLX_RESULT memory_support = support->pVtbl->IsSupportedGPUVRAM(support, &supported);
+    if (ADLX_SUCCEEDED(memory_support) && supported) {
         adlx_int used_mb = 0;
         ADLX_RESULT result = metrics->pVtbl->GPUVRAM(metrics, &used_mb);
         out->video_memory_used_bytes.state = ADLX_SUCCEEDED(result) && used_mb >= 0 ?
-            MACE_METRIC_VALID : MACE_METRIC_READ_FAILED;
+            MACE_METRIC_VALID : adlx_state(result);
         if (out->video_memory_used_bytes.state == MACE_METRIC_VALID)
             out->video_memory_used_bytes.value = (uint64_t)used_mb * UINT64_C(1000000);
-    } else out->video_memory_used_bytes.state = MACE_METRIC_UNSUPPORTED;
+    } else out->video_memory_used_bytes.state = ADLX_SUCCEEDED(memory_support) ?
+        MACE_METRIC_UNSUPPORTED : adlx_state(memory_support);
     support->pVtbl->Release(support);
     metrics->pVtbl->Release(metrics);
     return true;

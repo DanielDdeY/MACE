@@ -22,6 +22,15 @@ typedef struct {
 } IgclPrevious;
 static IgclPrevious previous[16];
 
+static MaceMetricState igcl_state(ctl_result_t result) {
+    if (result == CTL_RESULT_ERROR_DEVICE_LOST ||
+        result == CTL_RESULT_ERROR_DEVICE_UNAVAILABLE)
+        return MACE_METRIC_DEVICE_INACTIVE;
+    if (result == CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS)
+        return MACE_METRIC_ACCESS_DENIED;
+    return MACE_METRIC_READ_FAILED;
+}
+
 bool Igcl_Init(void) {
     if (api) return true;
     module = LoadLibraryExW(L"igcl.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
@@ -119,9 +128,17 @@ bool Igcl_PollAdapter(const MaceGpuAdapterInfoV2* adapter,
     ctl_power_telemetry_v2_t sample = {0};
     sample.Size = sizeof(sample);
     sample.Version = 1;
-    if (telemetry_fn(matched, &sample) != CTL_RESULT_SUCCESS) return false;
+    ctl_result_t telemetry_result = telemetry_fn(matched, &sample);
     out->provider_id = MACE_PROVIDER_INTEL_IGCL;
     out->power_scope = MACE_POWER_SCOPE_GPU_CHIP;
+    if (telemetry_result != CTL_RESULT_SUCCESS) {
+        MaceMetricState state = igcl_state(telemetry_result);
+        out->temperature_c.state = state;
+        out->power_w.state = state;
+        out->usage_percent.state = state;
+        out->fan_rpm.state = state;
+        return true;
+    }
     if (item_valid(&sample.gpuCurrentTemperature, CTL_UNITS_TEMPERATURE_CELSIUS)) {
         out->temperature_c.value = (float)numeric_value(&sample.gpuCurrentTemperature);
         out->temperature_c.state = MACE_METRIC_VALID;
