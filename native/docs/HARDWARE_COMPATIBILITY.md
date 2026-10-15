@@ -11,7 +11,7 @@ Fecha: 15-10-2026. Esta matriz recoge la comprobación inicial de fase 0 y es hi
 | GPU NVIDIA dedicada | DXGI puede enumerarla sin pedir la marca al usuario. | Independiente de la marca de CPU. | NVML es el proveedor previsto; RPM y porcentaje son lecturas distintas. | Pendiente de hardware. |
 | Dos GPU físicas, integrada + dedicada | DXGI enumera ambas, con LUID por sesión. | Se consulta la CPU por separado. | Cada proveedor debe asociar su lectura al LUID correcto; la política de GPU predeterminada se documentará en V2. | Pendiente de equipo híbrido. |
 
-La prueba `hardware_probe.exe` usa CPUID y `IDXGIFactory1::EnumAdapters1` directamente en Windows. La prueba `test_mace.exe` ejercita la DLL heredada y muestra la ausencia de sensores AMD/Radeon. Ninguno de esos resultados demuestra temperatura o potencia física AMD; tampoco demuestra soporte de Intel, NVIDIA o GPU integrada en esta máquina.
+La prueba `hardware_probe.exe` usa CPUID y `IDXGIFactory1::EnumAdapters1` directamente en Windows. En la fase 0, `test_mace.exe` ejercitaba la interfaz heredada y mostraba la ausencia de sensores AMD/Radeon; ahora muestra el inventario y las métricas V2. Los resultados de esta tabla corresponden a la fase 0. La prueba física actual de ADLX/Radeon se describe en `PHASE2.md`; todavía no demuestra temperatura o potencia física de la CPU AMD ni soporte de Intel, NVIDIA o GPU integrada.
 
 ## Selección de proveedores para la fase 2
 

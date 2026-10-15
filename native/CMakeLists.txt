@@ -58,7 +58,7 @@ set_target_properties(mace_native PROPERTIES
     MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
 )
 
-# Demostración heredada: no es una prueba automatizada, porque depende del equipo.
+# Demostración manual de telemetría V2 y procesos; depende del equipo.
 add_executable(test_mace test_main.c)
 target_include_directories(test_mace PRIVATE include)
 target_compile_options(test_mace PRIVATE /W4 /WX /utf-8)
