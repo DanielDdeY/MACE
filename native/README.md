@@ -1,16 +1,15 @@
-# MACE native — copia aislada
+# MACE native
 
-Esta rama contiene la línea base del repositorio y los entregables de la fase 0. La DLL sigue teniendo las funciones heredadas; los tipos V2 ya están definidos en cabeceras, pero sus funciones aún no están implementadas. Véanse [contrato ABI](docs/ABI.md), [pruebas de hardware](docs/HARDWARE_COMPATIBILITY.md) y [estado de la fase 0](docs/PHASE0.md).
+Biblioteca C17 para Windows 10/11 x64. La versión nativa 1.1.0 conserva la API usada por Java y añade una consulta de contrato (`CP_GetAbiInfo`). Los proveedores CPU/GPU adicionales y las extensiones siguen en desarrollo. Véanse [ABI](docs/ABI.md), [estado de fase 1](docs/PHASE1.md) y [entrega a los demás desarrolladores](docs/HANDOFF.md).
 
-Desde la raíz del repositorio, con CMake 3.28+, Visual Studio con MSVC x64 y el Windows SDK:
+Desde la raíz del repositorio, con Visual Studio 2022 o 2026 y las herramientas C++/Windows SDK instaladas:
 
 ```powershell
-cmake -S native -B native/build -A x64
-cmake --build native/build --config Release
-ctest --test-dir native/build -C Release --output-on-failure
-native/build/Release/hardware_probe.exe
+.\native\scripts\build-native.ps1 -Configuration Release
+.\native\scripts\build-native.ps1 -Configuration Debug
+.\native\scripts\package-native.ps1
 ```
 
-`hardware_probe.exe` identifica CPU y adaptadores GPU de este equipo; no prueba los sensores. `test_mace.exe` es la demostración heredada, con los límites documentados en `docs/ABI.md`. Para que la aplicación Java de la copia use la DLL recién compilada, se puede indicar la ruta absoluta mediante `MACE_NATIVE_LIB`. El launcher empaquetado tiene un manifiesto propio en `packaging/app.manifest`; ejecutar desde un IDE o Maven no aplica automáticamente su elevación.
+El script encuentra un CMake 3.28+ y ejecuta CTest. Para distribuir también exige JDK 22, porque verifica la DLL copiada en `native/dist/` mediante el ejemplo FFM. Las carpetas `native/build/` y `native/dist/` son salidas regenerables ignoradas por Git. El empaquetado falla si hay cambios de fuente en `native/` sin registrar, para que `build-info.json` pueda señalar una revisión exacta.
 
-Las salidas de `native/build/` se regeneran y están ignoradas por Git. El trabajo funcional de la DLL continuará en esta rama y solo dentro de `native/`.
+La aplicación Java puede utilizar el binario verificado indicando su ruta absoluta mediante `MACE_NATIVE_LIB` o `-Dmace.native.lib`. La DLL no solicita elevación por sí misma: hereda el token del proceso que la carga. El manifiesto de `MACE.exe` y su script de empaquetado están en `packaging/`.

@@ -26,7 +26,7 @@ typedef struct {
     uint32_t reserved;
 } MaceMetricU64V2;
 
-/* Consulta disponible antes de inicializar telemetría (se implementará en fase 1). */
+/* Consulta disponible antes de inicializar telemetría. */
 typedef struct {
     uint32_t struct_size;
     uint32_t version;

@@ -8,11 +8,19 @@
 #endif
 
 #include "mace_types.h"
+#include "mace_types_v2.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Disponible incluso antes de CP_InitializeTelemetry. Un out_info nulo con
+ * out_capacity=0 permite consultar el tamaño requerido. No hay escritura
+ * parcial si la capacidad es insuficiente. */
+CP_API MaceStatus CP_GetAbiInfo(MaceAbiInfoV2* out_info,
+                               uint32_t out_capacity,
+                               uint32_t* out_required_size);
 
 // Ciclo de vida del subsistema de telemetría
 CP_API int  CP_InitializeTelemetry(void);

@@ -1,6 +1,6 @@
 # Contrato de integración native/FFM
 
-Estado: línea base de la fase 0, tomada del commit `5a1d534e0fe09e27c94c29ff19483a212516adb4` el 15-10-2026. Los layouts V2 de `include/mace_types_v2.h` y `include/mace_extensions.h` quedan definidos y comprobados por CTest. **Los símbolos V2 aún no están exportados por la DLL**; implementarlos y publicar `CP_GetAbiInfo` corresponde a las fases siguientes. El Java actual solo consume la interfaz heredada.
+Estado: fase 1. La DLL exporta los siete símbolos heredados y `CP_GetAbiInfo`; este último devuelve ABI **1.1** en un registro de estructura versión **2**. Los demás símbolos V2 para telemetría, procesos y extensiones siguen reservados para fases posteriores. El Java actual solo consume la interfaz heredada.
 
 ## Plataforma y tipos
 
@@ -11,6 +11,10 @@ Estado: línea base de la fase 0, tomada del commit `5a1d534e0fe09e27c94c29ff194
 - Todo buffer pasado a la DLL pertenece al llamador hasta que la función retorna. Las funciones V2 propuestas recibirán capacidad explícita, nunca guardarán ese puntero y devolverán tamaño/cantidad requerida si es insuficiente.
 
 ## Interfaz heredada que debe conservarse
+
+La nueva consulta de identificación es `MaceStatus CP_GetAbiInfo(MaceAbiInfoV2* out_info, uint32_t out_capacity, uint32_t* out_required_size)`. Se puede llamar antes de `CP_InitializeTelemetry` y no carga sensores. Requiere `out_required_size`; siempre escribe allí `64` cuando el puntero es válido. Con `out_info=NULL, out_capacity=0` devuelve `MACE_E_BUFFER_TOO_SMALL (-2)` para consultar el tamaño. Si la capacidad es inferior a 64, no escribe ningún byte de `out_info`; si el puntero es nulo pese a capacidad suficiente devuelve `MACE_E_INVALID_ARGUMENT (-1)`. En éxito escribe solo los 64 bytes definidos, inicializa los reservados a cero y devuelve `MACE_OK (0)`. Se permiten buffers mayores; sus bytes adicionales permanecen intactos.
+
+`abi_major=1, abi_minor=1` significa que la interfaz heredada está intacta y se añadió esta consulta; **no** significa que ya se implementaron todas las funciones descritas en los tipos V2. `build_major/minor/patch=1.1.0` identifica la versión de esta DLL. El campo `implemented_capabilities` anuncia solo `MACE_CAP_CPU_USAGE` en esta fase. Un bit de capacidad indica implementación, no disponibilidad física del sensor en un equipo concreto. Los siete símbolos originales se comprueban al cargar exactamente la DLL distribuida.
 
 | Símbolo | Firma C | Resultado actual |
 |---|---|
@@ -69,7 +73,7 @@ Todos tienen `struct_size` y `version=2` cuando son registros de salida; la DLL 
 
 `include/mace_status.h` fija retornos `MACE_OK=0`, errores negativos y estados de métrica. Los errores de permiso, proceso finalizado, PID reutilizado, buffer insuficiente y sensor ausente son distintos. Una función V2 que falle por Win32 devolverá `MACE_E_WINDOWS_ERROR` y, cuando corresponda, un parámetro de salida `uint32_t win32_error` capturado **antes** de cerrar el handle. Nunca se sobrecargará un float con un código de error.
 
-La consulta `CP_GetAbiInfo` será la primera exportación V2 y no necesitará inicialización. Más tarde se implementarán enumeración de GPU y consulta por LUID, sondeos CPU/GPU/memoria, muestras de proceso y terminación por identidad, respuesta detallada de ventanas y API de caja negra. Estos nombres describen el contrato de integración; **no deben invocarse todavía**. Los módulos Java comprobarán ABI/capacidades antes de usar V2, manteniendo los siete símbolos heredados.
+`CP_GetAbiInfo` es la primera exportación ampliada y ya está disponible. Más tarde se implementarán enumeración de GPU y consulta por LUID, sondeos CPU/GPU/memoria, muestras de proceso y terminación por identidad, respuesta detallada de ventanas y API de caja negra. Estos nombres describen el contrato de integración; **no deben invocarse todavía**. Los módulos Java comprobarán ABI/capacidades antes de usar esas futuras funciones, manteniendo los siete símbolos heredados.
 
 El buffer de procesos y las estructuras de salida son propiedad del llamador. El mapeo V2 será propiedad de la DLL y expondrá un token opaco, escritura y lectura por copia, estadísticas y cierre; Java no liberará ni retendrá punteros internos. Habrá un escritor por buffer y las lecturas usarán el protocolo nativo de sincronización. El símbolo heredado que devuelve una vista requiere una función de cierre específica en la fase 4; hasta entonces no debe usarse en producción.
 
