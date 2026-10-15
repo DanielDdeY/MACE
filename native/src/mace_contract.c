@@ -68,7 +68,12 @@ CP_API MaceStatus CP_GetAbiInfo(MaceAbiInfoV2* out_info,
         .wchar_size = (uint32_t)sizeof(wchar_t),
         .pointer_size = (uint32_t)sizeof(void*),
         .reserved0 = 0,
-        .implemented_capabilities = MACE_CAP_CPU_USAGE,
+        .implemented_capabilities = MACE_CAP_CPU_USAGE |
+            MACE_CAP_CPU_TEMPERATURE | MACE_CAP_CPU_POWER |
+            MACE_CAP_GPU_INVENTORY | MACE_CAP_GPU_TEMPERATURE |
+            MACE_CAP_GPU_POWER | MACE_CAP_GPU_USAGE |
+            MACE_CAP_GPU_FAN_RPM | MACE_CAP_GPU_FAN_PERCENT |
+            MACE_CAP_GPU_MEMORY | MACE_CAP_SYSTEM_MEMORY,
         .build_major = MACE_BUILD_VERSION_MAJOR,
         .build_minor = MACE_BUILD_VERSION_MINOR,
         .build_patch = MACE_BUILD_VERSION_PATCH,

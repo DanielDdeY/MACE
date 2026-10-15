@@ -25,6 +25,7 @@ static unsigned long long g_prev_idle = 0;
 static unsigned long long g_prev_kernel = 0;
 static unsigned long long g_prev_user = 0;
 static bool g_have_prev = false;
+static bool g_last_usage_valid = false;
 
 /*
  * GetSystemTimes entrega tiempo ocioso, de kernel y de usuario acumulados. El de
@@ -34,6 +35,7 @@ static bool g_have_prev = false;
 static float ReadCpuUsagePercent(void) {
     FILETIME idle_ft, kernel_ft, user_ft;
     if (!GetSystemTimes(&idle_ft, &kernel_ft, &user_ft)) {
+        g_last_usage_valid = false;
         return 0.0f;
     }
 
@@ -42,6 +44,7 @@ static float ReadCpuUsagePercent(void) {
     unsigned long long user = filetime_to_u64(&user_ft);
 
     float usage = 0.0f;
+    g_last_usage_valid = g_have_prev;
     if (g_have_prev) {
         unsigned long long d_idle = idle - g_prev_idle;
         unsigned long long d_kernel = kernel - g_prev_kernel;
@@ -99,6 +102,8 @@ static uint32_t g_last_energy_raw = 0;
 static LARGE_INTEGER g_last_power_time = {0};
 static LARGE_INTEGER g_timer_freq = {0};
 static float g_cached_watts = 0.0f;
+static bool g_power_reference = false;
+static bool g_power_calculated = false;
 
 /* Los MSR que se leen aqui son de Intel: en otro fabricante no se intenta. */
 static bool IsIntelCpu(void) {
@@ -151,6 +156,7 @@ bool CpuSensors_Init(void) {
     QueryPerformanceCounter(&g_last_power_time);
     if (p_Rdmsr(MSR_PKG_ENERGY_STATUS, &eax, &edx)) {
         g_last_energy_raw = eax;
+        g_power_reference = true;
     }
 
     g_sensors_ready = true;
@@ -167,10 +173,22 @@ void CpuSensors_Shutdown(void) {
     }
     g_sensors_ready = false;
     g_init_attempted = false;
+    g_have_prev = false;
+    g_last_usage_valid = false;
+    g_power_reference = false;
+    g_power_calculated = false;
+    g_cached_watts = 0.0f;
+    g_energy_unit_joules = 0.0;
 }
 
 bool CpuSensors_HardwareAvailable(void) {
     return g_sensors_ready;
+}
+
+bool CpuSensors_UsageReady(void) { return g_last_usage_valid; }
+bool CpuSensors_PowerReady(void) { return g_power_calculated; }
+bool CpuSensors_PowerSupported(void) {
+    return g_sensors_ready && g_energy_unit_joules > 0.0 && g_power_reference;
 }
 
 /**
@@ -183,7 +201,7 @@ static float ReadCpuTemperature(void) {
     DWORD eax = 0, edx = 0;
 
     // 1. Obtener TjMax (límite térmico del empaque) en MSR 0x1A2
-    uint32_t tj_max = 100;
+    uint32_t tj_max = 0;
     if (p_Rdmsr(MSR_TEMPERATURE_TARGET, &eax, &edx)) {
         uint32_t target = (eax >> 16) & 0xFF;
         if (target > 50 && target < 125) {
@@ -192,7 +210,7 @@ static float ReadCpuTemperature(void) {
     }
 
     // 2. Leer estado térmico actual (MSR 0x19C)
-    if (p_Rdmsr(MSR_IA32_THERM_STATUS, &eax, &edx)) {
+    if (tj_max != 0 && p_Rdmsr(MSR_IA32_THERM_STATUS, &eax, &edx)) {
         // Bit 31: indica si el sensor entrega una lectura válida
         if (eax & 0x80000000) {
             uint32_t delta = (eax >> 16) & 0x7F;
@@ -212,12 +230,14 @@ static float ReadCpuTemperature(void) {
 static float ReadCpuPowerWatts(void) {
     if (!g_sensors_ready) return 0.0f;
 
-    if (g_energy_unit_joules <= 0.0) return 0.0f;
+    if (g_energy_unit_joules <= 0.0 || !g_power_reference ||
+        g_timer_freq.QuadPart == 0) return 0.0f;
 
     DWORD current_raw = 0, edx = 0;
     LARGE_INTEGER current_time;
 
     if (!p_Rdmsr(MSR_PKG_ENERGY_STATUS, &current_raw, &edx)) {
+        g_power_calculated = false;
         return 0.0f;
     }
 
@@ -231,6 +251,7 @@ static float ReadCpuPowerWatts(void) {
         double joules = (double)delta_energy_raw * g_energy_unit_joules;
 
         g_cached_watts = (float)(joules / delta_sec);
+        g_power_calculated = true;
         g_last_energy_raw = current_raw;
         g_last_power_time = current_time;
     }

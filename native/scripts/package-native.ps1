@@ -1,6 +1,7 @@
 param(
     [ValidateSet('Auto', 'VS2022', 'VS2026')][string]$VisualStudio = 'Auto',
-    [string]$BuildDirectory
+    [string]$BuildDirectory,
+    [string]$AdlxSdkDirectory = $env:MACE_ADLX_SDK_DIR
 )
 
 . (Join-Path $PSScriptRoot 'native-common.ps1')
@@ -18,7 +19,7 @@ $sourceRevision = (& git -C $repositoryRoot rev-parse HEAD).Trim()
 Assert-MaceCommandSucceeded 'Consulta de revisión Git'
 
 & (Join-Path $PSScriptRoot 'build-native.ps1') -Configuration Release `
-    -VisualStudio $VisualStudio -BuildDirectory $build
+    -VisualStudio $VisualStudio -BuildDirectory $build -AdlxSdkDirectory $AdlxSdkDirectory
 
 $sourceDll = Join-Path $build 'Release\mace_native.dll'
 $sourceLib = Join-Path $build 'Release\mace_native.lib'
@@ -70,7 +71,7 @@ $metadata = [ordered]@{
     schemaVersion = 1
     project = 'MACE native'
     nativeVersion = $nativeVersion
-    abiVersion = '1.1'
+    abiVersion = '1.2'
     abiInfoRecordVersion = 2
     platform = 'Windows x64'
     configuration = 'Release'
@@ -81,7 +82,8 @@ $metadata = [ordered]@{
     builtUtc = [DateTime]::UtcNow.ToString('o')
     dllSha256 = $sourceDllHash
     importLibrarySha256 = $sourceLibHash
-    tests = @('CTest abi_layouts', 'CTest abi_exports', 'C exports on distributed DLL', 'JDK 22 FFM on distributed DLL')
+    amdAdlxCompiled = -not [string]::IsNullOrWhiteSpace($AdlxSdkDirectory)
+    tests = @('CTest abi_layouts', 'CTest abi_exports', 'CTest telemetry_v2', 'C exports on distributed DLL', 'JDK 22 FFM on distributed DLL')
 }
 $metadata | ConvertTo-Json -Depth 5 |
     Set-Content -LiteralPath (Join-Path $package 'build-info.json') -Encoding utf8

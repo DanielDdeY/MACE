@@ -86,5 +86,6 @@ enum {
 #define MACE_CAP_WINDOW_RESPONSIVENESS (UINT64_C(1) << 12)
 #define MACE_CAP_BLACKBOX_BUFFER       (UINT64_C(1) << 13)
 #define MACE_CAP_SYSTEM_MEMORY         (UINT64_C(1) << 14)
+#define MACE_CAP_GPU_MEMORY            (UINT64_C(1) << 15)
 
 #endif /* MACE_STATUS_H */

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(mace_native VERSION 1.1.0 LANGUAGES C RC)
+project(mace_native VERSION 1.2.0 LANGUAGES C RC)
 
 if (NOT WIN32 OR NOT CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     message(FATAL_ERROR "mace_native requires Windows with the MSVC C compiler")
@@ -25,7 +25,10 @@ set(MACE_NATIVE_SOURCES
     src/process/process_filter.c
     src/process/process_controller.c
     src/telemetry/nvml_loader.c
+    src/telemetry/igcl_provider.c
+    src/telemetry/gpu_providers.c
     src/telemetry/cpu_sensors.c
+    src/hardware/gpu_inventory.c
     src/extensions/hang_detector_stub.c
     src/extensions/memory_map_stub.c
     "${CMAKE_CURRENT_BINARY_DIR}/generated/mace_native.rc"
@@ -33,11 +36,22 @@ set(MACE_NATIVE_SOURCES
 
 add_library(mace_native SHARED ${MACE_NATIVE_SOURCES})
 target_include_directories(mace_native PRIVATE include
+    vendor_headers/intel_igcl
     "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(MACE_ADLX_SDK_DIR "" CACHE PATH "External AMD ADLX SDK root (contains SDK/Include/ADLX.h)")
+if (MACE_ADLX_SDK_DIR AND EXISTS "${MACE_ADLX_SDK_DIR}/SDK/Include/ADLX.h")
+    target_sources(mace_native PRIVATE src/telemetry/adlx_provider.c)
+    target_include_directories(mace_native PRIVATE "${MACE_ADLX_SDK_DIR}")
+    target_compile_definitions(mace_native PRIVATE MACE_HAS_ADLX=1)
+elseif (MACE_ADLX_SDK_DIR)
+    message(FATAL_ERROR "MACE_ADLX_SDK_DIR does not contain SDK/Include/ADLX.h")
+else()
+    message(STATUS "AMD ADLX provider disabled: set MACE_ADLX_SDK_DIR to the official SDK")
+endif()
 target_compile_definitions(mace_native PRIVATE MACE_EXPORTS
     _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE)
 target_compile_options(mace_native PRIVATE /W4 /WX /utf-8)
-target_link_libraries(mace_native PRIVATE kernel32 psapi user32)
+target_link_libraries(mace_native PRIVATE kernel32 psapi user32 dxgi dxguid gdi32 shell32 ole32)
 set_target_properties(mace_native PROPERTIES
     OUTPUT_NAME mace_native
     PREFIX ""
@@ -69,6 +83,14 @@ if (BUILD_TESTING)
     set_target_properties(test_abi_exports PROPERTIES
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     add_test(NAME abi_exports COMMAND test_abi_exports "$<TARGET_FILE:mace_native>")
+
+    add_executable(test_telemetry_v2 tests/test_telemetry_v2.c)
+    target_include_directories(test_telemetry_v2 PRIVATE include)
+    target_compile_options(test_telemetry_v2 PRIVATE /W4 /WX /utf-8)
+    target_link_libraries(test_telemetry_v2 PRIVATE mace_native)
+    set_target_properties(test_telemetry_v2 PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    add_test(NAME telemetry_v2 COMMAND test_telemetry_v2)
 endif()
 
 # Prueba técnica opcional de detección automática; no se ejecuta en CI.

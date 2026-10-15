@@ -20,6 +20,9 @@ void CpuSensors_Shutdown(void);
 
 /** true si temperatura y energia provienen de sensores reales (WinRing0 + CPU Intel). */
 bool CpuSensors_HardwareAvailable(void);
+bool CpuSensors_UsageReady(void);
+bool CpuSensors_PowerReady(void);
+bool CpuSensors_PowerSupported(void);
 
 /**
  * Sondeo unificado. El uso de CPU siempre es real (GetSystemTimes); temperatura y

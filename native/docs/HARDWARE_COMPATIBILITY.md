@@ -1,6 +1,6 @@
 # Detección y sensores: comprobación inicial
 
-Fecha: 15-10-2026. Esta matriz distingue inventario de hardware, presencia de un proveedor y métricas medidas. No es una certificación de todos los modelos de una marca.
+Fecha: 15-10-2026. Esta matriz recoge la comprobación inicial de fase 0 y es histórica; los resultados actuales de fase 2 están en `PHASE2.md`. Distingue inventario de hardware, presencia de un proveedor y métricas medidas. No es una certificación de todos los modelos de una marca.
 
 | Configuración | Inventario automático | CPU temperatura/potencia | GPU sensores | Estado de prueba |
 |---|---|---|---|---|
