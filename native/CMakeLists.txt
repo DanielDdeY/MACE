@@ -40,3 +40,15 @@ set_target_properties(mace_native PROPERTIES
 # Ejecutable de prueba en consola
 add_executable(test_mace test_main.c)
 target_link_libraries(test_mace PRIVATE mace_native)
+
+# Fase 0: contrato binario compartido con Java FFM. No necesita sensores.
+include(CTest)
+if (BUILD_TESTING)
+    add_executable(test_abi_layouts tests/test_abi_layouts.c)
+    target_include_directories(test_abi_layouts PRIVATE include)
+    add_test(NAME abi_layouts COMMAND test_abi_layouts)
+endif()
+
+# Prueba técnica opcional de detección automática; no se ejecuta en CI.
+add_executable(hardware_probe tests/hardware_probe.c)
+target_link_libraries(hardware_probe PRIVATE dxgi dxguid)
