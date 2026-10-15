@@ -1,0 +1,13 @@
+#ifndef MACE_VERSION_H
+#define MACE_VERSION_H
+
+#define MACE_BUILD_VERSION_MAJOR @PROJECT_VERSION_MAJOR@u
+#define MACE_BUILD_VERSION_MINOR @PROJECT_VERSION_MINOR@u
+#define MACE_BUILD_VERSION_PATCH @PROJECT_VERSION_PATCH@u
+
+/* La API heredada sigue siendo la versión mayor 1. La consulta ABI es 1.2;
+ * el registro MaceAbiInfoV2 tiene su propia versión de estructura (=2). */
+#define MACE_ABI_MAJOR 1u
+#define MACE_ABI_MINOR 2u
+
+#endif /* MACE_VERSION_H */

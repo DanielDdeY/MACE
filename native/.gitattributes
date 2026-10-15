@@ -1,0 +1,2 @@
+# Preserve Intel's upstream SDK header and license without whitespace rewrites.
+vendor_headers/intel_igcl/* -whitespace

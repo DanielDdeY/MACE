@@ -1,0 +1,91 @@
+#ifndef MACE_STATUS_H
+#define MACE_STATUS_H
+
+#include <stdint.h>
+
+/* Contrato V2: valores de 32 bits estables para C y Java FFM. */
+typedef int32_t MaceStatus;
+
+enum {
+    MACE_OK = 0,
+    MACE_E_INVALID_ARGUMENT = -1,
+    MACE_E_BUFFER_TOO_SMALL = -2,
+    MACE_E_NOT_INITIALIZED = -3,
+    MACE_E_UNSUPPORTED_VERSION = -4,
+    MACE_E_ACCESS_DENIED = -5,
+    MACE_E_PROCESS_EXITED = -6,
+    MACE_E_PID_REUSED = -7,
+    MACE_E_SENSOR_UNAVAILABLE = -8,
+    MACE_E_DEVICE_NOT_FOUND = -9,
+    MACE_E_BUSY = -10,
+    MACE_E_WINDOWS_ERROR = -11
+};
+
+/* Cada medida tiene su propio estado; el valor solo se usa si es VALID. */
+typedef uint32_t MaceMetricState;
+enum {
+    MACE_METRIC_VALID = 0,
+    MACE_METRIC_NO_DEVICE = 1,
+    MACE_METRIC_NO_PROVIDER = 2,
+    MACE_METRIC_UNSUPPORTED = 3,
+    MACE_METRIC_ACCESS_DENIED = 4,
+    MACE_METRIC_WARMING_UP = 5,
+    MACE_METRIC_READ_FAILED = 6,
+    MACE_METRIC_DEVICE_INACTIVE = 7,
+    MACE_METRIC_NOT_INITIALIZED = 8
+};
+
+typedef uint32_t MaceProviderId;
+enum {
+    MACE_PROVIDER_NONE = 0,
+    MACE_PROVIDER_WINDOWS = 1,
+    MACE_PROVIDER_INTEL_MSR = 2,
+    MACE_PROVIDER_AMD_RYZEN_SDK = 3,
+    MACE_PROVIDER_AMD_UPROF = 4,
+    MACE_PROVIDER_NVIDIA_NVML = 5,
+    MACE_PROVIDER_AMD_ADLX = 6,
+    MACE_PROVIDER_INTEL_IGCL = 7
+};
+
+typedef uint32_t MacePowerScope;
+enum {
+    MACE_POWER_SCOPE_UNKNOWN = 0,
+    MACE_POWER_SCOPE_CPU_PACKAGE = 1,
+    MACE_POWER_SCOPE_CPU_RAIL = 2,
+    MACE_POWER_SCOPE_GPU_BOARD = 3,
+    MACE_POWER_SCOPE_GPU_CHIP = 4,
+    MACE_POWER_SCOPE_APU_SOC = 5
+};
+
+enum {
+    MACE_CPU_VENDOR_UNKNOWN = 0,
+    MACE_CPU_VENDOR_INTEL = 1,
+    MACE_CPU_VENDOR_AMD = 2
+};
+
+enum {
+    MACE_RESPONSIVENESS_RESPONDING = 0,
+    MACE_RESPONSIVENESS_HUNG = 1,
+    MACE_RESPONSIVENESS_NO_WINDOW = 2,
+    MACE_RESPONSIVENESS_PROCESS_EXITED = 3,
+    MACE_RESPONSIVENESS_ERROR = 4
+};
+
+#define MACE_CAP_CPU_USAGE             (UINT64_C(1) << 0)
+#define MACE_CAP_CPU_TEMPERATURE       (UINT64_C(1) << 1)
+#define MACE_CAP_CPU_POWER             (UINT64_C(1) << 2)
+#define MACE_CAP_GPU_INVENTORY         (UINT64_C(1) << 3)
+#define MACE_CAP_GPU_TEMPERATURE       (UINT64_C(1) << 4)
+#define MACE_CAP_GPU_POWER             (UINT64_C(1) << 5)
+#define MACE_CAP_GPU_USAGE             (UINT64_C(1) << 6)
+#define MACE_CAP_GPU_FAN_RPM           (UINT64_C(1) << 7)
+#define MACE_CAP_GPU_FAN_PERCENT       (UINT64_C(1) << 8)
+#define MACE_CAP_PROCESS_SAMPLES       (UINT64_C(1) << 9)
+#define MACE_CAP_PROCESS_IDENTITY      (UINT64_C(1) << 10)
+#define MACE_CAP_SAFE_TERMINATION      (UINT64_C(1) << 11)
+#define MACE_CAP_WINDOW_RESPONSIVENESS (UINT64_C(1) << 12)
+#define MACE_CAP_BLACKBOX_BUFFER       (UINT64_C(1) << 13)
+#define MACE_CAP_SYSTEM_MEMORY         (UINT64_C(1) << 14)
+#define MACE_CAP_GPU_MEMORY            (UINT64_C(1) << 15)
+
+#endif /* MACE_STATUS_H */

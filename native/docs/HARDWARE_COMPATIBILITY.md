@@ -1,0 +1,26 @@
+# Detección y sensores: comprobación inicial
+
+Fecha: 15-10-2026. Esta matriz recoge la comprobación inicial de fase 0 y es histórica; los resultados actuales de fase 2 están en `PHASE2.md`. Distingue inventario de hardware, presencia de un proveedor y métricas medidas. No es una certificación de todos los modelos de una marca.
+
+| Configuración | Inventario automático | CPU temperatura/potencia | GPU sensores | Estado de prueba |
+|---|---|---|---|---|
+| Ryzen 5 3600, Radeon RX 5500 XT, Windows 10 x64 (equipo de esta ejecución) | CPUID: `AuthenticAMD`, familia 23/modelo 113. DXGI: Radeon `1002:7340` y Microsoft Basic Render Driver `1414:008C` marcado como software. | La DLL actual devuelve 0 °C/0 W e `is_cpu_sensor_available=0`; uso global real medido. | La DLL actual devuelve `is_gpu_available=0` porque solo intenta NVML. DXGI sí detecta la Radeon. | **Inventario verificado; sensores AMD/Radeon pendientes.** |
+| CPU Intel (equipo físico) | CPUID permite identificar fabricante/familia/modelo. | El código heredado tiene un camino DTS/RAPL opcional; no se probó físicamente en esta fase. | Depende de la GPU instalada. | Pendiente de equipo y proveedor compatible. |
+| CPU AMD móvil/APU con Radeon integrada | CPUID y DXGI son el camino previsto. | La API AMD elegida debe probarse en un modelo concreto de portátil/APU. | ADLX requiere confirmar soporte por adaptador y driver; puede no ofrecer ventilador propio. | Pendiente de hardware y proveedor. |
+| GPU Intel integrada | DXGI puede enumerarla sin pedir la marca al usuario. | Independiente de la marca de CPU. | IGCL debe consultar capacidades concretas del adaptador; no se probó en este equipo. | Pendiente de hardware. |
+| GPU NVIDIA dedicada | DXGI puede enumerarla sin pedir la marca al usuario. | Independiente de la marca de CPU. | NVML es el proveedor previsto; RPM y porcentaje son lecturas distintas. | Pendiente de hardware. |
+| Dos GPU físicas, integrada + dedicada | DXGI enumera ambas, con LUID por sesión. | Se consulta la CPU por separado. | Cada proveedor debe asociar su lectura al LUID correcto; la política de GPU predeterminada se documentará en V2. | Pendiente de equipo híbrido. |
+
+La prueba `hardware_probe.exe` usa CPUID y `IDXGIFactory1::EnumAdapters1` directamente en Windows. En la fase 0, `test_mace.exe` ejercitaba la interfaz heredada y mostraba la ausencia de sensores AMD/Radeon; ahora muestra el inventario y las métricas V2. Los resultados de esta tabla corresponden a la fase 0. La prueba física actual de ADLX/Radeon se describe en `PHASE2.md`; todavía no demuestra temperatura o potencia física de la CPU AMD ni soporte de Intel, NVIDIA o GPU integrada.
+
+## Selección de proveedores para la fase 2
+
+1. Mantener la fachada pública en C, con selección automática por CPUID/DXGI y estado independiente por métrica. El usuario no ingresará marcas o modelos.
+2. Para AMD CPU/APU, **probar primero AMDPowerProfileAPI de AMD uProf**: AMD la describe para potencia, temperatura y frecuencia en CPU/APU. Validar SDK, arquitectura x64, instalación/redistribución permitida, valor y ámbito de cada contador, y modelos móviles reales antes de adoptarla. El Ryzen Master Monitoring SDK es otra opción oficial para Ryzen/Threadripper; su página no asegura por sí sola cobertura de todos los APUs móviles. Su llamada `GetCPUParameters` debe espaciarse a un segundo, de acuerdo con AMD.
+3. Para Intel CPU, revisar el camino DTS/RAPL con un acceso MSR compatible y verificable. El código actual depende opcionalmente de WinRing0, que **no** está en el repositorio ni en la distribución. No se considerará válida una lectura solo por haber cargado una DLL.
+4. Para GPU, usar proveedores NVIDIA/NVML, AMD/ADLX e Intel/IGCL según los adaptadores detectados. Consultar función por función; una tarjeta sin RPM aún puede dar temperatura. Una iGPU sin ventilador propio no heredará el ventilador del CPU.
+5. Priorizar las pruebas físicas CPU Intel y AMD, una APU móvil, y GPU Radeon/Intel/NVIDIA. Registrar modelo, driver, proveedor, métricas válidas, métricas ausentes, unidades y permisos. No inventar valores ni tratar N/D como soporte comprobado.
+
+La instalación local de la utilidad Ryzen Master no implica que el SDK de monitorización esté disponible o pueda usarse mediante interfaces no documentadas. No se instalarán drivers ni utilidades durante esta fase. Para cerrar la validación física hacen falta las plataformas de prueba y el proveedor oficial elegido. El diseño y la prueba de inventario pueden continuar mientras se consiguen esos recursos.
+
+Fuentes técnicas del fabricante: [CPUID en MSVC](https://learn.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex?view=msvc-170), [DXGI_ADAPTER_DESC1](https://learn.microsoft.com/en-us/windows/win32/api/dxgi/ns-dxgi-dxgi_adapter_desc1), [AMD uProf PowerProfileAPI](https://docs.amd.com/r/en-US/57368-uProf-user-guide/AMDPowerProfileAPI-Library), [Ryzen Master Monitoring SDK](https://www.amd.com/en/developer/ryzen-master-monitoring-sdk.html), [AMD ADLX](https://gpuopen.com/manuals/adlx/adlx-sdk-references/adlx-interfaces/performance-monitoring/iadlxgpumetrics/), [Intel IGCL](https://github.com/intel/drivers.gpu.control-library) y [NVIDIA NVML](https://docs.nvidia.com/deploy/nvml-api/latest/api/group__nvmlDeviceQueries.html).
