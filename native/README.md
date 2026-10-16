@@ -14,6 +14,13 @@ Para compilar el proveedor Radeon, descargue el SDK oficial ADLX de AMD y pase s
 
 Para compilar la temperatura de CPU AMD, instale Ryzen Master **Monitoring SDK** y pase su raíz con `-RyzenSdkDirectory "C:\Program Files\AMD\RyzenMasterMonitoringSDK"`. En ejecución, la DLL busca `Platform.dll` en la instalación registrada por el SDK; requiere su controlador y un proceso elevado. La app Ryzen Master sin el Monitoring SDK no basta. El SDK no se copia al repositorio ni al paquete MACE. Consulte [prueba y límites de CPU AMD](docs/AMD_CPU_TEMPERATURE.md).
 
+Para incluir ambos proveedores AMD en la misma DLL, pase las dos rutas al compilar y empaquetar:
+
+```powershell
+.\native\scripts\build-native.ps1 -Configuration Release -AdlxSdkDirectory 'C:\Program Files\AMD\ADLX-2.0' -RyzenSdkDirectory 'C:\Program Files\AMD\RyzenMasterMonitoringSDK'
+.\native\scripts\package-native.ps1 -AdlxSdkDirectory 'C:\Program Files\AMD\ADLX-2.0' -RyzenSdkDirectory 'C:\Program Files\AMD\RyzenMasterMonitoringSDK'
+```
+
 El script encuentra un CMake 3.28+ y ejecuta CTest. Para distribuir también exige JDK 22, porque verifica la DLL copiada en `native/dist/` mediante el ejemplo FFM. Las carpetas `native/build/` y `native/dist/` son salidas regenerables ignoradas por Git. El empaquetado falla si hay cambios de fuente en `native/` sin registrar, para que `build-info.json` pueda señalar una revisión exacta. El paquete indica por separado si se compilaron los proveedores ADLX y Ryzen Master Monitoring SDK.
 
 La aplicación Java puede utilizar el binario verificado indicando su ruta absoluta mediante `MACE_NATIVE_LIB` o `-Dmace.native.lib`. La DLL no solicita elevación por sí misma: hereda el token del proceso que la carga. El manifiesto de `MACE.exe` y su script de empaquetado están en `packaging/`.
