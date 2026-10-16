@@ -9,16 +9,12 @@
 #include "telemetry/gpu_providers.h"
 #include "telemetry/cpu_sensors.h"
 #include "process/process_internal.h"
-#include "extensions/blackbox_buffer.h"
+#include "internal/mace_runtime.h"
+#include "extensions/hang_detector.h"
+#include "extensions/shared_buffer.h"
 #ifdef MACE_HAS_RYZEN_SDK
 #include "telemetry/amd_ryzen_provider.h"
 #endif
-
-extern int CheckWindowHung(uint32_t);
-extern void* SetupSharedTelemetryBuffer(const wchar_t*, uint32_t);
-
-static bool initialized;
-static SRWLOCK lifecycle_lock = SRWLOCK_INIT;
 
 static uint64_t monotonic_ns(void) { return GetTickCount64() * UINT64_C(1000000); }
 
@@ -35,32 +31,11 @@ static uint32_t cpu_vendor(void) {
 }
 
 CP_API int CP_InitializeTelemetry(void) {
-    AcquireSRWLockExclusive(&lifecycle_lock);
-    if (!initialized) {
-        CpuSensors_Init();
-#ifdef MACE_HAS_RYZEN_SDK
-        if (cpu_vendor() == MACE_CPU_VENDOR_AMD) AmdRyzenProvider_Init();
-#endif
-        GpuProviders_Init();
-        initialized = true;
-    }
-    ReleaseSRWLockExclusive(&lifecycle_lock);
-    return 0;
+    return MaceRuntime_Initialize(cpu_vendor());
 }
 
 CP_API void CP_ShutdownTelemetry(void) {
-    AcquireSRWLockExclusive(&lifecycle_lock);
-    Blackbox_CloseAll();
-    SharedBuffer_CloseAll();
-    if (initialized) {
-        GpuProviders_Shutdown();
-#ifdef MACE_HAS_RYZEN_SDK
-        AmdRyzenProvider_Shutdown();
-#endif
-        CpuSensors_Shutdown();
-        initialized = false;
-    }
-    ReleaseSRWLockExclusive(&lifecycle_lock);
+    MaceRuntime_Shutdown();
 }
 
 CP_API MaceStatus CP_EnumerateGpuAdapters(MaceGpuAdapterInfoV2* adapters,
@@ -68,15 +43,7 @@ CP_API MaceStatus CP_EnumerateGpuAdapters(MaceGpuAdapterInfoV2* adapters,
     return GpuInventory_Enumerate(adapters, capacity, count);
 }
 
-CP_API MaceStatus CP_PollCpuTelemetryV2(MaceCpuTelemetryV2* out,
-                                         uint32_t capacity) {
-    if (capacity < sizeof(*out)) return MACE_E_BUFFER_TOO_SMALL;
-    if (!out) return MACE_E_INVALID_ARGUMENT;
-    AcquireSRWLockExclusive(&lifecycle_lock);
-    if (!initialized) {
-        ReleaseSRWLockExclusive(&lifecycle_lock);
-        return MACE_E_NOT_INITIALIZED;
-    }
+static MaceStatus poll_cpu_locked(MaceCpuTelemetryV2* out) {
     MaceCpuTelemetryV2 sample = {0};
     sample.struct_size = sizeof(sample);
     sample.version = MACE_V2_CONTRACT_VERSION;
@@ -103,7 +70,32 @@ CP_API MaceStatus CP_PollCpuTelemetryV2(MaceCpuTelemetryV2* out,
         AmdRyzenProvider_Poll(&sample);
 #endif
     memcpy(out, &sample, sizeof(sample));
-    ReleaseSRWLockExclusive(&lifecycle_lock);
+    return MACE_OK;
+}
+
+CP_API MaceStatus CP_PollCpuTelemetryV2(MaceCpuTelemetryV2* out,
+                                         uint32_t capacity) {
+    if (capacity < sizeof(*out)) return MACE_E_BUFFER_TOO_SMALL;
+    if (!out) return MACE_E_INVALID_ARGUMENT;
+    MaceStatus status = MaceRuntime_BeginPoll();
+    if (status != MACE_OK) return status;
+    status = poll_cpu_locked(out);
+    MaceRuntime_EndPoll();
+    return status;
+}
+
+static MaceStatus poll_gpu_locked(const MaceAdapterLuidV2* luid,
+                                  MaceGpuTelemetryV2* out) {
+    MaceGpuAdapterInfoV2 adapter;
+    MaceStatus status = GpuInventory_Find(luid, &adapter);
+    if (status != MACE_OK) return status;
+    MaceGpuTelemetryV2 sample = {0};
+    sample.struct_size = sizeof(sample);
+    sample.version = MACE_V2_CONTRACT_VERSION;
+    sample.timestamp_monotonic_ns = monotonic_ns();
+    sample.luid = *luid;
+    GpuProviders_Poll(&adapter, &sample);
+    memcpy(out, &sample, sizeof(sample));
     return MACE_OK;
 }
 
@@ -113,26 +105,11 @@ CP_API MaceStatus CP_PollGpuTelemetryV2(const MaceAdapterLuidV2* luid,
     if (!luid) return MACE_E_INVALID_ARGUMENT;
     if (capacity < sizeof(*out)) return MACE_E_BUFFER_TOO_SMALL;
     if (!out) return MACE_E_INVALID_ARGUMENT;
-    AcquireSRWLockExclusive(&lifecycle_lock);
-    if (!initialized) {
-        ReleaseSRWLockExclusive(&lifecycle_lock);
-        return MACE_E_NOT_INITIALIZED;
-    }
-    MaceGpuAdapterInfoV2 adapter;
-    MaceStatus status = GpuInventory_Find(luid, &adapter);
-    if (status != MACE_OK) {
-        ReleaseSRWLockExclusive(&lifecycle_lock);
-        return status;
-    }
-    MaceGpuTelemetryV2 sample = {0};
-    sample.struct_size = sizeof(sample);
-    sample.version = MACE_V2_CONTRACT_VERSION;
-    sample.timestamp_monotonic_ns = monotonic_ns();
-    sample.luid = *luid;
-    GpuProviders_Poll(&adapter, &sample);
-    memcpy(out, &sample, sizeof(sample));
-    ReleaseSRWLockExclusive(&lifecycle_lock);
-    return MACE_OK;
+    MaceStatus status = MaceRuntime_BeginPoll();
+    if (status != MACE_OK) return status;
+    status = poll_gpu_locked(luid, out);
+    MaceRuntime_EndPoll();
+    return status;
 }
 
 CP_API MaceStatus CP_PollSystemMemoryV2(MaceSystemMemoryV2* out,
@@ -157,8 +134,9 @@ CP_API MaceStatus CP_PollSystemMemoryV2(MaceSystemMemoryV2* out,
 CP_API int CP_PollTelemetry(TelemetryData* out) {
     if (!out) return -1;
     memset(out, 0, sizeof(*out));
+    if (MaceRuntime_BeginPoll() != MACE_OK) return 0;
     MaceCpuTelemetryV2 cpu;
-    if (CP_PollCpuTelemetryV2(&cpu, sizeof(cpu)) == MACE_OK) {
+    if (poll_cpu_locked(&cpu) == MACE_OK) {
         out->cpu_usage = cpu.usage_percent.state == MACE_METRIC_VALID ? cpu.usage_percent.value : 0;
         out->cpu_temp = cpu.temperature_c.state == MACE_METRIC_VALID ? cpu.temperature_c.value : 0;
         out->cpu_watts = cpu.power_w.state == MACE_METRIC_VALID ? cpu.power_w.value : 0;
@@ -173,7 +151,7 @@ CP_API int CP_PollTelemetry(TelemetryData* out) {
         if (adapters && CP_EnumerateGpuAdapters(adapters, count, &count) == MACE_OK) {
             for (uint32_t i = 0; i < count; ++i) {
                 MaceGpuTelemetryV2 gpu;
-                if (CP_PollGpuTelemetryV2(&adapters[i].luid, &gpu, sizeof(gpu)) != MACE_OK ||
+                if (poll_gpu_locked(&adapters[i].luid, &gpu) != MACE_OK ||
                     gpu.temperature_c.state != MACE_METRIC_VALID) continue;
                 out->gpu_temp = gpu.temperature_c.value;
                 out->gpu_watts = gpu.power_w.state == MACE_METRIC_VALID ? gpu.power_w.value : 0;
@@ -184,6 +162,7 @@ CP_API int CP_PollTelemetry(TelemetryData* out) {
         }
         if (adapters) HeapFree(GetProcessHeap(), 0, adapters);
     }
+    MaceRuntime_EndPoll();
     return 0;
 }
 
@@ -193,5 +172,8 @@ CP_API int CP_EnumerateUserlandProcesses(ProcessData* buffer, uint32_t max_count
 CP_API int CP_TerminateProcess(uint32_t pid) { return TerminateProcessByPid(pid); }
 CP_API int CP_CheckProcessResponsiveness(uint32_t pid) { return CheckWindowHung(pid); }
 CP_API void* CP_InitSharedTelemetryBuffer(const wchar_t* name, uint32_t size) {
-    return SetupSharedTelemetryBuffer(name, size);
+    MaceRuntime_BeginResourceCreation();
+    void* view = SetupSharedTelemetryBuffer(name, size);
+    MaceRuntime_EndResourceCreation();
+    return view;
 }

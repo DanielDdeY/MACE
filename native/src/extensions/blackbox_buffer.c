@@ -1,5 +1,6 @@
 #include "mace_api.h"
 #include "blackbox_buffer.h"
+#include "../internal/mace_runtime.h"
 #include <windows.h>
 #include <string.h>
 
@@ -40,7 +41,7 @@ static uint32_t expected_payload_size(uint32_t type) {
     }
 }
 
-CP_API MaceStatus CP_BlackboxCreateV2(const wchar_t* name,
+static MaceStatus create_blackbox(const wchar_t* name,
     uint32_t capacity_records, uint64_t* out_handle, uint32_t* out_win32_error) {
     if (out_win32_error) *out_win32_error = ERROR_SUCCESS;
     if (out_handle) *out_handle = 0;
@@ -101,6 +102,15 @@ CP_API MaceStatus CP_BlackboxCreateV2(const wchar_t* name,
     return MACE_OK;
 }
 
+CP_API MaceStatus CP_BlackboxCreateV2(const wchar_t* name,
+    uint32_t capacity_records, uint64_t* out_handle, uint32_t* out_win32_error) {
+    MaceRuntime_BeginResourceCreation();
+    MaceStatus status = create_blackbox(name, capacity_records, out_handle,
+                                        out_win32_error);
+    MaceRuntime_EndResourceCreation();
+    return status;
+}
+
 CP_API MaceStatus CP_BlackboxGetStatsV2(uint64_t handle,
     MaceBlackboxHeaderV2* out_header, uint32_t out_capacity) {
     if (!handle) return MACE_E_INVALID_ARGUMENT;
@@ -109,8 +119,9 @@ CP_API MaceStatus CP_BlackboxGetStatsV2(uint64_t handle,
     AcquireSRWLockShared(&blackbox_lock);
     BlackboxContext* item = find_context(handle);
     if (item) memcpy(out_header, item->header, sizeof(*out_header));
+    bool found = item != NULL;
     ReleaseSRWLockShared(&blackbox_lock);
-    return item ? MACE_OK : MACE_E_INVALID_ARGUMENT;
+    return found ? MACE_OK : MACE_E_INVALID_ARGUMENT;
 }
 
 CP_API MaceStatus CP_BlackboxAppendV2(uint64_t handle, uint32_t record_type,

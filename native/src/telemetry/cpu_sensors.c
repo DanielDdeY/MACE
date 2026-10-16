@@ -17,10 +17,7 @@ static unsigned long long filetime_to_u64(const FILETIME* ft) {
     return u.QuadPart;
 }
 
-/*
- * Estado entre sondeos para calcular el uso por diferencia de tiempos. El sondeo
- * de MACE es de un solo hilo ("mace-monitoring" a 1 Hz), asi que no se sincroniza.
- */
+/* Estado diferencial protegido por MaceRuntime_BeginPoll. */
 static unsigned long long g_prev_idle = 0;
 static unsigned long long g_prev_kernel = 0;
 static unsigned long long g_prev_user = 0;
@@ -44,18 +41,20 @@ static float ReadCpuUsagePercent(void) {
     unsigned long long user = filetime_to_u64(&user_ft);
 
     float usage = 0.0f;
-    g_last_usage_valid = g_have_prev;
-    if (g_have_prev) {
+    g_last_usage_valid = false;
+    if (g_have_prev && idle >= g_prev_idle && kernel >= g_prev_kernel &&
+        user >= g_prev_user) {
         unsigned long long d_idle = idle - g_prev_idle;
         unsigned long long d_kernel = kernel - g_prev_kernel;
         unsigned long long d_user = user - g_prev_user;
         unsigned long long d_total = d_kernel + d_user; // El tiempo kernel ya incluye idle
 
-        if (d_total > 0) {
+        if (d_total > 0 && d_idle <= d_total) {
             unsigned long long busy = d_total - d_idle;
             usage = (float)((double)busy * 100.0 / (double)d_total);
             if (usage < 0.0f) usage = 0.0f;
             if (usage > 100.0f) usage = 100.0f;
+            g_last_usage_valid = true;
         }
     }
 
@@ -139,6 +138,9 @@ bool CpuSensors_Init(void) {
     if (!p_InitializeOls || !p_DeinitializeOls || !p_Rdmsr || !p_InitializeOls()) {
         FreeLibrary(g_winring0_mod);
         g_winring0_mod = NULL;
+        p_InitializeOls = NULL;
+        p_DeinitializeOls = NULL;
+        p_Rdmsr = NULL;
         return false;
     }
 
@@ -173,12 +175,21 @@ void CpuSensors_Shutdown(void) {
     }
     g_sensors_ready = false;
     g_init_attempted = false;
+    p_InitializeOls = NULL;
+    p_DeinitializeOls = NULL;
+    p_Rdmsr = NULL;
+    g_prev_idle = 0;
+    g_prev_kernel = 0;
+    g_prev_user = 0;
     g_have_prev = false;
     g_last_usage_valid = false;
     g_power_reference = false;
     g_power_calculated = false;
     g_cached_watts = 0.0f;
     g_energy_unit_joules = 0.0;
+    g_last_energy_raw = 0;
+    g_last_power_time.QuadPart = 0;
+    g_timer_freq.QuadPart = 0;
 }
 
 bool CpuSensors_HardwareAvailable(void) {

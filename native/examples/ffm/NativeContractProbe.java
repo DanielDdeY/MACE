@@ -59,7 +59,7 @@ public class NativeContractProbe {
                     processSize != 1584 || telemetrySize != 28 || blackboxSize != 16 ||
                     wcharSize != 2 || pointerSize != 8 ||
                     (capabilities & requiredCapabilities) != requiredCapabilities ||
-                    buildMajor != 1 || buildMinor != 4 || buildPatch != 0) {
+                    buildMajor != 1 || buildMinor != 4 || buildPatch != 1) {
                 throw new AssertionError("La DLL no coincide con el contrato FFM esperado");
             }
             System.out.printf("FFM OK: ABI %d.%d, DLL %d.%d.%d, layouts %d/%d/%d, %s%n",

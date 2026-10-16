@@ -22,6 +22,16 @@ typedef struct {
 } IgclPrevious;
 static IgclPrevious previous[16];
 
+static void clear_functions(void) {
+    close_fn = NULL;
+    enumerate_fn = NULL;
+    properties_fn = NULL;
+    telemetry_fn = NULL;
+    memory_modules_fn = NULL;
+    memory_properties_fn = NULL;
+    memory_state_fn = NULL;
+}
+
 static MaceMetricState igcl_state(ctl_result_t result) {
     if (result == CTL_RESULT_ERROR_DEVICE_LOST ||
         result == CTL_RESULT_ERROR_DEVICE_UNAVAILABLE)
@@ -61,6 +71,7 @@ failed:
     if (module) FreeLibrary(module);
     api = NULL;
     module = NULL;
+    clear_functions();
     return false;
 }
 
@@ -69,6 +80,7 @@ void Igcl_Shutdown(void) {
     if (module) FreeLibrary(module);
     api = NULL;
     module = NULL;
+    clear_functions();
     memset(previous, 0, sizeof(previous));
 }
 

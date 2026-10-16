@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(mace_native VERSION 1.4.0 LANGUAGES C RC)
+project(mace_native VERSION 1.4.1 LANGUAGES C RC)
 
 if (NOT WIN32 OR NOT CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     message(FATAL_ERROR "mace_native requires Windows with the MSVC C compiler")
@@ -21,6 +21,7 @@ configure_file(resources/mace_native.rc.in
 set(MACE_NATIVE_SOURCES
     src/mace_api.c
     src/mace_contract.c
+    src/internal/mace_runtime.c
     src/process/process_enumerator.c
     src/process/process_paths.c
     src/process/process_security.c
@@ -166,6 +167,30 @@ if (BUILD_TESTING)
     set_target_properties(test_blackbox_buffer PROPERTIES
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     add_test(NAME blackbox_buffer COMMAND test_blackbox_buffer)
+
+    add_executable(test_lifecycle tests/test_lifecycle.c)
+    target_include_directories(test_lifecycle PRIVATE include)
+    target_compile_options(test_lifecycle PRIVATE /W4 /WX /utf-8)
+    target_link_libraries(test_lifecycle PRIVATE mace_native psapi)
+    set_target_properties(test_lifecycle PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    add_test(NAME lifecycle COMMAND test_lifecycle)
+
+    add_executable(test_concurrency tests/test_concurrency.c)
+    target_include_directories(test_concurrency PRIVATE include)
+    target_compile_options(test_concurrency PRIVATE /W4 /WX /utf-8)
+    target_link_libraries(test_concurrency PRIVATE mace_native)
+    set_target_properties(test_concurrency PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    add_test(NAME concurrency COMMAND test_concurrency)
+
+    add_executable(test_buffer_concurrency tests/test_buffer_concurrency.c)
+    target_include_directories(test_buffer_concurrency PRIVATE include)
+    target_compile_options(test_buffer_concurrency PRIVATE /W4 /WX /utf-8)
+    target_link_libraries(test_buffer_concurrency PRIVATE mace_native)
+    set_target_properties(test_buffer_concurrency PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    add_test(NAME buffer_concurrency COMMAND test_buffer_concurrency)
 
     option(MACE_TEST_PROCESS_TERMINATION
         "Run an explicit termination test against a helper created by CTest" OFF)

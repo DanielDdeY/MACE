@@ -27,7 +27,7 @@ static int check_version_resource(const wchar_t* dll_path) {
                  fixed->dwSignature != 0xFEEF04BD ||
                  HIWORD(fixed->dwFileVersionMS) != 1 ||
                  LOWORD(fixed->dwFileVersionMS) != 4 ||
-                 HIWORD(fixed->dwFileVersionLS) != 0 ||
+                 HIWORD(fixed->dwFileVersionLS) != 1 ||
                  LOWORD(fixed->dwFileVersionLS) != 0;
     if (failed) fprintf(stderr, "Incorrect Windows version resource\n");
     free(data);
@@ -130,7 +130,7 @@ int wmain(int argc, wchar_t** argv) {
         buffer.info.blackbox_header_size != sizeof(BlackboxSharedHeader) ||
         buffer.info.wchar_size != 2 || buffer.info.pointer_size != 8 ||
         buffer.info.build_major != 1 || buffer.info.build_minor != 4 ||
-        buffer.info.build_patch != 0 ||
+        buffer.info.build_patch != 1 ||
         (buffer.info.implemented_capabilities &
           (MACE_CAP_CPU_USAGE | MACE_CAP_GPU_INVENTORY |
            MACE_CAP_GPU_MEMORY | MACE_CAP_SYSTEM_MEMORY |
@@ -159,6 +159,6 @@ int wmain(int argc, wchar_t** argv) {
     FreeLibrary(library);
     if (failed) return 1;
 
-    puts("24 exports, ABI 1.4, legacy layouts and file version 1.4.0: OK");
+    puts("24 exports, ABI 1.4, legacy layouts and file version 1.4.1: OK");
     return 0;
 }
