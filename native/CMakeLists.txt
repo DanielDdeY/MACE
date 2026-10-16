@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(mace_native VERSION 1.3.0 LANGUAGES C RC)
+project(mace_native VERSION 1.4.0 LANGUAGES C RC)
 
 if (NOT WIN32 OR NOT CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     message(FATAL_ERROR "mace_native requires Windows with the MSVC C compiler")
@@ -26,14 +26,16 @@ set(MACE_NATIVE_SOURCES
     src/process/process_security.c
     src/process/process_identity.c
     src/process/process_api_v2.c
+    src/process/process_samples.c
     src/process/process_controller.c
     src/telemetry/nvml_loader.c
     src/telemetry/igcl_provider.c
     src/telemetry/gpu_providers.c
     src/telemetry/cpu_sensors.c
     src/hardware/gpu_inventory.c
-    src/extensions/hang_detector_stub.c
-    src/extensions/memory_map_stub.c
+    src/extensions/hang_detector.c
+    src/extensions/shared_buffer.c
+    src/extensions/blackbox_buffer.c
     "${CMAKE_CURRENT_BINARY_DIR}/generated/mace_native.rc"
 )
 
@@ -148,6 +150,22 @@ if (BUILD_TESTING)
     set_target_properties(test_process_api PROPERTIES
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     add_test(NAME process_api COMMAND test_process_api)
+
+    add_executable(test_process_extensions tests/test_process_extensions.c)
+    target_include_directories(test_process_extensions PRIVATE include)
+    target_compile_options(test_process_extensions PRIVATE /W4 /WX /utf-8)
+    target_link_libraries(test_process_extensions PRIVATE mace_native)
+    set_target_properties(test_process_extensions PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    add_test(NAME process_extensions COMMAND test_process_extensions)
+
+    add_executable(test_blackbox_buffer tests/test_blackbox_buffer.c)
+    target_include_directories(test_blackbox_buffer PRIVATE include)
+    target_compile_options(test_blackbox_buffer PRIVATE /W4 /WX /utf-8)
+    target_link_libraries(test_blackbox_buffer PRIVATE mace_native)
+    set_target_properties(test_blackbox_buffer PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    add_test(NAME blackbox_buffer COMMAND test_blackbox_buffer)
 
     option(MACE_TEST_PROCESS_TERMINATION
         "Run an explicit termination test against a helper created by CTest" OFF)

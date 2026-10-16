@@ -1,6 +1,6 @@
 # MACE native
 
-Biblioteca C17/C++17 para Windows 10/11 x64. La versión nativa 1.3.0 conserva la API usada por Java y añade telemetría V2 y gestión protegida de procesos. Véanse [ABI](docs/ABI.md), [resultados de fase 2](docs/PHASE2.md), [fase 3](docs/PHASE3.md) y [entrega a los demás desarrolladores](docs/HANDOFF.md).
+Biblioteca C17/C++17 para Windows 10/11 x64. La versión nativa 1.4.0 conserva la API usada por Java y añade telemetría V2, gestión protegida de procesos y las bases nativas de las extensiones previstas. Véanse [ABI](docs/ABI.md), [fase 4](docs/PHASE4.md), [extensiones](docs/EXTENSIONS.md) y [entrega a los demás desarrolladores](docs/HANDOFF.md).
 
 Desde la raíz del repositorio, con Visual Studio 2022 o 2026 y las herramientas C++/Windows SDK instaladas:
 

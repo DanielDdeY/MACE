@@ -9,6 +9,7 @@
 #include "telemetry/gpu_providers.h"
 #include "telemetry/cpu_sensors.h"
 #include "process/process_internal.h"
+#include "extensions/blackbox_buffer.h"
 #ifdef MACE_HAS_RYZEN_SDK
 #include "telemetry/amd_ryzen_provider.h"
 #endif
@@ -49,6 +50,8 @@ CP_API int CP_InitializeTelemetry(void) {
 
 CP_API void CP_ShutdownTelemetry(void) {
     AcquireSRWLockExclusive(&lifecycle_lock);
+    Blackbox_CloseAll();
+    SharedBuffer_CloseAll();
     if (initialized) {
         GpuProviders_Shutdown();
 #ifdef MACE_HAS_RYZEN_SDK

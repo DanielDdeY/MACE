@@ -243,6 +243,56 @@ int main(void) {
         errors = 1;
     }
 
+    printf("\n------------------------------------------------------------\n");
+    printf("[3] Comprobando extensiones con este proceso de prueba...\n");
+    MaceProcessIdentityV2 self = {0};
+    uint32_t win32_error = 0;
+    if (CP_GetProcessIdentityV2(GetCurrentProcessId(), &self, sizeof(self),
+                                 &win32_error) == MACE_OK) {
+        MaceProcessSampleV2 sample = {0};
+        MaceStatus sampled = CP_SampleProcessV2(&self, &sample, sizeof(sample),
+                                                &win32_error);
+        if (sampled == MACE_OK) {
+            if (sample.working_set_bytes.state == MACE_METRIC_VALID)
+                printf(" -> Working Set propio     : %.2f MiB\n",
+                       (double)sample.working_set_bytes.value / (1024.0 * 1024.0));
+            if (sample.private_bytes.state == MACE_METRIC_VALID)
+                printf(" -> Private Bytes propios  : %.2f MiB\n",
+                       (double)sample.private_bytes.value / (1024.0 * 1024.0));
+            uint64_t blackbox = 0, sequence = 0;
+            if (CP_BlackboxCreateV2(NULL, 4, &blackbox, &win32_error) == MACE_OK) {
+                if (CP_BlackboxAppendV2(blackbox, MACE_RECORD_PROCESS_SAMPLE,
+                        &sample, sizeof(sample), &sequence) == MACE_OK)
+                    printf(" -> Caja negra en RAM      : muestra registrada (secuencia %llu)\n",
+                           (unsigned long long)sequence);
+                CP_BlackboxCloseV2(blackbox);
+            }
+        } else {
+            printf(" -> Muestra de proceso     : no disponible (codigo %d, Windows %u)\n",
+                   sampled, win32_error);
+        }
+        MaceResponsivenessV2 response = {0};
+        MaceStatus checked = CP_CheckProcessResponsivenessV2(&self, &response,
+                                                               sizeof(response));
+        if (checked == MACE_OK) {
+            printf(" -> Ventanas visibles      : %u examinadas, %u colgadas\n",
+                   response.windows_examined, response.windows_hung);
+            printf(" -> Estado de ventanas     : %s",
+                   response.outcome == MACE_RESPONSIVENESS_NO_WINDOW ? "Sin ventana" :
+                   response.outcome == MACE_RESPONSIVENESS_RESPONDING ? "Responden" :
+                   response.outcome == MACE_RESPONSIVENESS_HUNG ? "Alguna colgada" :
+                   response.outcome == MACE_RESPONSIVENESS_PROCESS_EXITED ? "Proceso finalizado" :
+                   "Error de consulta");
+            if (response.outcome == MACE_RESPONSIVENESS_ERROR)
+                printf(" (Windows %u)", response.win32_error);
+            putchar('\n');
+        } else {
+            printf(" -> Estado de ventanas     : no disponible (codigo %d)\n", checked);
+        }
+    } else {
+        printf(" -> Identidad propia       : no disponible (Windows %u)\n", win32_error);
+    }
+
     printf("\n=== PRUEBA FINALIZADA %s ===\n", errors ? "CON ERRORES" : "CON EXITO");
     return errors;
 }
