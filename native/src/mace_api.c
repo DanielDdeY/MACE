@@ -8,12 +8,11 @@
 #include "hardware/gpu_inventory.h"
 #include "telemetry/gpu_providers.h"
 #include "telemetry/cpu_sensors.h"
+#include "process/process_internal.h"
 #ifdef MACE_HAS_RYZEN_SDK
 #include "telemetry/amd_ryzen_provider.h"
 #endif
 
-extern int EnumerateProcesses(ProcessData*, uint32_t, uint32_t*);
-extern int TerminateProcessByPid(uint32_t);
 extern int CheckWindowHung(uint32_t);
 extern void* SetupSharedTelemetryBuffer(const wchar_t*, uint32_t);
 

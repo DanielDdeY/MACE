@@ -18,7 +18,8 @@ enum {
     MACE_E_SENSOR_UNAVAILABLE = -8,
     MACE_E_DEVICE_NOT_FOUND = -9,
     MACE_E_BUSY = -10,
-    MACE_E_WINDOWS_ERROR = -11
+    MACE_E_WINDOWS_ERROR = -11,
+    MACE_E_PROTECTED_PROCESS = -12
 };
 
 /* Cada medida tiene su propio estado; el valor solo se usa si es VALID. */

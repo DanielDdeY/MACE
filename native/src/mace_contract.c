@@ -41,6 +41,13 @@ _Static_assert(sizeof(BlackboxSharedHeader) == 16 &&
                "BlackboxSharedHeader legacy ABI changed");
 _Static_assert(sizeof(MaceAbiInfoV2) == 64 && _Alignof(MaceAbiInfoV2) == 8,
                "MaceAbiInfoV2 ABI changed");
+_Static_assert(sizeof(MaceProcessInfoV2) == 576 &&
+               _Alignof(MaceProcessInfoV2) == 8 &&
+               offsetof(MaceProcessInfoV2, identity) == 8 &&
+               offsetof(MaceProcessInfoV2, working_set_bytes) == 24 &&
+               offsetof(MaceProcessInfoV2, private_bytes) == 40 &&
+               offsetof(MaceProcessInfoV2, name) == 56,
+               "MaceProcessInfoV2 ABI changed");
 
 CP_API MaceStatus CP_GetAbiInfo(MaceAbiInfoV2* out_info,
                                uint32_t out_capacity,
@@ -73,7 +80,8 @@ CP_API MaceStatus CP_GetAbiInfo(MaceAbiInfoV2* out_info,
             MACE_CAP_GPU_INVENTORY | MACE_CAP_GPU_TEMPERATURE |
             MACE_CAP_GPU_POWER | MACE_CAP_GPU_USAGE |
             MACE_CAP_GPU_FAN_RPM | MACE_CAP_GPU_FAN_PERCENT |
-            MACE_CAP_GPU_MEMORY | MACE_CAP_SYSTEM_MEMORY,
+            MACE_CAP_GPU_MEMORY | MACE_CAP_SYSTEM_MEMORY |
+            MACE_CAP_PROCESS_IDENTITY | MACE_CAP_SAFE_TERMINATION,
         .build_major = MACE_BUILD_VERSION_MAJOR,
         .build_minor = MACE_BUILD_VERSION_MINOR,
         .build_patch = MACE_BUILD_VERSION_PATCH,

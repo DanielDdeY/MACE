@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(mace_native VERSION 1.2.1 LANGUAGES C RC)
+project(mace_native VERSION 1.3.0 LANGUAGES C RC)
 
 if (NOT WIN32 OR NOT CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     message(FATAL_ERROR "mace_native requires Windows with the MSVC C compiler")
@@ -22,7 +22,10 @@ set(MACE_NATIVE_SOURCES
     src/mace_api.c
     src/mace_contract.c
     src/process/process_enumerator.c
-    src/process/process_filter.c
+    src/process/process_paths.c
+    src/process/process_security.c
+    src/process/process_identity.c
+    src/process/process_api_v2.c
     src/process/process_controller.c
     src/telemetry/nvml_loader.c
     src/telemetry/igcl_provider.c
@@ -36,6 +39,7 @@ set(MACE_NATIVE_SOURCES
 
 add_library(mace_native SHARED ${MACE_NATIVE_SOURCES})
 target_include_directories(mace_native PRIVATE include
+    src/process
     vendor_headers/intel_igcl
     "${CMAKE_CURRENT_BINARY_DIR}/generated")
 set(MACE_ADLX_SDK_DIR "" CACHE PATH "External AMD ADLX SDK root (contains SDK/Include/ADLX.h)")
@@ -128,6 +132,37 @@ if (BUILD_TESTING)
     set_target_properties(test_gpu_provider_dispatch PROPERTIES
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     add_test(NAME gpu_provider_dispatch COMMAND test_gpu_provider_dispatch)
+
+    add_executable(test_process_security tests/test_process_security.c
+        src/process/process_security.c src/process/process_identity.c)
+    target_include_directories(test_process_security PRIVATE include src/process)
+    target_compile_options(test_process_security PRIVATE /W4 /WX /utf-8)
+    set_target_properties(test_process_security PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    add_test(NAME process_security COMMAND test_process_security)
+
+    add_executable(test_process_api tests/test_process_api.c)
+    target_include_directories(test_process_api PRIVATE include)
+    target_compile_options(test_process_api PRIVATE /W4 /WX /utf-8)
+    target_link_libraries(test_process_api PRIVATE mace_native)
+    set_target_properties(test_process_api PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    add_test(NAME process_api COMMAND test_process_api)
+
+    option(MACE_TEST_PROCESS_TERMINATION
+        "Run an explicit termination test against a helper created by CTest" OFF)
+    if (MACE_TEST_PROCESS_TERMINATION)
+        add_executable(process_helper tests/process_helper.c)
+        add_executable(test_process_termination tests/test_process_termination.c)
+        target_include_directories(test_process_termination PRIVATE include)
+        target_link_libraries(test_process_termination PRIVATE mace_native)
+        target_compile_options(process_helper PRIVATE /W4 /WX /utf-8)
+        target_compile_options(test_process_termination PRIVATE /W4 /WX /utf-8)
+        set_target_properties(process_helper test_process_termination PROPERTIES
+            MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+        add_dependencies(test_process_termination process_helper)
+        add_test(NAME process_termination COMMAND test_process_termination)
+    endif()
 endif()
 
 # Prueba técnica opcional de detección automática; no se ejecuta en CI.

@@ -73,7 +73,7 @@ $metadata = [ordered]@{
     schemaVersion = 1
     project = 'MACE native'
     nativeVersion = $nativeVersion
-    abiVersion = '1.2'
+    abiVersion = '1.3'
     abiInfoRecordVersion = 2
     platform = 'Windows x64'
     configuration = 'Release'
@@ -86,7 +86,7 @@ $metadata = [ordered]@{
     importLibrarySha256 = $sourceLibHash
     amdAdlxCompiled = -not [string]::IsNullOrWhiteSpace($AdlxSdkDirectory)
     amdRyzenSdkCompiled = -not [string]::IsNullOrWhiteSpace($RyzenSdkDirectory)
-    tests = @('CTest abi_layouts', 'CTest abi_exports', 'CTest telemetry_v2', 'CTest gpu_provider_dispatch', 'C exports on distributed DLL', 'JDK 22 FFM on distributed DLL')
+    tests = @('CTest abi_layouts', 'CTest abi_exports', 'CTest telemetry_v2', 'CTest gpu_provider_dispatch', 'CTest process_security', 'CTest process_api', 'C exports on distributed DLL', 'JDK 22 FFM on distributed DLL')
 }
 $metadata | ConvertTo-Json -Depth 5 |
     Set-Content -LiteralPath (Join-Path $package 'build-info.json') -Encoding utf8

@@ -1,6 +1,6 @@
 # Contrato de integración native/FFM
 
-Estado: fase 2. La DLL exporta los siete símbolos heredados, `CP_GetAbiInfo` y cuatro funciones V2 de telemetría. `CP_GetAbiInfo` devuelve ABI **1.2** en un registro de estructura versión **2**. Los símbolos V2 de procesos y extensiones siguen reservados para fases posteriores. El Java actual solo consume la interfaz heredada.
+Estado: fase 3. La DLL exporta los siete símbolos heredados, `CP_GetAbiInfo`, cuatro funciones V2 de telemetría y cuatro de procesos. `CP_GetAbiInfo` devuelve ABI **1.3** en un registro de estructura versión **2**. Las extensiones de la fase 4 siguen reservadas. El Java actual solo consume la interfaz heredada.
 
 ## Plataforma y tipos
 
@@ -14,21 +14,25 @@ Estado: fase 2. La DLL exporta los siete símbolos heredados, `CP_GetAbiInfo` y 
 
 La nueva consulta de identificación es `MaceStatus CP_GetAbiInfo(MaceAbiInfoV2* out_info, uint32_t out_capacity, uint32_t* out_required_size)`. Se puede llamar antes de `CP_InitializeTelemetry` y no carga sensores. Requiere `out_required_size`; siempre escribe allí `64` cuando el puntero es válido. Con `out_info=NULL, out_capacity=0` devuelve `MACE_E_BUFFER_TOO_SMALL (-2)` para consultar el tamaño. Si la capacidad es inferior a 64, no escribe ningún byte de `out_info`; si el puntero es nulo pese a capacidad suficiente devuelve `MACE_E_INVALID_ARGUMENT (-1)`. En éxito escribe solo los 64 bytes definidos, inicializa los reservados a cero y devuelve `MACE_OK (0)`. Se permiten buffers mayores; sus bytes adicionales permanecen intactos.
 
-`abi_major=1, abi_minor=2` significa que la interfaz heredada está intacta y se añadieron inventario y sondeos V2. `build_major/minor/patch=1.2.1` identifica esta DLL. `implemented_capabilities` anuncia las rutas implementadas para CPU, GPU y memoria; un bit indica código disponible, no que el sensor físico sea válido en todos los equipos. Los doce símbolos exportados se comprueban al cargar exactamente la DLL distribuida.
+`abi_major=1, abi_minor=3` significa que la interfaz heredada está intacta y se añadieron telemetría y procesos V2. `build_major/minor/patch=1.3.0` identifica esta DLL. `implemented_capabilities` anuncia además `MACE_CAP_PROCESS_IDENTITY` y `MACE_CAP_SAFE_TERMINATION`; un bit indica código disponible, no acceso a todos los procesos del equipo. Los 16 símbolos exportados se comprueban al cargar exactamente la DLL distribuida.
 
 | Símbolo | Firma C | Resultado actual |
 |---|---|
 | `CP_InitializeTelemetry` | `int (void)` | Devuelve `0` aunque falten proveedores opcionales. Carga CPU, NVML, IGCL, ADLX y Ryzen Master Monitoring SDK si se compilaron los adaptadores respectivos. |
 | `CP_ShutdownTelemetry` | `void (void)` | Descarga proveedores y reinicia las referencias de muestreo. |
 | `CP_PollTelemetry` | `int (TelemetryData*)` | `-1` si el puntero es nulo; `0` en otro caso, aun si faltan sensores. |
-| `CP_EnumerateUserlandProcesses` | `int (ProcessData*, uint32_t max_count, uint32_t* out_count)` | `-1` si los argumentos son inválidos; `0` si la enumeración termina; código Win32 positivo si falla el snapshot. Puede truncar al llegar a `max_count` sin indicarlo. |
-| `CP_TerminateProcess` | `int (uint32_t pid)` | `-1` para PID 0/4; `0` si termina; código Win32 positivo si falla. Solo se invoca por petición manual de la aplicación. |
+| `CP_EnumerateUserlandProcesses` | `int (ProcessData*, uint32_t max_count, uint32_t* out_count)` | `-1` si los argumentos son inválidos; `0` si la enumeración termina; código Win32 positivo si falla el snapshot. Puede truncar al llegar a `max_count` sin indicarlo; comparte el filtro de seguridad con V2. |
+| `CP_TerminateProcess` | `int (uint32_t pid)` | `-1` para PID 0/4; `0` si termina; `ERROR_ACCESS_DENIED` para objetivo protegido/propio y código Win32 positivo en otros errores. Revalida el objetivo en el mismo handle, pero no puede detectar que un PID cambió desde una enumeración previa. Solo se invoca por petición manual. |
 | `CP_CheckProcessResponsiveness` | `int (uint32_t pid)` | `1` para la primera ventana visible colgada; `0` para ventana que responde **o sin ventana**. |
 | `CP_InitSharedTelemetryBuffer` | `void* (const wchar_t* mapping_name, uint32_t buffer_size)` | Vista compartida o `NULL`. No hay hoy API de cierre: defecto pendiente de fase 4. |
 | `CP_EnumerateGpuAdapters` | `MaceStatus (MaceGpuAdapterInfoV2*, uint32_t capacity, uint32_t* count)` | Enumera GPU físicas DXGI. Un buffer nulo y capacidad 0 consulta el número requerido. |
 | `CP_PollCpuTelemetryV2` | `MaceStatus (MaceCpuTelemetryV2*, uint32_t capacity)` | CPU detectada por CPUID, uso Windows y sensores Intel opcionales. |
 | `CP_PollGpuTelemetryV2` | `MaceStatus (const MaceAdapterLuidV2*, MaceGpuTelemetryV2*, uint32_t capacity)` | Consulta un adaptador específico por LUID y devuelve estados por métrica. |
 | `CP_PollSystemMemoryV2` | `MaceStatus (MaceSystemMemoryV2*, uint32_t capacity)` | Memoria física total y disponible de Windows. No requiere inicializar telemetría. |
+| `CP_EnumerateUserlandProcessesV2` | `MaceStatus (MaceProcessInfoV2*, uint32_t capacity, uint32_t* required, uint32_t* skipped, uint32_t* win32_error)` | Devuelve identidades y estados de memoria. La capacidad es cantidad de registros; con buffer corto informa la cantidad necesaria y no escribe entradas. `skipped` cuenta fallos de acceso/consulta, no exclusiones deliberadas por política. |
+| `CP_GetProcessIdentityV2` | `MaceStatus (uint32_t pid, MaceProcessIdentityV2*, uint32_t capacity_bytes, uint32_t* win32_error)` | Obtiene PID + FILETIME de creación. Puede consultarse incluso para el proceso propio; no concede permiso para terminarlo. |
+| `CP_GetProcessImagePathV2` | `MaceStatus (const MaceProcessIdentityV2*, wchar_t*, uint32_t capacity_chars, uint32_t* required_chars, uint32_t* win32_error)` | Ruta UTF-16 completa; `required_chars` incluye NUL. Verifica la identidad y la política antes de copiar. Un buffer corto no se modifica. |
+| `CP_TerminateProcessV2` | `MaceStatus (const MaceProcessIdentityV2*, uint32_t* win32_error)` | Rechaza PID reutilizado, proceso propio, crítico, nombre/ruta protegidos o imposibilidad de verificarlos. La comprobación y `TerminateProcess` usan el mismo handle. |
 
 Los códigos `-1` y Win32 positivos pertenecen a la API heredada. **No** se reinterpretan como los estados MACE negativos de V2. Las funciones de procesos no requieren `CP_InitializeTelemetry`; la aplicación debe coordinar su propio ciclo de vida y evitar consultas concurrentes con `CP_ShutdownTelemetry` hasta que la fase 5 añada sincronización nativa.
 
@@ -67,6 +71,7 @@ Todos tienen `struct_size` y `version=2` cuando son registros de salida; la DLL 
 - `MaceGpuTelemetryV2` (104 B): LUID del adaptador consultado, proveedor y estados independientes de temperatura, potencia, uso, RPM, porcentaje de ventilador y memoria de vídeo. Jamás se mezclan valores de varias GPU.
 - `MaceSystemMemoryV2` (48 B): memoria total y disponible del sistema con estados separados.
 - `MaceProcessIdentityV2` (16 B): PID más fecha de creación Windows FILETIME en intervalos de 100 ns UTC. Deben compararse ambos para rechazar reutilización del PID.
+- `MaceProcessInfoV2` (576 B): identidad, nombre UTF-16, Working Set y Private Bytes con estados independientes. Su ruta completa se solicita aparte y no se trunca en este contrato.
 - `MaceProcessSampleV2` (64 B): identidad, marca monotónica, Working Set y Private Bytes con estados separados.
 - `MaceResponsivenessV2` (40 B): identidad, número de ventanas examinadas/colgadas y resultado explícito; no confunde ausencia de ventanas con capacidad de respuesta.
 - `MaceBlackboxHeaderV2` (48 B) y `MaceBlackboxRecordV2` (160 B): capacidad en registros, secuencia, sobrescrituras y carga acotada de 128 B. Las estructuras CPU/GPU/proceso/sistema definidas aquí caben en esa carga. La caja negra en RAM no equivale al archivo persistente que corresponde al sink Java.
@@ -77,7 +82,7 @@ Todos tienen `struct_size` y `version=2` cuando son registros de salida; la DLL 
 
 `include/mace_status.h` fija retornos `MACE_OK=0`, errores negativos y estados de métrica. Los errores de permiso, proceso finalizado, PID reutilizado, buffer insuficiente y sensor ausente son distintos. Una función V2 que falle por Win32 devolverá `MACE_E_WINDOWS_ERROR` y, cuando corresponda, un parámetro de salida `uint32_t win32_error` capturado **antes** de cerrar el handle. Nunca se sobrecargará un float con un código de error.
 
-`CP_GetAbiInfo`, `CP_EnumerateGpuAdapters`, `CP_PollCpuTelemetryV2`, `CP_PollGpuTelemetryV2` y `CP_PollSystemMemoryV2` ya están disponibles. Muestras de proceso, terminación por identidad, respuesta detallada de ventanas y caja negra quedan reservadas para fases posteriores. Java debe comprobar ABI/capacidades antes de adoptar las funciones nuevas, manteniendo los siete símbolos heredados.
+`CP_GetAbiInfo`, telemetría V2, inventario e identidad/terminación/ruta de procesos V2 ya están disponibles. Las muestras temporales de proceso, respuesta detallada de ventanas y caja negra quedan para fases posteriores. Java debe comprobar ABI/capacidades antes de adoptar las funciones nuevas, manteniendo los siete símbolos heredados.
 
 El buffer de procesos y las estructuras de salida son propiedad del llamador. El mapeo V2 será propiedad de la DLL y expondrá un token opaco, escritura y lectura por copia, estadísticas y cierre; Java no liberará ni retendrá punteros internos. Habrá un escritor por buffer y las lecturas usarán el protocolo nativo de sincronización. El símbolo heredado que devuelve una vista requiere una función de cierre específica en la fase 4; hasta entonces no debe usarse en producción.
 
