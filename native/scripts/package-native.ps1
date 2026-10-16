@@ -1,7 +1,8 @@
 param(
     [ValidateSet('Auto', 'VS2022', 'VS2026')][string]$VisualStudio = 'Auto',
     [string]$BuildDirectory,
-    [string]$AdlxSdkDirectory = $env:MACE_ADLX_SDK_DIR
+    [string]$AdlxSdkDirectory = $env:MACE_ADLX_SDK_DIR,
+    [string]$RyzenSdkDirectory = $env:MACE_RYZEN_SDK_DIR
 )
 
 . (Join-Path $PSScriptRoot 'native-common.ps1')
@@ -19,7 +20,8 @@ $sourceRevision = (& git -C $repositoryRoot rev-parse HEAD).Trim()
 Assert-MaceCommandSucceeded 'Consulta de revisión Git'
 
 & (Join-Path $PSScriptRoot 'build-native.ps1') -Configuration Release `
-    -VisualStudio $VisualStudio -BuildDirectory $build -AdlxSdkDirectory $AdlxSdkDirectory
+    -VisualStudio $VisualStudio -BuildDirectory $build -AdlxSdkDirectory $AdlxSdkDirectory `
+    -RyzenSdkDirectory $RyzenSdkDirectory
 
 $sourceDll = Join-Path $build 'Release\mace_native.dll'
 $sourceLib = Join-Path $build 'Release\mace_native.lib'
@@ -83,6 +85,7 @@ $metadata = [ordered]@{
     dllSha256 = $sourceDllHash
     importLibrarySha256 = $sourceLibHash
     amdAdlxCompiled = -not [string]::IsNullOrWhiteSpace($AdlxSdkDirectory)
+    amdRyzenSdkCompiled = -not [string]::IsNullOrWhiteSpace($RyzenSdkDirectory)
     tests = @('CTest abi_layouts', 'CTest abi_exports', 'CTest telemetry_v2', 'CTest gpu_provider_dispatch', 'C exports on distributed DLL', 'JDK 22 FFM on distributed DLL')
 }
 $metadata | ConvertTo-Json -Depth 5 |

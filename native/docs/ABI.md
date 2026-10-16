@@ -14,11 +14,11 @@ Estado: fase 2. La DLL exporta los siete símbolos heredados, `CP_GetAbiInfo` y 
 
 La nueva consulta de identificación es `MaceStatus CP_GetAbiInfo(MaceAbiInfoV2* out_info, uint32_t out_capacity, uint32_t* out_required_size)`. Se puede llamar antes de `CP_InitializeTelemetry` y no carga sensores. Requiere `out_required_size`; siempre escribe allí `64` cuando el puntero es válido. Con `out_info=NULL, out_capacity=0` devuelve `MACE_E_BUFFER_TOO_SMALL (-2)` para consultar el tamaño. Si la capacidad es inferior a 64, no escribe ningún byte de `out_info`; si el puntero es nulo pese a capacidad suficiente devuelve `MACE_E_INVALID_ARGUMENT (-1)`. En éxito escribe solo los 64 bytes definidos, inicializa los reservados a cero y devuelve `MACE_OK (0)`. Se permiten buffers mayores; sus bytes adicionales permanecen intactos.
 
-`abi_major=1, abi_minor=2` significa que la interfaz heredada está intacta y se añadieron inventario y sondeos V2. `build_major/minor/patch=1.2.0` identifica esta DLL. `implemented_capabilities` anuncia las rutas implementadas para CPU, GPU y memoria; un bit indica código disponible, no que el sensor físico sea válido en todos los equipos. Los doce símbolos exportados se comprueban al cargar exactamente la DLL distribuida.
+`abi_major=1, abi_minor=2` significa que la interfaz heredada está intacta y se añadieron inventario y sondeos V2. `build_major/minor/patch=1.2.1` identifica esta DLL. `implemented_capabilities` anuncia las rutas implementadas para CPU, GPU y memoria; un bit indica código disponible, no que el sensor físico sea válido en todos los equipos. Los doce símbolos exportados se comprueban al cargar exactamente la DLL distribuida.
 
 | Símbolo | Firma C | Resultado actual |
 |---|---|
-| `CP_InitializeTelemetry` | `int (void)` | Devuelve `0` aunque falten proveedores opcionales. Carga CPU, NVML, IGCL y ADLX si se compiló con su SDK. |
+| `CP_InitializeTelemetry` | `int (void)` | Devuelve `0` aunque falten proveedores opcionales. Carga CPU, NVML, IGCL, ADLX y Ryzen Master Monitoring SDK si se compilaron los adaptadores respectivos. |
 | `CP_ShutdownTelemetry` | `void (void)` | Descarga proveedores y reinicia las referencias de muestreo. |
 | `CP_PollTelemetry` | `int (TelemetryData*)` | `-1` si el puntero es nulo; `0` en otro caso, aun si faltan sensores. |
 | `CP_EnumerateUserlandProcesses` | `int (ProcessData*, uint32_t max_count, uint32_t* out_count)` | `-1` si los argumentos son inválidos; `0` si la enumeración termina; código Win32 positivo si falla el snapshot. Puede truncar al llegar a `max_count` sin indicarlo. |

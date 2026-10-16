@@ -8,6 +8,9 @@
 #include "hardware/gpu_inventory.h"
 #include "telemetry/gpu_providers.h"
 #include "telemetry/cpu_sensors.h"
+#ifdef MACE_HAS_RYZEN_SDK
+#include "telemetry/amd_ryzen_provider.h"
+#endif
 
 extern int EnumerateProcesses(ProcessData*, uint32_t, uint32_t*);
 extern int TerminateProcessByPid(uint32_t);
@@ -35,6 +38,9 @@ CP_API int CP_InitializeTelemetry(void) {
     AcquireSRWLockExclusive(&lifecycle_lock);
     if (!initialized) {
         CpuSensors_Init();
+#ifdef MACE_HAS_RYZEN_SDK
+        if (cpu_vendor() == MACE_CPU_VENDOR_AMD) AmdRyzenProvider_Init();
+#endif
         GpuProviders_Init();
         initialized = true;
     }
@@ -46,6 +52,9 @@ CP_API void CP_ShutdownTelemetry(void) {
     AcquireSRWLockExclusive(&lifecycle_lock);
     if (initialized) {
         GpuProviders_Shutdown();
+#ifdef MACE_HAS_RYZEN_SDK
+        AmdRyzenProvider_Shutdown();
+#endif
         CpuSensors_Shutdown();
         initialized = false;
     }
@@ -87,6 +96,10 @@ CP_API MaceStatus CP_PollCpuTelemetryV2(MaceCpuTelemetryV2* out,
             (CpuSensors_PowerSupported() ? MACE_METRIC_WARMING_UP : MACE_METRIC_READ_FAILED);
         sample.power_w.value = power;
     }
+#ifdef MACE_HAS_RYZEN_SDK
+    if (sample.cpu_vendor == MACE_CPU_VENDOR_AMD)
+        AmdRyzenProvider_Poll(&sample);
+#endif
     memcpy(out, &sample, sizeof(sample));
     ReleaseSRWLockExclusive(&lifecycle_lock);
     return MACE_OK;
