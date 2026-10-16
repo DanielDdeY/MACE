@@ -1,0 +1,29 @@
+# Fase 2: proveedores nativos de telemetría
+
+Estado al 15-10-2026: implementación y prueba local de Radeon completadas; la validación física multiplataforma y temperatura/potencia CPU AMD siguen abiertas. La versión de DLL es 1.2.0, ABI 1.2. Solo se modificó `native/` en la copia aislada.
+
+## Comportamiento implementado
+
+- CPU: CPUID detecta Intel, AMD u otro fabricante sin intervención del usuario. El uso global proviene de `GetSystemTimes`; la primera muestra se marca `WARMING_UP`. El proveedor Intel DTS/RAPL sigue siendo opcional y depende de WinRing0; no se distribuye el controlador. Si no existe un proveedor de temperatura/potencia, cada métrica declara `NO_PROVIDER`.
+- GPU: DXGI enumera adaptadores físicos, excluye el adaptador de software y entrega LUID por sesión. ADLX empareja Radeon por LUID; IGCL empareja Intel por LUID; NVML empareja NVIDIA por dirección PCI obtenida del LUID mediante D3DKMT. Un fallo de emparejamiento deja las métricas como `NO_PROVIDER`, en lugar de asignar sensores de otra tarjeta.
+- AMD/ADLX: temperatura, potencia de chip, uso, RPM y memoria dedicada usada en MB, si cada capacidad existe. El proveedor se compila solo con un SDK oficial externo. `amdadlx64.dll` se carga del directorio del sistema.
+- Intel/IGCL: temperatura y RPM cuando el controlador los reporta; potencia y uso se calculan entre dos muestras de contadores acumulados, con estado `WARMING_UP` antes del primer intervalo. Para memoria local discreta, se consulta el estado de los módulos del dispositivo. Una iGPU sin ventilador propio deja RPM no disponible.
+- NVIDIA/NVML: temperatura, potencia, uso, memoria, porcentaje de ventilador y RPM se consultan por separado. Se busca la DLL en System32 o en la ubicación NVSMI de una instalación estándar. `nvmlDeviceGetFanSpeed` representa porcentaje y jamás se copia al campo RPM.
+- Windows: memoria física del sistema mediante `GlobalMemoryStatusEx`; capacidad de video dedicada o compartida mediante DXGI. `QueryVideoMemoryInfo.CurrentUsage` no se usa como memoria global de la GPU porque describe el consumo del proceso llamador. El consumo de GPU queda sin valor válido si el proveedor no lo ofrece.
+- Compatibilidad: los siete exports heredados y los tamaños de `TelemetryData`/`ProcessData` se mantienen; el registro heredado se inicializa por completo y selecciona la primera GPU con temperatura válida. Cuatro exports V2 nuevos admiten inventario, CPU, GPU por LUID y memoria del sistema. Los estados son individuales por métrica.
+
+## Pruebas ejecutadas en este equipo
+
+Windows 10 x64, Ryzen 5 3600 y Radeon RX 5500 XT (`1002:7340`). Compilación MSVC 2026 Release con SDK ADLX 2.0 externo: 4/4 pruebas CTest pasaron (`abi_layouts`, `abi_exports`, `telemetry_v2`, `gpu_provider_dispatch`). Esta última inyecta tres proveedores simulados por enlace y comprueba la selección por fabricante sin depender de hardware. El test V2 detectó automáticamente una GPU Radeon y midió aproximadamente 33 °C, 3–7 W, 0–32 % de uso, 1290 RPM y 1175 MB de VRAM usada; las lecturas varían con la carga. DXGI reportó ~4,25 GB de memoria dedicada. CPU AMD se detectó; su uso Windows fue válido, temperatura/potencia quedaron `NO_PROVIDER`.
+
+La prueba confirma el camino AMD/ADLX para **esta** Radeon y este controlador. No valida todavía CPU Intel DTS/RAPL, GPU Intel/IGCL, GPU NVIDIA/NVML, portátiles con iGPU/dGPU o suspensión de GPU. Tampoco prueba la integración Java V2: `app/` sigue usando el ABI heredado.
+
+## Dependencias y decisiones de entrega
+
+El SDK ADLX de AMD se usa como dependencia de compilación fuera del repositorio. Su licencia limita la redistribución de los encabezados como fuente; el paquete MACE incluye la DLL compilada, no el SDK. Para repetir una compilación con Radeon, obtener el SDK oficial y ejecutar `native/scripts/build-native.ps1 -AdlxSdkDirectory <raíz ADLX>`; el paquete usa el mismo parámetro. Sin él, el código compila, pero `amdAdlxCompiled=false` y la Radeon solo ofrece inventario/capacidad. El encabezado Intel IGCL se distribuye bajo la licencia Intel incluida en `vendor_headers/intel_igcl/LICENSE`.
+
+No se instaló un controlador CPU AMD adicional. La API de AMD uProf declara soporte de potencia/temperatura para CPU/APU, pero necesita su driver y la nota de versión 5.1 advierte que la Power Profile API en Windows está averiada. El Ryzen Master Monitoring SDK es una alternativa, pero exige descargar/aceptar su EULA y comprobar qué modelos móviles admite. Por ello no se creó un lector AMD MSR no documentado ni se afirmó que 0 °C/0 W sean lecturas reales. El siguiente paso para cerrar CPU AMD es probar una versión oficial funcional del SDK en Ryzen de escritorio y APU portátil, respetar el intervalo mínimo de consulta de 1 s y mapear cada contador a su ámbito real.
+
+Para completar la matriz de aceptación se necesitan al menos: Intel CPU + iGPU, Ryzen APU con Radeon integrada, NVIDIA dGPU, y portátil híbrido. En cada uno ejecutar `test_telemetry_v2`, registrar ID PCI/controlador/estado de cada métrica y comparar temperatura, potencia y RPM con una herramienta del fabricante bajo carga y reposo. Las métricas no soportadas deben permanecer `UNSUPPORTED` o `NO_PROVIDER`; no se aprueba un proveedor por limitarse a enumerar el adaptador.
+
+Referencias: [ADLX GPU metrics](https://gpuopen.com/manuals/adlx/adlx-sdk-references/adlx-interfaces/performance-monitoring/iadlxgpumetrics/), [Intel IGCL](https://intel.github.io/drivers.gpu.control-library/), [NVIDIA NVML](https://docs.nvidia.com/deploy/nvml-api/nvml-api-reference.html), [AMD uProf API](https://docs.amd.com/r/en-US/57368-uProf-user-guide/AMDPowerProfileAPI-Library), [AMD uProf 5.1 limits](https://docs.amd.com/r/en-US/63856-uProf-release-notes/Power-Profiling), [Ryzen Master Monitoring SDK](https://www.amd.com/en/developer/ryzen-master-monitoring-sdk.html).
