@@ -1,6 +1,6 @@
 # Entrega para los otros desarrolladores
 
-El paquete verificado se genera bajo `native/dist/mace-native-1.4.2-win-x64-.../`. Usar `bin/mace_native.dll` de ese paquete y cotejar su SHA-256 con `build-info.json` o `SHA256SUMS.txt`. El `.lib` sirve para consumidores C; Java FFM carga directamente la DLL. Las cabeceras publicadas definen el contrato C.
+El paquete verificado se genera bajo `native/dist/mace-native-1.4.2-win-x64-.../`. Usar `bin/mace_native.dll` de ese paquete y cotejar su SHA-256 con `build-info.json` o `SHA256SUMS.txt`. Para comprobar hardware en otro equipo sin herramientas de compilación, ejecutar `bin/test_mace.exe` desde la misma carpeta que la DLL siguiendo [la guía del grupo](TEAM_DIAGNOSTIC_GUIDE.md). El `.lib` sirve para consumidores C; Java FFM carga directamente la DLL. Las cabeceras publicadas definen el contrato C.
 
 El Java actual enlaza los siete símbolos anteriores y no necesita cambios inmediatos. Para pruebas se puede fijar `MACE_NATIVE_LIB` o `-Dmace.native.lib` a la ruta absoluta del binario de `dist/`; así se evita cargar una DLL antigua de `app/lib/`. El script `packaging/package-windows.bat` del repositorio aún no consulta el ABI ni los hashes; Dev 3 deberá integrarlo cuando se trabaje en `packaging/`. Las nuevas funciones Java de caja negra deben usar el token V2: el puntero del hook heredado deja de ser válido al cerrarlo o apagar telemetría, y la DLL no puede saber si Java todavía lo lee.
 

@@ -96,7 +96,7 @@ set_target_properties(mace_native PROPERTIES
 add_executable(test_mace test_main.c)
 target_include_directories(test_mace PRIVATE include)
 target_compile_options(test_mace PRIVATE /W4 /WX /utf-8)
-target_link_libraries(test_mace PRIVATE mace_native)
+target_link_libraries(test_mace PRIVATE mace_native advapi32)
 set_target_properties(test_mace PROPERTIES
     MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
@@ -216,6 +216,7 @@ set_target_properties(hardware_probe PROPERTIES
     MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 install(TARGETS mace_native RUNTIME DESTINATION bin ARCHIVE DESTINATION lib)
+install(TARGETS test_mace RUNTIME DESTINATION bin)
 install(DIRECTORY include/ DESTINATION include FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY docs/ DESTINATION docs FILES_MATCHING PATTERN "*.md")
 install(FILES README.md DESTINATION .)
