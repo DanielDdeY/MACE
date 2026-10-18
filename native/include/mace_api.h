@@ -70,7 +70,8 @@ CP_API MaceStatus CP_CheckProcessResponsivenessV2(
     uint32_t out_capacity);
 
 /* Opaque token owned by the DLL. A named mapping already in use is rejected.
- * All output records are copied; no mapping pointer escapes through V2. */
+ * All output records are copied; no mapping pointer escapes through V2.
+ * Pass NULL for a mapping used only by this process. */
 CP_API MaceStatus CP_BlackboxCreateV2(const wchar_t* mapping_name,
     uint32_t capacity_records, uint64_t* out_handle, uint32_t* out_win32_error);
 CP_API MaceStatus CP_BlackboxGetStatsV2(uint64_t handle,
@@ -84,6 +85,8 @@ CP_API MaceStatus CP_BlackboxCloseV2(uint64_t handle);
 
 // Hooks para extensiones futuras
 CP_API int  CP_CheckProcessResponsiveness(uint32_t pid);
+/* Legacy raw view: consumers must stop using the pointer before close or
+ * CP_ShutdownTelemetry. New integrations should use the V2 token API. */
 CP_API void* CP_InitSharedTelemetryBuffer(const wchar_t* mapping_name, uint32_t buffer_size);
 /* Closes exactly a view returned by CP_InitSharedTelemetryBuffer. */
 CP_API MaceStatus CP_CloseSharedTelemetryBuffer(void* view);

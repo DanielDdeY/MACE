@@ -8,7 +8,7 @@ Dev 2 conserva las últimas 30 `MaceProcessSampleV2` por identidad completa (`pi
 
 ## Caja negra
 
-Dev 3 crea un único buffer con `CP_BlackboxCreateV2`, registra muestras CPU/GPU/proceso/memoria mediante `CP_BlackboxAppendV2`, lee por secuencia con `CP_BlackboxReadV2` y copia los datos al sink persistente Java. Debe cerrar el token con `CP_BlackboxCloseV2`, o dejar que el apagado global limpie como recuperación. El archivo histórico tiene un solo propietario: el sink Java. Si la lectura observa una brecha de secuencias, debe marcar registros perdidos; la memoria circular por sí sola no sobrevive al cierre del último handle. El nombre del mapping no constituye un protocolo entre procesos: los nombres existentes se rechazan y la lectura concurrente solo se ofrece a través de la API de la DLL.
+Dev 3 crea un único buffer con `CP_BlackboxCreateV2(NULL, capacidad, ...)`, registra muestras CPU/GPU/proceso/memoria mediante `CP_BlackboxAppendV2`, lee por secuencia con `CP_BlackboxReadV2` y copia los datos al sink persistente Java. Debe cerrar el token con `CP_BlackboxCloseV2`, o dejar que el apagado global limpie como recuperación. El archivo histórico tiene un solo propietario: el sink Java. Si la lectura observa una brecha de secuencias, debe marcar registros perdidos; la memoria circular por sí sola no sobrevive al cierre del último handle. Un nombre de mapping se reserva para un requisito explícito de acceso entre procesos: los nombres existentes se rechazan y la lectura concurrente solo se ofrece a través de la API de la DLL. Dev 3 no usa `CP_InitSharedTelemetryBuffer`, cuyo puntero heredado exige detener y esperar a todos sus lectores antes de cerrar o apagar.
 
 ## Micro-HUD
 

@@ -11,6 +11,13 @@ typedef struct BlackboxContext {
     uint64_t token;
     HANDLE mapping;
     MaceBlackboxHeaderV2* header;
+    /* Authoritative ring state is private to this DLL, never read from the
+     * writable mapping exposed by a named file-mapping object. */
+    uint32_t capacity_records;
+    uint32_t write_cursor;
+    uint32_t record_count;
+    uint64_t next_sequence;
+    uint64_t overwritten_records;
 } BlackboxContext;
 
 /* Serializes create, append, read and close. Tokens are never reused during a
@@ -23,6 +30,25 @@ static BlackboxContext* find_context(uint64_t token) {
     for (BlackboxContext* item = blackboxes; item; item = item->next)
         if (item->token == token) return item;
     return NULL;
+}
+
+static MaceBlackboxHeaderV2 snapshot_header(const BlackboxContext* item) {
+    MaceBlackboxHeaderV2 header = {0};
+    header.struct_size = sizeof(header);
+    header.version = MACE_V2_CONTRACT_VERSION;
+    header.magic = MACE_BLACKBOX_V2_MAGIC;
+    header.record_size = sizeof(MaceBlackboxRecordV2);
+    header.capacity_records = item->capacity_records;
+    header.write_cursor = item->write_cursor;
+    header.record_count = item->record_count;
+    header.next_sequence = item->next_sequence;
+    header.overwritten_records = item->overwritten_records;
+    return header;
+}
+
+static void publish_header(BlackboxContext* item) {
+    MaceBlackboxHeaderV2 snapshot = snapshot_header(item);
+    memcpy(item->header, &snapshot, sizeof(snapshot));
 }
 
 static void destroy_context(BlackboxContext* item) {
@@ -79,14 +105,11 @@ static MaceStatus create_blackbox(const wchar_t* name,
         return MACE_E_WINDOWS_ERROR;
     }
     memset(header, 0, (SIZE_T)bytes);
-    header->struct_size = sizeof(*header);
-    header->version = MACE_V2_CONTRACT_VERSION;
-    header->magic = MACE_BLACKBOX_V2_MAGIC;
-    header->record_size = sizeof(MaceBlackboxRecordV2);
-    header->capacity_records = capacity_records;
-    header->next_sequence = 1;
     item->mapping = mapping;
     item->header = header;
+    item->capacity_records = capacity_records;
+    item->next_sequence = 1;
+    publish_header(item);
 
     AcquireSRWLockExclusive(&blackbox_lock);
     if (next_token == 0) {
@@ -118,7 +141,7 @@ CP_API MaceStatus CP_BlackboxGetStatsV2(uint64_t handle,
     if (!out_header) return MACE_E_INVALID_ARGUMENT;
     AcquireSRWLockShared(&blackbox_lock);
     BlackboxContext* item = find_context(handle);
-    if (item) memcpy(out_header, item->header, sizeof(*out_header));
+    if (item) *out_header = snapshot_header(item);
     bool found = item != NULL;
     ReleaseSRWLockShared(&blackbox_lock);
     return found ? MACE_OK : MACE_E_INVALID_ARGUMENT;
@@ -140,24 +163,24 @@ CP_API MaceStatus CP_BlackboxAppendV2(uint64_t handle, uint32_t record_type,
         ReleaseSRWLockExclusive(&blackbox_lock);
         return MACE_E_INVALID_ARGUMENT;
     }
-    MaceBlackboxHeaderV2* header = item->header;
-    if (header->next_sequence == UINT64_MAX) {
+    if (item->next_sequence == UINT64_MAX) {
         ReleaseSRWLockExclusive(&blackbox_lock);
         return MACE_E_BUSY;
     }
-    MaceBlackboxRecordV2* records = (MaceBlackboxRecordV2*)(header + 1);
-    MaceBlackboxRecordV2* record = &records[header->write_cursor];
+    MaceBlackboxRecordV2* records = (MaceBlackboxRecordV2*)(item->header + 1);
+    MaceBlackboxRecordV2* record = &records[item->write_cursor];
     memset(record, 0, sizeof(*record));
     record->struct_size = sizeof(*record);
     record->version = MACE_V2_CONTRACT_VERSION;
     record->record_type = record_type;
     record->payload_size = payload_size;
-    record->sequence = header->next_sequence++;
+    record->sequence = item->next_sequence++;
     record->timestamp_monotonic_ns = GetTickCount64() * UINT64_C(1000000);
     memcpy(record->payload, payload, payload_size);
-    header->write_cursor = (header->write_cursor + 1) % header->capacity_records;
-    if (header->record_count < header->capacity_records) ++header->record_count;
-    else ++header->overwritten_records;
+    item->write_cursor = (item->write_cursor + 1) % item->capacity_records;
+    if (item->record_count < item->capacity_records) ++item->record_count;
+    else ++item->overwritten_records;
+    publish_header(item);
     if (out_sequence) *out_sequence = record->sequence;
     ReleaseSRWLockExclusive(&blackbox_lock);
     return MACE_OK;
@@ -174,11 +197,10 @@ CP_API MaceStatus CP_BlackboxReadV2(uint64_t handle, uint64_t from_sequence,
         ReleaseSRWLockShared(&blackbox_lock);
         return MACE_E_INVALID_ARGUMENT;
     }
-    const MaceBlackboxHeaderV2* header = item->header;
-    const uint64_t oldest = header->next_sequence - header->record_count;
+    const uint64_t oldest = item->next_sequence - item->record_count;
     const uint64_t start = (from_sequence == 0 || from_sequence < oldest) ? oldest : from_sequence;
-    const uint32_t required = start < header->next_sequence ?
-        (uint32_t)(header->next_sequence - start) : 0;
+    const uint32_t required = start < item->next_sequence ?
+        (uint32_t)(item->next_sequence - start) : 0;
     *out_required_count = required;
     if (capacity_records < required) {
         ReleaseSRWLockShared(&blackbox_lock);
@@ -188,12 +210,12 @@ CP_API MaceStatus CP_BlackboxReadV2(uint64_t handle, uint64_t from_sequence,
         ReleaseSRWLockShared(&blackbox_lock);
         return MACE_E_INVALID_ARGUMENT;
     }
-    const MaceBlackboxRecordV2* records = (const MaceBlackboxRecordV2*)(header + 1);
-    const uint32_t oldest_index = (header->write_cursor + header->capacity_records -
-                                   header->record_count) % header->capacity_records;
+    const MaceBlackboxRecordV2* records = (const MaceBlackboxRecordV2*)(item->header + 1);
+    const uint32_t oldest_index = (item->write_cursor + item->capacity_records -
+                                   item->record_count) % item->capacity_records;
     for (uint32_t i = 0; i < required; ++i) {
         uint32_t index = (oldest_index + (uint32_t)(start - oldest) + i) %
-                         header->capacity_records;
+                         item->capacity_records;
         out_records[i] = records[index];
     }
     ReleaseSRWLockShared(&blackbox_lock);

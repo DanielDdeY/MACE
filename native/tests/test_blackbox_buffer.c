@@ -64,6 +64,41 @@ int main(void) {
     }
     CHECK(CP_BlackboxReadV2(token, 4, records, 3, &required) == MACE_OK);
     CHECK(required == 2 && records[0].sequence == 4 && records[1].sequence == 5);
+
+    /* A second writable view simulates a process corrupting the named
+     * mapping's control header. DLL operations must use private state. */
+    HANDLE outsider = OpenFileMappingW(FILE_MAP_ALL_ACCESS, FALSE, name);
+    CHECK(outsider != NULL);
+    MaceBlackboxHeaderV2* exposed = MapViewOfFile(outsider, FILE_MAP_ALL_ACCESS,
+                                                   0, 0, sizeof(*exposed));
+    CHECK(exposed != NULL);
+    exposed->magic = 0;
+    exposed->capacity_records = 0;
+    exposed->write_cursor = UINT32_MAX;
+    exposed->record_count = UINT32_MAX;
+    exposed->next_sequence = UINT64_MAX;
+    exposed->overwritten_records = UINT64_MAX;
+    CHECK(CP_BlackboxGetStatsV2(token, &stats, sizeof(stats)) == MACE_OK);
+    CHECK(stats.magic == MACE_BLACKBOX_V2_MAGIC && stats.capacity_records == 3);
+    CHECK(stats.write_cursor == 2 && stats.record_count == 3);
+    CHECK(stats.next_sequence == 6 && stats.overwritten_records == 2);
+    CHECK(CP_BlackboxReadV2(token, 0, records, 3, &required) == MACE_OK);
+    CHECK(required == 3 && records[0].sequence == 3 && records[2].sequence == 5);
+    uint64_t recovered_sequence = 0;
+    memory.total_bytes.value = 6;
+    CHECK(CP_BlackboxAppendV2(token, MACE_RECORD_SYSTEM_MEMORY, &memory,
+          sizeof(memory), &recovered_sequence) == MACE_OK);
+    CHECK(recovered_sequence == 6);
+    CHECK(CP_BlackboxGetStatsV2(token, &stats, sizeof(stats)) == MACE_OK);
+    CHECK(stats.write_cursor == 0 && stats.record_count == 3);
+    CHECK(stats.next_sequence == 7 && stats.overwritten_records == 3);
+    CHECK(exposed->magic == stats.magic && exposed->capacity_records == 3);
+    CHECK(exposed->next_sequence == 7 && exposed->write_cursor == 0);
+    CHECK(CP_BlackboxReadV2(token, 0, records, 3, &required) == MACE_OK);
+    CHECK(required == 3 && records[0].sequence == 4 && records[2].sequence == 6);
+    CHECK(UnmapViewOfFile(exposed));
+    CHECK(CloseHandle(outsider));
+
     CHECK(CP_BlackboxCloseV2(token) == MACE_OK);
     CHECK(CP_BlackboxCloseV2(token) == MACE_E_INVALID_ARGUMENT);
     CHECK(CP_BlackboxReadV2(token, 0, records, 3, &required) == MACE_E_INVALID_ARGUMENT);
