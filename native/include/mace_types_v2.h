@@ -107,6 +107,16 @@ typedef struct {
     uint64_t creation_time_100ns_utc;
 } MaceProcessIdentityV2;
 
+/* Inventario de procesos seguro; la ruta completa se consulta aparte. */
+typedef struct {
+    uint32_t struct_size;
+    uint32_t version;
+    MaceProcessIdentityV2 identity;
+    MaceMetricU64V2 working_set_bytes;
+    MaceMetricU64V2 private_bytes;
+    wchar_t name[260];
+} MaceProcessInfoV2;
+
 typedef struct {
     uint32_t struct_size;
     uint32_t version;

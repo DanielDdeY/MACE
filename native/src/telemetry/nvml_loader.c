@@ -35,6 +35,20 @@ static NvmlResult (*memory_fn)(NvmlDevice, NvmlMemoryInfo*);
 static NvmlResult (*fan_percent_fn)(NvmlDevice, unsigned int*);
 static NvmlResult (*fan_rpm_fn)(NvmlDevice, NvmlFanInfo*);
 
+static void clear_functions(void) {
+    init_fn = NULL;
+    shutdown_fn = NULL;
+    count_fn = NULL;
+    handle_fn = NULL;
+    pci_fn = NULL;
+    temperature_fn = NULL;
+    power_fn = NULL;
+    utilization_fn = NULL;
+    memory_fn = NULL;
+    fan_percent_fn = NULL;
+    fan_rpm_fn = NULL;
+}
+
 static MaceMetricState result_state(NvmlResult result) {
     if (result == NVML_OK) return MACE_METRIC_VALID;
     if (result == NVML_NOT_SUPPORTED) return MACE_METRIC_UNSUPPORTED;
@@ -79,6 +93,7 @@ bool Nvml_Init(void) {
         init_fn() != NVML_OK) {
         FreeLibrary(module);
         module = NULL;
+        clear_functions();
         return false;
     }
     ready = true;
@@ -90,6 +105,7 @@ void Nvml_Shutdown(void) {
     if (module) FreeLibrary(module);
     module = NULL;
     ready = false;
+    clear_functions();
 }
 
 bool Nvml_PollAdapter(const MaceGpuAdapterInfoV2* adapter,

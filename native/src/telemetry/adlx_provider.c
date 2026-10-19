@@ -9,6 +9,9 @@
 
 /* ADLX SDK headers are supplied externally at build time; they are not
  * redistributable as source under AMD's SDK agreement. */
+/* A successful ADLX session is intentionally retained for the process
+ * lifetime. Repeated ADLXTerminate/reinitialize cycles leak driver handles
+ * on the tested Radeon driver; failed initialization still cleans up. */
 static HMODULE module;
 static IADLXSystem* system_api;
 static IADLXPerformanceMonitoringServices* performance;
@@ -44,16 +47,8 @@ failed:
     performance = NULL;
     system_api = NULL;
     module = NULL;
+    terminate_fn = NULL;
     return false;
-}
-
-void Adlx_Shutdown(void) {
-    if (performance) performance->pVtbl->Release(performance);
-    if (system_api && terminate_fn) terminate_fn();
-    if (module) FreeLibrary(module);
-    performance = NULL;
-    system_api = NULL;
-    module = NULL;
 }
 
 static IADLXGPU* find_gpu(const MaceAdapterLuidV2* wanted) {

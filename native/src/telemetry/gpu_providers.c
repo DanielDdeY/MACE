@@ -12,7 +12,6 @@ void Igcl_Shutdown(void);
 bool Igcl_PollAdapter(const MaceGpuAdapterInfoV2*, MaceGpuTelemetryV2*);
 #ifdef MACE_HAS_ADLX
 bool Adlx_Init(void);
-void Adlx_Shutdown(void);
 bool Adlx_PollAdapter(const MaceGpuAdapterInfoV2*, MaceGpuTelemetryV2*);
 #endif
 
@@ -33,7 +32,9 @@ void GpuProviders_Shutdown(void) {
     Nvml_Shutdown();
     Igcl_Shutdown();
 #ifdef MACE_HAS_ADLX
-    Adlx_Shutdown();
+    /* ADLX 1.x on some AMD drivers retains three OS handles after every
+     * ADLXTerminate/reinitialize pair. Keep its one session for the DLL's
+     * process lifetime; runtime_lock prevents polling while inactive. */
     adlx_ready = false;
 #endif
     nvml_ready = false;
