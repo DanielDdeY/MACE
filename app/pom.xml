@@ -113,4 +113,38 @@
         </plugins>
     </build>
 
+    <profiles>
+        <!--
+            Vista previa sin DLL ni administrador (adaptadores simulados):
+                mvn javafx:run -Ppreview
+                mvn javafx:run -Ppreview -Dmace.mock.scenario=DUAL_GPU -Dmace.mock.seed=7
+            Escenarios: ver com.mace.infrastructure.mock.MockScenario.
+        -->
+        <profile>
+            <id>preview</id>
+            <properties>
+                <mace.mock.scenario>NORMAL</mace.mock.scenario>
+                <mace.mock.seed>42</mace.mock.seed>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openjfx</groupId>
+                        <artifactId>javafx-maven-plugin</artifactId>
+                        <version>0.0.8</version>
+                        <configuration>
+                            <mainClass>${app.mainClass}</mainClass>
+                            <options>
+                                <option>--enable-native-access=ALL-UNNAMED</option>
+                                <option>-Dmace.infra.mode=mock</option>
+                                <option>-Dmace.mock.scenario=${mace.mock.scenario}</option>
+                                <option>-Dmace.mock.seed=${mace.mock.seed}</option>
+                            </options>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

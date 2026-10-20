@@ -3,12 +3,15 @@
  *
  * <p>Subpaquetes:</p>
  * <ul>
- *   <li>{@code nativebridge}: puente Java ↔ C con la FFM API (JEP 454). {@code NativeLayouts}
- *       replica las estructuras de {@code mace_types.h}, {@code NativeFunctions} enlaza los
- *       símbolos de {@code mace_api.h} y {@code FfmSensorsAdapter} / {@code FfmProcessAdapter}
- *       implementan los puertos del dominio sobre la DLL.</li>
- *   <li>{@code mock}: {@code MockSensorsAdapter} y {@code MockProcessAdapter} generan datos
- *       verosímiles para trabajar sin la DLL (ni Windows).</li>
+ *   <li>{@code nativebridge}: puente Java ↔ C con la FFM API (JEP 454) sobre el contrato V2
+ *       (ABI 1.4). {@code NativeLayouts} replica las estructuras de {@code mace_types.h} y
+ *       {@code mace_types_v2.h}; {@code NativeFunctions} verifica {@code CP_GetAbiInfo} antes de
+ *       enlazar los símbolos; {@code FfmSensorsAdapter} / {@code FfmProcessAdapter} implementan
+ *       los puertos del dominio y {@code NativeBlackboxRing} maneja el anillo V2 por token.</li>
+ *   <li>{@code mock}: adaptadores simulados con el mismo contrato V2 y escenarios reproducibles
+ *       ({@code MockScenario}) para trabajar sin la DLL (ni Windows).</li>
+ *   <li>{@code telemetry}: publicador Flow compartido por dashboard y Micro-HUD y caja negra
+ *       persistente ({@code PersistentBlackboxSink}), dueña exclusiva del archivo histórico.</li>
  * </ul>
  *
  * <p>{@link com.mace.infrastructure.InfrastructureAdapters} es el punto de composición:
@@ -17,8 +20,11 @@
  * <p>Opciones de JVM relevantes:</p>
  * <ul>
  *   <li>{@code --enable-native-access=ALL-UNNAMED}: evita las advertencias de acceso restringido de FFM.</li>
- *   <li>{@code -Dmace.native.lib=<ruta>} (o la variable {@code MACE_NATIVE_LIB}): ubicación explícita
- *       de {@code mace_native.dll} si no está en las carpetas de compilación habituales.</li>
+ *   <li>{@code -Dmace.native.lib=<ruta>} (o {@code MACE_NATIVE_LIB}): ubicación de la DLL verificada.</li>
+ *   <li>{@code -Dmace.native.sha256=<hash>} (o {@code MACE_NATIVE_SHA256}): rechaza cualquier otra DLL.</li>
+ *   <li>{@code -Dmace.mock.scenario=<NOMBRE>} y {@code -Dmace.mock.seed=<n>}: perfil simulado.</li>
+ *   <li>{@code -Dmace.blackbox.dir=<carpeta>}: carpeta de la caja negra (por defecto
+ *       {@code %LOCALAPPDATA%\MACE\blackbox}).</li>
  * </ul>
  */
 package com.mace.infrastructure;
