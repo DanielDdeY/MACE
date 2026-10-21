@@ -1,5 +1,6 @@
 package com.mace.infrastructure;
 
+import com.mace.domain.port.out.BlackboxHistoryPort;
 import com.mace.domain.port.out.BlackboxSinkPort;
 import com.mace.domain.port.out.HardwareSensorsPort;
 import com.mace.domain.port.out.ProcessLifecyclePort;
@@ -14,6 +15,7 @@ import com.mace.infrastructure.nativebridge.NativeFunctions;
 import com.mace.infrastructure.nativebridge.NativeLibraryException;
 import com.mace.infrastructure.telemetry.BlackboxRing;
 import com.mace.infrastructure.telemetry.BlackboxSettings;
+import com.mace.infrastructure.telemetry.FileBlackboxHistoryAdapter;
 import com.mace.infrastructure.telemetry.InMemoryBlackboxRing;
 import com.mace.infrastructure.telemetry.NoOpBlackboxSink;
 import com.mace.infrastructure.telemetry.PersistentBlackboxSink;
@@ -78,6 +80,7 @@ public final class InfrastructureAdapters implements AutoCloseable {
     private final String fallbackReason;
 
     private BlackboxSinkPort blackbox;
+    private Path blackboxDirectory;
     private String blackboxFailure;
     private boolean closed;
 
@@ -234,6 +237,7 @@ public final class InfrastructureAdapters implements AutoCloseable {
         if (blackbox != null) {
             return blackbox;
         }
+        blackboxDirectory = settings.directory();
         BlackboxRing ring = null;
         try {
             ring = isNative()
@@ -254,6 +258,15 @@ public final class InfrastructureAdapters implements AutoCloseable {
     /** Motivo por el que la caja negra no pudo abrirse. */
     public synchronized Optional<String> blackboxFailure() {
         return Optional.ofNullable(blackboxFailure);
+    }
+
+    /**
+     * Historial de solo lectura de la carpeta donde se abrió la caja negra (o la carpeta por
+     * defecto si aún no se abrió). Usar con {@code BlackboxHistoryService}.
+     */
+    public synchronized BlackboxHistoryPort blackboxHistory() {
+        Path directory = blackboxDirectory != null ? blackboxDirectory : BlackboxSettings.defaultDirectory(!isNative());
+        return new FileBlackboxHistoryAdapter(directory);
     }
 
     /**

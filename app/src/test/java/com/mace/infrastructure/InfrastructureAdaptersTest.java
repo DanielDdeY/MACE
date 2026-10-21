@@ -1,6 +1,8 @@
 package com.mace.infrastructure;
 
+import com.mace.application.usecase.BlackboxHistoryService;
 import com.mace.domain.DomainFixtures;
+import com.mace.domain.model.BlackboxSessionState;
 import com.mace.domain.model.BlackboxStats;
 import com.mace.domain.port.out.BlackboxSinkPort;
 import com.mace.infrastructure.mock.MockScenario;
@@ -152,6 +154,22 @@ class InfrastructureAdaptersTest {
             assertTrue(adapters.blackboxFailure().isPresent());
             sink.record(DomainFixtures.snapshot(DomainFixtures.cpu(50)));
             assertFalse(sink.stats().enabled());
+        }
+    }
+
+    @Test
+    void elHistorialLeeLaMismaCarpetaDondeSeAbrioLaCajaNegra(@TempDir Path dir) {
+        try (InfrastructureAdapters adapters = InfrastructureAdapters.mock(MockScenario.NORMAL, 1)) {
+            BlackboxSinkPort sink = adapters.openBlackbox(BlackboxSettings.defaults(dir));
+            sink.record(adapters.sensors().fetchHardwareSnapshot());
+            sink.flush();
+
+            var history = new BlackboxHistoryService(adapters.blackboxHistory(), sink::stats);
+            var sessions = history.listSessions();
+
+            assertEquals(1, sessions.size());
+            assertEquals(BlackboxSessionState.IN_PROGRESS, sessions.get(0).state());
+            assertEquals("Simulada", sessions.get(0).originLabel());
         }
     }
 

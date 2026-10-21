@@ -45,3 +45,14 @@ La temperatura de CPU AMD requiere Ryzen Master Monitoring SDK instalado en el e
 ejecutar elevado; la potencia AMD no tiene proveedor; Intel depende de WinRing0 (no se
 distribuye). Las ausencias se muestran por estado (NO_PROVIDER, ACCESS_DENIED...), no son
 fallos del puente FFM.
+
+Informe de compatibilidad de cada equipo (pedido por la guia de integracion):
+
+    cd app
+    mvn -q -DskipTests package
+    java --enable-native-access=ALL-UNNAMED -cp target\mace-app-1.0.0-SNAPSHOT.jar ^
+         com.mace.infrastructure.diagnostics.HardwareReport C:\ruta\al\paquete\bin\mace_native.dll
+
+Genera mace-reporte-<EQUIPO>.md con Windows, modelo de CPU/GPU, version de controlador, SHA-256
+de la DLL y, para CPU, cada GPU y RAM, el proveedor, el ambito de potencia y el estado/valor de
+cada metrica. Ejecutarlo tambien como administrador si se quiere comparar.
