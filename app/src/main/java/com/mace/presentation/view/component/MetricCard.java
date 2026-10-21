@@ -37,6 +37,7 @@ public final class MetricCard extends VBox implements AutoCloseable {
                 () -> reading.getValue() == null ? "N/D" : reading.getValue().text(), reading));
         if (captionText != null) {
             caption.getStyleClass().add("metric-card-caption");
+            caption.setWrapText(true);
             caption.textProperty().bind(captionText);
             getChildren().addAll(name, value, caption);
         } else {

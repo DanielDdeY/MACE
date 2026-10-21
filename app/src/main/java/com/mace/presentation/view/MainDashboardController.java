@@ -58,22 +58,33 @@ public final class MainDashboardController {
     private static final int PIE_PROCESS_LIMIT = 8;
     private static final DateTimeFormatter ALERT_TIME = DateTimeFormatter.ofPattern("HH:mm:ss");
 
+    @FXML private ToggleButton navHome;
     @FXML private ToggleButton navCpu;
     @FXML private ToggleButton navGpu;
+    @FXML private ToggleButton navRam;
     @FXML private ToggleButton navHistorial;
     @FXML private ToggleButton navAlerts;
     @FXML private ToggleButton navProcesos;
     @FXML private Label dataSourceLabel;
 
+    @FXML private ScrollPane paneHome;
     @FXML private ScrollPane paneCpu;
     @FXML private ScrollPane paneGpu;
+    @FXML private ScrollPane paneRam;
     @FXML private ScrollPane paneHistorial;
     @FXML private VBox paneAlerts;
     @FXML private VBox paneProcesos;
 
     @FXML private Label cpuVendorLabel;
     @FXML private Label cpuProviderLabel;
+    @FXML private Label homeCpuLabel;
+    @FXML private Label homeGpuCountLabel;
+    @FXML private Label homeProcessCountLabel;
+    @FXML private Label homeProcessMemoryLabel;
+    @FXML private Label homeInventoryLabel;
+    @FXML private FlowPane homeMetricsPane;
     @FXML private FlowPane cpuMetricsPane;
+    @FXML private FlowPane ramMetricsPane;
     @FXML private Label cpuStatusLabel;
     @FXML private Label cpuMaxLabel;
     @FXML private Label cpuAvgLabel;
@@ -84,13 +95,13 @@ public final class MainDashboardController {
     @FXML private LineChart<Number, Number> cpuUsageChart;
     @FXML private LineChart<Number, Number> gpuTempChart;
     @FXML private LineChart<Number, Number> gpuUsageChart;
-    @FXML private LineChart<Number, Number> gpuPowerChart;
     @FXML private ComboBox<GpuCardViewModel> gpuSelector;
     @FXML private Label blackboxStatusLabel;
     @FXML private Label blackboxCountsLabel;
     @FXML private Label blackboxLocationLabel;
 
     @FXML private Label alertSummaryLabel;
+    @FXML private Button alertsHelpButton;
     @FXML private ListView<AlertItemViewModel> alertList;
 
     @FXML private TextField searchProcesos;
@@ -108,18 +119,16 @@ public final class MainDashboardController {
 
     private final MainDashboardViewModel dashboardViewModel;
     private final Map<GpuAdapterId, GpuCard> gpuCardsById = new HashMap<>();
-    private final List<MetricCard> cpuMetricCards = new ArrayList<>();
+    private final List<MetricCard> metricCards = new ArrayList<>();
     private ProcessTableViewModel procesosViewModel;
     private GpuCardViewModel selectedGpu;
     private GpuAdapterId selectedGpuId;
+    private boolean hasReceivedInventory;
 
     private final ListChangeListener<MetricHistory.Point> selectedTempListener = change ->
             renderChart(gpuTempChart, selectedGpu == null ? null : selectedGpu.temperatureHistory());
     private final ListChangeListener<MetricHistory.Point> selectedUsageListener = change ->
             renderChart(gpuUsageChart, selectedGpu == null ? null : selectedGpu.usageHistory());
-    private final ListChangeListener<MetricHistory.Point> selectedPowerListener = change ->
-            renderChart(gpuPowerChart, selectedGpu == null ? null : selectedGpu.powerHistory());
-
     public MainDashboardController(MainDashboardViewModel dashboardViewModel) {
         this.dashboardViewModel = Objects.requireNonNull(dashboardViewModel, "dashboardViewModel no puede ser null");
     }
@@ -127,8 +136,10 @@ public final class MainDashboardController {
     @FXML
     public void initialize() {
         configureNavigation();
+        configureHome();
         configureCpu();
         configureGpus();
+        configureRam();
         configureHistory();
         configureAlerts();
         configureProcesses();
@@ -137,54 +148,101 @@ public final class MainDashboardController {
     }
 
     private void configureNavigation() {
+        navHome.setGraphic(NavIcon.home());
         navCpu.setGraphic(NavIcon.cpu());
         navGpu.setGraphic(NavIcon.gpu());
+        navRam.setGraphic(NavIcon.ram());
         navHistorial.setGraphic(NavIcon.historial());
         navAlerts.setGraphic(NavIcon.alerts());
         navProcesos.setGraphic(NavIcon.procesos());
         ToggleGroup group = new ToggleGroup();
-        for (ToggleButton button : List.of(navCpu, navGpu, navHistorial, navAlerts, navProcesos)) {
+        for (ToggleButton button : List.of(navHome, navCpu, navGpu, navRam,
+                navHistorial, navAlerts, navProcesos)) {
             button.setToggleGroup(group);
         }
+        navHome.setOnAction(e -> showSection(paneHome));
         navCpu.setOnAction(e -> showSection(paneCpu));
         navGpu.setOnAction(e -> showSection(paneGpu));
+        navRam.setOnAction(e -> showSection(paneRam));
         navHistorial.setOnAction(e -> showSection(paneHistorial));
         navAlerts.setOnAction(e -> showSection(paneAlerts));
         navProcesos.setOnAction(e -> showSection(paneProcesos));
         group.selectedToggleProperty().addListener((obs, oldValue, next) -> {
             if (next == null && oldValue != null) oldValue.setSelected(true);
         });
-        navCpu.setSelected(true);
-        showSection(paneCpu);
+        navHome.setSelected(true);
+        showSection(paneHome);
     }
 
     private void showSection(Node section) {
-        for (Node node : List.of(paneCpu, paneGpu, paneHistorial, paneAlerts, paneProcesos)) {
+        for (Node node : List.of(paneHome, paneCpu, paneGpu, paneRam,
+                paneHistorial, paneAlerts, paneProcesos)) {
             boolean visible = node == section;
             node.setVisible(visible);
             node.setManaged(visible);
         }
     }
 
+    private void configureHome() {
+        homeCpuLabel.textProperty().bind(dashboardViewModel.cpuVendorProperty().map(v -> "CPU: " + v));
+        homeGpuCountLabel.textProperty().bind(dashboardViewModel.hardwareSequenceProperty().map(sequence ->
+                sequence.longValue() == 0 ? "GPU: esperando datos"
+                        : "GPU detectadas: " + dashboardViewModel.gpuCards().size()));
+        metricCards.addAll(List.of(
+                new MetricCard("Temperatura CPU", dashboardViewModel.cpuTemperatureDisplayProperty()),
+                new MetricCard("Temperatura GPU", dashboardViewModel.gpuSummaryTemperatureDisplayProperty(),
+                        dashboardViewModel.gpuSummaryNameProperty()),
+                new MetricCard("RAM en uso", dashboardViewModel.memoryUsedDisplayProperty(),
+                        dashboardViewModel.memoryUsedPercentDisplayProperty().map(display ->
+                                "Uso total: " + display.text()))));
+        homeMetricsPane.getChildren().addAll(0, metricCards);
+        dashboardViewModel.getProcesses().addListener((ListChangeListener<ProcessRow>) change -> updateHomeProcesses());
+        dashboardViewModel.processInventoryAvailableProperty().addListener((obs, previous, available) ->
+                updateHomeProcesses());
+        dashboardViewModel.monitoringSequenceProperty().addListener((obs, previous, next) ->
+                updateHomeProcesses());
+        updateHomeProcesses();
+    }
+
+    private void updateHomeProcesses() {
+        int count = dashboardViewModel.getProcesses().size();
+        boolean received = dashboardViewModel.monitoringSequenceProperty().get() > 0;
+        boolean available = dashboardViewModel.processInventoryAvailableProperty().get();
+        if (available) hasReceivedInventory = true;
+        homeProcessCountLabel.setText(hasReceivedInventory ? String.valueOf(count) : "N/D");
+        homeProcessMemoryLabel.setText(hasReceivedInventory
+                ? String.format(Locale.ROOT, "Working Set: %.0f MiB",
+                        ProcessMemorySummary.totalListedMebibytes(dashboardViewModel.getProcesses()))
+                : "Working Set: N/D");
+        homeInventoryLabel.setText(!received ? "Esperando inventario" : available
+                ? "Inventario actualizado" : hasReceivedInventory
+                ? "Último inventario conocido" : "Inventario no disponible");
+    }
+
     private void configureCpu() {
         cpuVendorLabel.textProperty().bind(dashboardViewModel.cpuVendorProperty().map(v -> "Fabricante: " + v));
         cpuProviderLabel.textProperty().bind(dashboardViewModel.cpuProviderProperty().map(v -> "Proveedor: " + v));
-        cpuMetricCards.addAll(List.of(
+        List<MetricCard> cpuCards = List.of(
                 new MetricCard("Temperatura CPU", dashboardViewModel.cpuTemperatureDisplayProperty()),
-                new MetricCard("Uso CPU", dashboardViewModel.cpuUsageDisplayProperty()),
-                new MetricCard("Potencia CPU", dashboardViewModel.cpuPowerDisplayProperty(),
-                        dashboardViewModel.cpuPowerScopeProperty()),
-                new MetricCard("RAM física total", dashboardViewModel.memoryTotalDisplayProperty()),
-                new MetricCard("RAM en uso", dashboardViewModel.memoryUsedDisplayProperty()),
-                new MetricCard("RAM disponible", dashboardViewModel.memoryAvailableDisplayProperty()),
-                new MetricCard("Uso de RAM", dashboardViewModel.memoryUsedPercentDisplayProperty())));
-        cpuMetricsPane.getChildren().addAll(cpuMetricCards);
+                new MetricCard("Uso CPU", dashboardViewModel.cpuUsageDisplayProperty()));
+        metricCards.addAll(cpuCards);
+        cpuMetricsPane.getChildren().addAll(cpuCards);
         dashboardViewModel.cpuTemperaturePoints().points().addListener(
                 (ListChangeListener<MetricHistory.Point>) change -> updateCpuStats());
         dashboardViewModel.cpuTemperatureDisplayProperty().addListener((obs, oldValue, next) -> updateCpuStatus());
         dashboardViewModel.alerts().addListener((ListChangeListener<AlertItemViewModel>) change -> updateCpuStatus());
         updateCpuStatus();
         updateCpuStats();
+    }
+
+    private void configureRam() {
+        List<MetricCard> ramCards = List.of(
+                new MetricCard("RAM física total", dashboardViewModel.memoryTotalDisplayProperty()),
+                new MetricCard("RAM en uso", dashboardViewModel.memoryUsedDisplayProperty()),
+                new MetricCard("RAM disponible", dashboardViewModel.memoryAvailableDisplayProperty()),
+                new MetricCard("Uso de RAM", dashboardViewModel.memoryUsedPercentDisplayProperty()));
+        metricCards.addAll(ramCards);
+        ramMetricsPane.getChildren().addAll(ramCards);
     }
 
     private void updateCpuStatus() {
@@ -315,17 +373,14 @@ public final class MainDashboardController {
         if (selectedGpu != null) {
             selectedGpu.temperatureHistory().points().removeListener(selectedTempListener);
             selectedGpu.usageHistory().points().removeListener(selectedUsageListener);
-            selectedGpu.powerHistory().points().removeListener(selectedPowerListener);
         }
         selectedGpu = next;
         if (next != null) {
             next.temperatureHistory().points().addListener(selectedTempListener);
             next.usageHistory().points().addListener(selectedUsageListener);
-            next.powerHistory().points().addListener(selectedPowerListener);
         }
         renderChart(gpuTempChart, next == null ? null : next.temperatureHistory());
         renderChart(gpuUsageChart, next == null ? null : next.usageHistory());
-        renderChart(gpuPowerChart, next == null ? null : next.powerHistory());
     }
 
     private static void watchHistory(LineChart<Number, Number> chart, MetricHistory history) {
@@ -350,6 +405,7 @@ public final class MainDashboardController {
     }
 
     private void configureAlerts() {
+        alertsHelpButton.setOnAction(event -> showAlertsHelp());
         alertList.setItems(dashboardViewModel.alerts());
         alertList.setPlaceholder(new Label("Sin alertas activas"));
         alertList.setCellFactory(list -> new ListCell<>() {
@@ -376,6 +432,18 @@ public final class MainDashboardController {
         });
         dashboardViewModel.alerts().addListener((ListChangeListener<AlertItemViewModel>) change -> updateAlertSummary());
         updateAlertSummary();
+    }
+
+    private void showAlertsHelp() {
+        Alert help = new Alert(Alert.AlertType.INFORMATION);
+        help.setTitle("Ayuda sobre alertas");
+        help.setHeaderText("¿Para qué sirve esta ventana?");
+        help.setContentText("Aquí aparecen avisos cuando la CPU o una GPU se calientan demasiado, "
+                + "cuando un programa podría estar consumiendo cada vez más memoria, o cuando su ventana "
+                + "deja de responder. Un aviso sirve para que revises lo que ocurre; no siempre indica una avería. "
+                + "MACE no cierra programas automáticamente. Si decides cerrar uno, hazlo desde Procesos "
+                + "y confirma la acción.");
+        help.showAndWait();
     }
 
     private void updateAlertSummary() {

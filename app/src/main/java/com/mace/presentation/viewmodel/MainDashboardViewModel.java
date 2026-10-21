@@ -54,6 +54,8 @@ public final class MainDashboardViewModel implements AutoCloseable {
     private final ReadOnlyObjectWrapper<MetricDisplay> cpuTemperatureDisplay = missing();
     private final ReadOnlyObjectWrapper<MetricDisplay> cpuPowerDisplay = missing();
     private final ReadOnlyObjectWrapper<MetricDisplay> cpuUsageDisplay = missing();
+    private final ReadOnlyObjectWrapper<MetricDisplay> gpuSummaryTemperatureDisplay = missing();
+    private final ReadOnlyStringWrapper gpuSummaryName = new ReadOnlyStringWrapper("Esperando GPU");
     private final ReadOnlyObjectWrapper<MetricDisplay> memoryTotalDisplay = missing();
     private final ReadOnlyObjectWrapper<MetricDisplay> memoryAvailableDisplay = missing();
     private final ReadOnlyObjectWrapper<MetricDisplay> memoryUsedDisplay = missing();
@@ -183,6 +185,16 @@ public final class MainDashboardViewModel implements AutoCloseable {
         memoryUsedPercentDisplay.set(MetricDisplay.decimal(memory.usedPercent(), "%", 1));
         memoryUsedPercentPoints.append(sequence, memory.usedPercent());
 
+        GpuReading summaryGpu = snapshot.gpus().stream()
+                .filter(gpu -> gpu.temperatureCelsius().isValid())
+                .max(java.util.Comparator.comparingDouble(gpu -> gpu.temperatureCelsius().value()))
+                .orElseGet(() -> snapshot.gpus().isEmpty() ? null : snapshot.gpus().getFirst());
+        gpuSummaryTemperatureDisplay.set(summaryGpu == null
+                ? MetricDisplay.unavailable(MetricState.NO_DEVICE)
+                : MetricDisplay.decimal(summaryGpu.temperatureCelsius(), "°C", 1));
+        gpuSummaryName.set(summaryGpu == null ? "No se detectaron GPU físicas"
+                : summaryGpu.adapter().displayName());
+
         Map<GpuAdapterId, GpuCardViewModel> nextCards = new LinkedHashMap<>();
         for (GpuReading reading : snapshot.gpus()) {
             GpuCardViewModel card = gpuCardsById.get(reading.adapterId());
@@ -220,6 +232,10 @@ public final class MainDashboardViewModel implements AutoCloseable {
     public ReadOnlyObjectProperty<MetricDisplay> cpuTemperatureDisplayProperty() { return cpuTemperatureDisplay.getReadOnlyProperty(); }
     public ReadOnlyObjectProperty<MetricDisplay> cpuPowerDisplayProperty() { return cpuPowerDisplay.getReadOnlyProperty(); }
     public ReadOnlyObjectProperty<MetricDisplay> cpuUsageDisplayProperty() { return cpuUsageDisplay.getReadOnlyProperty(); }
+    public ReadOnlyObjectProperty<MetricDisplay> gpuSummaryTemperatureDisplayProperty() {
+        return gpuSummaryTemperatureDisplay.getReadOnlyProperty();
+    }
+    public ReadOnlyStringProperty gpuSummaryNameProperty() { return gpuSummaryName.getReadOnlyProperty(); }
     public ReadOnlyObjectProperty<MetricDisplay> memoryTotalDisplayProperty() { return memoryTotalDisplay.getReadOnlyProperty(); }
     public ReadOnlyObjectProperty<MetricDisplay> memoryAvailableDisplayProperty() { return memoryAvailableDisplay.getReadOnlyProperty(); }
     public ReadOnlyObjectProperty<MetricDisplay> memoryUsedDisplayProperty() { return memoryUsedDisplay.getReadOnlyProperty(); }

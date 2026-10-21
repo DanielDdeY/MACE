@@ -53,6 +53,11 @@ class MainDashboardPresentationTest {
             HardwareSnapshot first = new MockSensorsAdapter(MockScenario.DUAL_GPU).fetchHardwareSnapshot();
             fixture.publish(snapshot(1, 1, first));
             assertEquals(2, fixture.viewModel.gpuCards().size());
+            var hottest = first.gpus().stream().max(java.util.Comparator.comparingDouble(
+                    gpu -> gpu.temperatureCelsius().value())).orElseThrow();
+            assertEquals(hottest.adapter().displayName(), fixture.viewModel.gpuSummaryNameProperty().get());
+            assertEquals(hottest.temperatureCelsius().value(),
+                    fixture.viewModel.gpuSummaryTemperatureDisplayProperty().get().value().orElseThrow());
             GpuCardViewModel intel = fixture.viewModel.gpuCards().get(0);
             GpuCardViewModel nvidia = fixture.viewModel.gpuCards().get(1);
             GpuAdapterId intelId = intel.id();
@@ -87,12 +92,16 @@ class MainDashboardPresentationTest {
             HardwareSnapshot none = new MockSensorsAdapter(MockScenario.NO_GPU).fetchHardwareSnapshot();
             fixture.publish(snapshot(1, 1, none));
             assertTrue(fixture.viewModel.gpuCards().isEmpty());
+            assertEquals(MetricState.NO_DEVICE,
+                    fixture.viewModel.gpuSummaryTemperatureDisplayProperty().get().state());
 
             HardwareSnapshot noSensor = new MockSensorsAdapter(MockScenario.GPU_NO_SENSOR).fetchHardwareSnapshot();
             fixture.publish(snapshot(2, 2, noSensor));
             assertEquals(1, fixture.viewModel.gpuCards().size());
             MetricDisplay temperature = fixture.viewModel.gpuCards().get(0).temperatureProperty().get();
             assertEquals(MetricState.NO_PROVIDER, temperature.state());
+            assertEquals(MetricState.NO_PROVIDER,
+                    fixture.viewModel.gpuSummaryTemperatureDisplayProperty().get().state());
             assertFalse(temperature.value().isPresent());
             assertTrue(temperature.text().startsWith("N/D"));
             assertFalse(fixture.viewModel.gpuCards().getFirst().temperatureProperty().get().isValid());

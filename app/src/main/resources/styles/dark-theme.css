@@ -209,6 +209,16 @@
     -fx-text-fill: -color-fg-muted;
 }
 
+.help-button {
+    -fx-min-width: 28;
+    -fx-min-height: 28;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: -color-border-default;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
 /* ---------- Tarjetas de graficos ---------- */
 
 .chart-card {

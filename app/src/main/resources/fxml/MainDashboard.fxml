@@ -5,6 +5,7 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
@@ -31,8 +32,10 @@
             <Label fx:id="dataSourceLabel" text="Fuente de datos" wrapText="true" styleClass="sidebar-subtitle" />
             <VBox spacing="4" styleClass="sidebar-nav">
                 <padding><Insets top="24" /></padding>
-                <ToggleButton fx:id="navCpu" text="CPU y memoria" styleClass="nav-button" maxWidth="Infinity" />
+                <ToggleButton fx:id="navHome" text="Panel Principal" styleClass="nav-button" maxWidth="Infinity" />
+                <ToggleButton fx:id="navCpu" text="CPU" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navGpu" text="GPU" styleClass="nav-button" maxWidth="Infinity" />
+                <ToggleButton fx:id="navRam" text="RAM" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navHistorial" text="Historial" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navAlerts" text="Alertas" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navProcesos" text="Procesos" styleClass="nav-button" maxWidth="Infinity" />
@@ -44,9 +47,30 @@
         <StackPane styleClass="content-area">
             <padding><Insets top="20" right="20" bottom="20" left="20" /></padding>
 
+            <ScrollPane fx:id="paneHome" fitToWidth="true" hbarPolicy="NEVER" styleClass="section-scroll">
+                <VBox spacing="16" styleClass="section-pane">
+                    <Label text="Panel Principal" styleClass="section-title" />
+                    <Label text="Resumen del equipo y sus procesos; las lecturas se actualizan automáticamente" styleClass="section-subtitle" wrapText="true" />
+                    <VBox spacing="6" styleClass="chart-card">
+                        <Label text="Equipo detectado" styleClass="chart-card-title" />
+                        <Label fx:id="homeCpuLabel" text="CPU: esperando datos" styleClass="device-provider" wrapText="true" />
+                        <Label fx:id="homeGpuCountLabel" text="GPU: esperando datos" styleClass="device-provider" />
+                    </VBox>
+                    <FlowPane fx:id="homeMetricsPane" hgap="10" vgap="10" prefWrapLength="740">
+                        <VBox spacing="6" styleClass="metric-card" minWidth="190" prefWidth="210">
+                            <Label text="Procesos listados" styleClass="metric-card-title" />
+                            <Label fx:id="homeProcessCountLabel" text="N/D" styleClass="metric-card-value" />
+                            <Label fx:id="homeProcessMemoryLabel" text="Working Set: N/D" styleClass="metric-card-caption" wrapText="true" />
+                            <Label fx:id="homeInventoryLabel" text="Esperando inventario" styleClass="metric-card-caption" wrapText="true" />
+                        </VBox>
+                    </FlowPane>
+                    <Label text="El uso de RAM corresponde a todo el equipo; el Working Set solo suma los procesos listados." styleClass="section-subtitle" wrapText="true" />
+                </VBox>
+            </ScrollPane>
+
             <ScrollPane fx:id="paneCpu" fitToWidth="true" hbarPolicy="NEVER" styleClass="section-scroll">
                 <VBox spacing="16" styleClass="section-pane">
-                    <Label text="CPU y memoria física" styleClass="section-title" />
+                    <Label text="CPU" styleClass="section-title" />
                     <Label text="Lecturas independientes: un sensor ausente no oculta los demás" styleClass="section-subtitle" />
                     <HBox spacing="16">
                         <Label fx:id="cpuVendorLabel" text="Fabricante: esperando datos" styleClass="device-provider" />
@@ -76,6 +100,14 @@
                     <Label text="Cada GPU detectada aparece por separado, incluida la integrada" styleClass="section-subtitle" />
                     <Label fx:id="gpuEmptyLabel" text="Esperando la primera detección" styleClass="empty-state" />
                     <VBox fx:id="gpuCardsBox" spacing="14" />
+                </VBox>
+            </ScrollPane>
+
+            <ScrollPane fx:id="paneRam" fitToWidth="true" hbarPolicy="NEVER" styleClass="section-scroll">
+                <VBox spacing="16" styleClass="section-pane">
+                    <Label text="RAM" styleClass="section-title" />
+                    <Label text="Memoria física del equipo: capacidad total, uso actual y espacio disponible" styleClass="section-subtitle" wrapText="true" />
+                    <FlowPane fx:id="ramMetricsPane" hgap="10" vgap="10" prefWrapLength="740" />
                 </VBox>
             </ScrollPane>
 
@@ -121,18 +153,14 @@
                             <yAxis><NumberAxis label="\%" lowerBound="0" upperBound="100" tickUnit="20" autoRanging="false" /></yAxis>
                         </LineChart>
                     </VBox>
-                    <VBox styleClass="chart-card">
-                        <Label text="Potencia GPU (ámbito indicado en la tarjeta)" styleClass="chart-card-title" />
-                        <LineChart fx:id="gpuPowerChart" legendVisible="false" animated="false" createSymbols="true" prefHeight="220">
-                            <xAxis><NumberAxis label="Sondeo" forceZeroInRange="false" /></xAxis>
-                            <yAxis><NumberAxis label="W" forceZeroInRange="false" /></yAxis>
-                        </LineChart>
-                    </VBox>
                 </VBox>
             </ScrollPane>
 
             <VBox fx:id="paneAlerts" spacing="12" styleClass="section-pane">
-                <Label text="Alertas activas" styleClass="section-title" />
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <Label text="Alertas activas" styleClass="section-title" />
+                    <Button fx:id="alertsHelpButton" text="?" styleClass="help-button" accessibleText="Ayuda sobre alertas" />
+                </HBox>
                 <Label text="Avisos informativos; MACE nunca finaliza procesos automáticamente" styleClass="section-subtitle" />
                 <Label fx:id="alertSummaryLabel" text="Esperando datos" styleClass="device-provider" />
                 <ListView fx:id="alertList" VBox.vgrow="ALWAYS" />

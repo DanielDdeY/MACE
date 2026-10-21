@@ -44,7 +44,6 @@ public final class GpuCard extends VBox implements AutoCloseable {
         metrics = List.of(
                 new MetricCard("Temperatura", model.temperatureProperty()),
                 new MetricCard("Uso", model.usageProperty()),
-                new MetricCard("Potencia", model.powerProperty(), model.powerScopeProperty()),
                 new MetricCard("Ventilador", model.fanRpmProperty()),
                 new MetricCard("Velocidad del ventilador", model.fanPercentProperty()),
                 new MetricCard("VRAM usada", model.vramUsedProperty()),

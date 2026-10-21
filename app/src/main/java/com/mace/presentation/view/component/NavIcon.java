@@ -19,6 +19,14 @@ public final class NavIcon {
     private NavIcon() {
     }
 
+    public static Node home() {
+        Rectangle topLeft = square(2, 2, 6);
+        Rectangle topRight = square(10, 2, 6);
+        Rectangle bottomLeft = square(2, 10, 6);
+        Rectangle bottomRight = square(10, 10, 6);
+        return icon(topLeft, topRight, bottomLeft, bottomRight);
+    }
+
     public static Node cpu() {
         Rectangle outer = square(4, 4, 10);
         Rectangle inner = square(7, 7, 4);
@@ -43,6 +51,17 @@ public final class NavIcon {
         Line port = line(6, 15.5, 12, 15.5);
 
         return icon(body, fan, port);
+    }
+
+    public static Node ram() {
+        Rectangle module = new Rectangle(1, 5, 16, 8);
+        module.setArcWidth(2);
+        module.setArcHeight(2);
+        style(module);
+        Line chip1 = line(5, 7, 5, 11);
+        Line chip2 = line(9, 7, 9, 11);
+        Line chip3 = line(13, 7, 13, 11);
+        return icon(module, chip1, chip2, chip3);
     }
 
     public static Node historial() {
