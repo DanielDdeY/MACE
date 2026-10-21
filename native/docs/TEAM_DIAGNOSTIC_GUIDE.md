@@ -37,7 +37,7 @@ Esta guía usa `test_mace.exe`, compilado a partir de `native/test_main.c`. Es u
 ## Opción B: compilar desde el código fuente
 
 1. Extraer `mace-native-source-1.4.2-....zip` en una **carpeta independiente**, por ejemplo `Escritorio\MACE-native-fuente`. No copiar `build/`, `dist/`, `.vs/` ni `.vscode/` entre equipos. La estructura extraída debe contener `native\CMakeLists.txt`, `native\test_main.c`, `native\include\` y `native\scripts\`.
-2. Instalar **Visual Studio 2022 o 2026** con la carga de trabajo **Desarrollo de escritorio con C++**, herramientas MSVC x64 y Windows SDK. Usar **CMake 3.28 o posterior** (la versión incluida en Visual Studio sirve si cumple ese mínimo) y PowerShell. El script detecta la versión compatible instalada y ejecuta la compilación y las pruebas CTest. No hace falta instalar Java para compilar y ejecutar `test_mace.exe`. **JDK 22+** solo hace falta para el empaquetado verificado desde un clon Git con `package-native.ps1`; ese script exige además que la fuente esté registrada en Git, por lo que no se ejecuta directamente desde el ZIP de fuente.
+2. Instalar **Visual Studio 2022 o 2026** con la carga de trabajo **Desarrollo de escritorio con C++**, herramientas MSVC x64 y Windows SDK. Usar **CMake 3.28 o posterior** (la versión incluida en Visual Studio sirve si cumple ese mínimo) y PowerShell. El script detecta la versión compatible instalada y compila la DLL y `test_mace.exe`. No hace falta instalar Java para compilar o ejecutar este diagnóstico ni para crear el paquete nativo. **JDK 22+** y Maven sí son necesarios para empaquetar la aplicación Java como MACE.exe y MACE-Preview.exe.
 3. Abrir PowerShell en la carpeta que contiene `native/` y ejecutar:
 
    ```powershell
@@ -56,4 +56,4 @@ Esta guía usa `test_mace.exe`, compilado a partir de `native/test_main.c`. Es u
    Compilar sin esos parámetros es válido, pero no incluirá los proveedores AMD opcionales correspondientes. Un compañero Intel o NVIDIA que solo quiere **probar** debe usar la opción A; no necesita instalar los SDK AMD.
 5. En Visual Studio también se puede abrir directamente la carpeta `native/`, seleccionar el preset `vs2022-x64` o `vs2026-x64` según la instalación, compilar en **Release**, escoger **`test_mace.exe`** como elemento de inicio y pulsar **Ctrl+F5**. El archivo fuente se llama `test_main.c`, pero el objetivo ejecutable de CMake es `test_mace`.
 
-La aplicación Java de `app/` todavía usa principalmente la interfaz heredada. Esta prueba usa V2 directamente para verificar el trabajo nativo en hardware distinto antes de la integración Java.
+La aplicación Java de `app/` y este diagnóstico usan el contrato V2. Compare sus lecturas en el mismo equipo para comprobar la integración.

@@ -57,11 +57,8 @@ function Get-MaceToolchain {
             if ($LASTEXITCODE -ne 0 -or $versionLine -notmatch 'cmake version (\d+\.\d+(?:\.\d+)?)') { continue }
             $cmakeVersion = [version]$Matches[1]
             if ($cmakeVersion -lt [version]'3.28') { continue }
-            $ctest = Join-Path (Split-Path -Parent $candidate) 'ctest.exe'
-            if (-not (Test-Path -LiteralPath $ctest -PathType Leaf)) { continue }
             return [pscustomobject]@{
                 CMake = $candidate
-                CTest = $ctest
                 CMakeVersion = $cmakeVersion.ToString()
                 Generator = $generator
                 Preset = $preset

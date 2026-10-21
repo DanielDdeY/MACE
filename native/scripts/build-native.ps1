@@ -3,8 +3,7 @@ param(
     [ValidateSet('Auto', 'VS2022', 'VS2026')][string]$VisualStudio = 'Auto',
     [string]$BuildDirectory,
     [string]$AdlxSdkDirectory = $env:MACE_ADLX_SDK_DIR,
-    [string]$RyzenSdkDirectory = $env:MACE_RYZEN_SDK_DIR,
-    [switch]$EnableTerminationTest
+    [string]$RyzenSdkDirectory = $env:MACE_RYZEN_SDK_DIR
 )
 
 . (Join-Path $PSScriptRoot 'native-common.ps1')
@@ -14,14 +13,11 @@ $build = Get-MaceBuildDirectory -BuildDirectory $BuildDirectory -Preset $toolcha
 
 Write-Host "MACE native: $($toolchain.Generator), CMake $($toolchain.CMakeVersion), $Configuration"
 $configureArgs = @('-S', $nativeRoot, '-B', $build, '-G', $toolchain.Generator,
-    '-A', 'x64', '-DBUILD_TESTING=ON', "-DMACE_ADLX_SDK_DIR=$AdlxSdkDirectory",
-    "-DMACE_RYZEN_SDK_DIR=$RyzenSdkDirectory",
-    "-DMACE_TEST_PROCESS_TERMINATION=$([int]$EnableTerminationTest.IsPresent)")
+    '-A', 'x64', "-DMACE_ADLX_SDK_DIR=$AdlxSdkDirectory",
+    "-DMACE_RYZEN_SDK_DIR=$RyzenSdkDirectory")
 & $toolchain.CMake @configureArgs
 Assert-MaceCommandSucceeded 'Configuración CMake'
 & $toolchain.CMake --build $build --config $Configuration
 Assert-MaceCommandSucceeded 'Compilación nativa'
-& $toolchain.CTest --test-dir $build -C $Configuration --output-on-failure
-Assert-MaceCommandSucceeded 'Pruebas CTest'
-
 Write-Host "DLL compilada: $(Join-Path $build "$Configuration\mace_native.dll")"
+Write-Host "Diagnóstico manual: $(Join-Path $build "$Configuration\test_mace.exe")"

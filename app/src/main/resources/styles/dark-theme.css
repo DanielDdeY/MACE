@@ -85,6 +85,13 @@
 
 .section-pane {
     -fx-background-color: transparent;
+    -fx-padding: 0 12 12 0;
+}
+
+.section-scroll,
+.section-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
 }
 
 .section-title {
@@ -98,13 +105,9 @@
     -fx-text-fill: -color-fg-muted;
 }
 
-/* ---------- Gauges (CPU / GPU) ---------- */
+/* ---------- Lecturas por dispositivo ---------- */
 
-.gauges-box {
-    -fx-alignment: center-left;
-}
-
-.gauge-dial {
+.metric-card {
     -fx-background-color: -color-bg-subtle;
     -fx-background-radius: 12;
     -fx-padding: 16;
@@ -113,14 +116,53 @@
     -fx-border-width: 1;
 }
 
-.gauge-title {
+.metric-card-title {
     -fx-font-size: 12px;
     -fx-text-fill: -color-fg-muted;
     -fx-font-weight: bold;
 }
 
-.gauge-value {
+.metric-card-value {
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
     -fx-text-fill: -color-fg-default;
+}
+
+.metric-card-caption,
+.device-provider {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-fg-muted;
+}
+
+.gpu-card {
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 12;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+
+.gpu-card .metric-card {
+    -fx-background-color: -color-bg-inset;
+}
+
+.gpu-name {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-default;
+}
+
+.gpu-status {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 8 4 8;
+    -fx-background-radius: 6;
+}
+
+.empty-state {
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-size: 14px;
+    -fx-padding: 20;
 }
 
 /* ---------- Estadisticas en vivo (CPU / GPU) ---------- */
@@ -151,16 +193,30 @@
     -fx-text-fill: -color-fg-default;
 }
 
-.stat-value.status-ok {
+.status-ok {
     -fx-text-fill: #3fb950;
 }
 
-.stat-value.status-warning {
+.status-warning {
     -fx-text-fill: #d29922;
 }
 
-.stat-value.status-critical {
+.status-critical {
     -fx-text-fill: #f85149;
+}
+
+.status-muted {
+    -fx-text-fill: -color-fg-muted;
+}
+
+.help-button {
+    -fx-min-width: 28;
+    -fx-min-height: 28;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: -color-border-default;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
 }
 
 /* ---------- Tarjetas de graficos ---------- */
@@ -189,8 +245,36 @@
     -fx-background-color: transparent;
 }
 
-.default-color0.chart-series-line {
+.chart-series-line {
     -fx-stroke: #3fb950;
+}
+
+.chart-line-symbol {
+    -fx-background-color: #3fb950, -color-bg-subtle;
+    -fx-background-radius: 4px;
+    -fx-padding: 3px;
+}
+
+.blackbox-tools {
+    -fx-alignment: center-left;
+}
+
+.blackbox-table {
+    -fx-background-color: -color-bg-subtle;
+}
+
+.blackbox-gap-row {
+    -fx-background-color: rgba(210, 153, 34, 0.18);
+}
+
+.list-view {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 10;
+}
+
+.list-cell {
+    -fx-padding: 12;
 }
 
 .axis {
