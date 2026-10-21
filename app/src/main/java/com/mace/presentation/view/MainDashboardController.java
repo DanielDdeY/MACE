@@ -68,6 +68,8 @@ public final class MainDashboardController {
     @FXML private ToggleButton navHistorial;
     @FXML private ToggleButton navAlerts;
     @FXML private ToggleButton navProcesos;
+    @FXML private ToggleButton navBlackbox;
+    @FXML private ToggleButton navHud;
     @FXML private Label dataSourceLabel;
 
     @FXML private ScrollPane paneHome;
@@ -77,6 +79,8 @@ public final class MainDashboardController {
     @FXML private ScrollPane paneHistorial;
     @FXML private VBox paneAlerts;
     @FXML private VBox paneProcesos;
+    @FXML private ScrollPane paneBlackbox;
+    @FXML private VBox paneHud;
 
     @FXML private Label cpuVendorLabel;
     @FXML private Label cpuProviderLabel;
@@ -103,6 +107,7 @@ public final class MainDashboardController {
     @FXML private Label blackboxCountsLabel;
     @FXML private Label blackboxLocationLabel;
     @FXML private VBox blackboxExplorerBox;
+    @FXML private Button blackboxHelpButton;
 
     @FXML private Label alertSummaryLabel;
     @FXML private Button alertsHelpButton;
@@ -150,6 +155,7 @@ public final class MainDashboardController {
         configureHistory();
         configureAlerts();
         configureProcesses();
+        configureBlackbox();
         bindBlackbox();
         dashboardViewModel.start();
     }
@@ -159,24 +165,28 @@ public final class MainDashboardController {
         navCpu.setGraphic(NavIcon.cpu());
         navGpu.setGraphic(NavIcon.gpu());
         navRam.setGraphic(NavIcon.ram());
+        navProcesos.setGraphic(NavIcon.procesos());
         navHistorial.setGraphic(NavIcon.historial());
         navAlerts.setGraphic(NavIcon.alerts());
-        navProcesos.setGraphic(NavIcon.procesos());
+        navBlackbox.setGraphic(NavIcon.blackbox());
+        navHud.setGraphic(NavIcon.hud());
         ToggleGroup group = new ToggleGroup();
         for (ToggleButton button : List.of(navHome, navCpu, navGpu, navRam,
-                navHistorial, navAlerts, navProcesos)) {
+                navProcesos, navHistorial, navAlerts, navBlackbox, navHud)) {
             button.setToggleGroup(group);
         }
         navHome.setOnAction(e -> showSection(paneHome));
         navCpu.setOnAction(e -> showSection(paneCpu));
         navGpu.setOnAction(e -> showSection(paneGpu));
         navRam.setOnAction(e -> showSection(paneRam));
-        navHistorial.setOnAction(e -> {
-            showSection(paneHistorial);
+        navProcesos.setOnAction(e -> showSection(paneProcesos));
+        navHistorial.setOnAction(e -> showSection(paneHistorial));
+        navAlerts.setOnAction(e -> showSection(paneAlerts));
+        navBlackbox.setOnAction(e -> {
+            showSection(paneBlackbox);
             blackboxHistory.refresh();
         });
-        navAlerts.setOnAction(e -> showSection(paneAlerts));
-        navProcesos.setOnAction(e -> showSection(paneProcesos));
+        navHud.setOnAction(e -> showSection(paneHud));
         group.selectedToggleProperty().addListener((obs, oldValue, next) -> {
             if (next == null && oldValue != null) oldValue.setSelected(true);
         });
@@ -186,7 +196,7 @@ public final class MainDashboardController {
 
     private void showSection(Node section) {
         for (Node node : List.of(paneHome, paneCpu, paneGpu, paneRam,
-                paneHistorial, paneAlerts, paneProcesos)) {
+                paneProcesos, paneHistorial, paneAlerts, paneBlackbox, paneHud)) {
             boolean visible = node == section;
             node.setVisible(visible);
             node.setManaged(visible);
@@ -345,7 +355,6 @@ public final class MainDashboardController {
     }
 
     private void configureHistory() {
-        blackboxExplorerBox.getChildren().add(new BlackboxHistoryPane(blackboxHistory));
         watchHistory(cpuUsageChart, dashboardViewModel.cpuUsagePoints());
         watchHistory(cpuTempChart, dashboardViewModel.cpuTemperaturePoints());
         gpuSelector.setItems(dashboardViewModel.gpuCards());
@@ -454,6 +463,23 @@ public final class MainDashboardController {
                 + "deja de responder. Un aviso sirve para que revises lo que ocurre; no siempre indica una avería. "
                 + "MACE no cierra programas automáticamente. Si decides cerrar uno, hazlo desde Procesos "
                 + "y confirma la acción.");
+        help.showAndWait();
+    }
+
+    private void configureBlackbox() {
+        blackboxExplorerBox.getChildren().add(new BlackboxHistoryPane(blackboxHistory));
+        blackboxHelpButton.setOnAction(event -> showBlackboxHelp());
+    }
+
+    private void showBlackboxHelp() {
+        Alert help = new Alert(Alert.AlertType.INFORMATION);
+        help.setTitle("Ayuda sobre la Caja Negra");
+        help.setHeaderText("¿Para qué sirve la Caja Negra?");
+        help.setContentText("La Caja Negra guarda un historial de lecturas del equipo, procesos, avisos y "
+                + "acciones realizadas en MACE. Sirve para revisar qué ocurrió antes, incluso después de "
+                + "cerrar el programa. Cada archivo reúne datos de un período de uso. Si ves 'huecos' o "
+                + "'perdidos', significa que faltan algunos registros. Consultar esta ventana no cambia "
+                + "los datos ni cierra programas.");
         help.showAndWait();
     }
 

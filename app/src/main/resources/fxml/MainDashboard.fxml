@@ -36,9 +36,11 @@
                 <ToggleButton fx:id="navCpu" text="CPU" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navGpu" text="GPU" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navRam" text="RAM" styleClass="nav-button" maxWidth="Infinity" />
+                <ToggleButton fx:id="navProcesos" text="Procesos" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navHistorial" text="Historial" styleClass="nav-button" maxWidth="Infinity" />
                 <ToggleButton fx:id="navAlerts" text="Alertas" styleClass="nav-button" maxWidth="Infinity" />
-                <ToggleButton fx:id="navProcesos" text="Procesos" styleClass="nav-button" maxWidth="Infinity" />
+                <ToggleButton fx:id="navBlackbox" text="Caja Negra" styleClass="nav-button" maxWidth="Infinity" />
+                <ToggleButton fx:id="navHud" text="Micro-HUD" styleClass="nav-button" maxWidth="Infinity" />
             </VBox>
         </VBox>
     </left>
@@ -115,13 +117,6 @@
                 <VBox spacing="12" styleClass="section-pane">
                     <Label text="Historial en tiempo real" styleClass="section-title" />
                     <Label text="Últimos 30 sondeos físicos; los huecos indican lecturas no disponibles" styleClass="section-subtitle" />
-                    <VBox spacing="4" styleClass="chart-card">
-                        <Label text="Caja negra persistente" styleClass="chart-card-title" />
-                        <Label fx:id="blackboxStatusLabel" text="Esperando el primer sondeo" />
-                        <Label fx:id="blackboxCountsLabel" text="Registros: 0 · Perdidos: 0 · Huecos: 0" />
-                        <Label fx:id="blackboxLocationLabel" text="Sin archivo" wrapText="true" />
-                        <VBox fx:id="blackboxExplorerBox" />
-                    </VBox>
                     <VBox styleClass="chart-card">
                         <Label text="Uso de CPU" styleClass="chart-card-title" />
                         <LineChart fx:id="cpuUsageChart" legendVisible="false" animated="false" createSymbols="true" prefHeight="220">
@@ -166,6 +161,25 @@
                 <Label fx:id="alertSummaryLabel" text="Esperando datos" styleClass="device-provider" />
                 <ListView fx:id="alertList" VBox.vgrow="ALWAYS" />
             </VBox>
+
+            <ScrollPane fx:id="paneBlackbox" fitToWidth="true" hbarPolicy="NEVER" styleClass="section-scroll">
+                <VBox spacing="12" styleClass="section-pane">
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label text="Caja Negra" styleClass="section-title" />
+                        <Button fx:id="blackboxHelpButton" text="?" styleClass="help-button" accessibleText="Ayuda sobre la caja negra" />
+                    </HBox>
+                    <Label text="Consulta las lecturas y los avisos guardados por la Caja Negra" styleClass="section-subtitle" wrapText="true" />
+                    <VBox spacing="4" styleClass="chart-card">
+                        <Label text="Caja negra persistente" styleClass="chart-card-title" />
+                        <Label fx:id="blackboxStatusLabel" text="Esperando el primer sondeo" />
+                        <Label fx:id="blackboxCountsLabel" text="Registros: 0 · Perdidos: 0 · Huecos: 0" />
+                        <Label fx:id="blackboxLocationLabel" text="Sin archivo" wrapText="true" />
+                        <VBox fx:id="blackboxExplorerBox" />
+                    </VBox>
+                </VBox>
+            </ScrollPane>
+
+            <VBox fx:id="paneHud" styleClass="section-pane" />
 
             <VBox fx:id="paneProcesos" spacing="12" styleClass="section-pane">
                 <Label text="Procesos activos" styleClass="section-title" />

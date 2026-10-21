@@ -81,6 +81,28 @@ public final class NavIcon {
         return icon(triangle, mark, dot);
     }
 
+    public static Node blackbox() {
+        Rectangle caseOutline = new Rectangle(2, 4, 14, 11);
+        caseOutline.setArcWidth(2);
+        caseOutline.setArcHeight(2);
+        style(caseOutline);
+        Line lid = line(5, 2, 13, 2);
+        Circle indicator = dot(9, 9.5);
+        return icon(caseOutline, lid, indicator);
+    }
+
+    public static Node hud() {
+        Line topLeft = line(2, 6, 2, 3);
+        Line top = line(2, 3, 6, 3);
+        Line topRight = line(12, 3, 16, 3);
+        Line rightTop = line(16, 3, 16, 6);
+        Line bottomLeft = line(2, 12, 2, 15);
+        Line bottom = line(2, 15, 6, 15);
+        Line bottomRight = line(12, 15, 16, 15);
+        Line rightBottom = line(16, 12, 16, 15);
+        return icon(topLeft, top, topRight, rightTop, bottomLeft, bottom, bottomRight, rightBottom);
+    }
+
     public static Node procesos() {
         Circle bullet1 = dot(2, 5);
         Circle bullet2 = dot(2, 9);
