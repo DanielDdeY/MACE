@@ -12,6 +12,7 @@ import com.mace.domain.service.MemoryLeakDetector;
 import com.mace.domain.service.SystemProcessGuard;
 import com.mace.domain.service.ThermalAlertEvaluator;
 import com.mace.infrastructure.InfrastructureAdapters;
+import com.mace.infrastructure.telemetry.BlackboxSettings;
 import com.mace.infrastructure.telemetry.SubmissionTelemetryPublisher;
 import com.mace.presentation.view.MainDashboardController;
 import com.mace.presentation.viewmodel.MainDashboardViewModel;
@@ -30,6 +31,7 @@ public final class MaceApplication extends Application {
     private SubmissionTelemetryPublisher telemetryPublisher;
     private MonitoringService monitoringService;
     private MainDashboardViewModel dashboardViewModel;
+    private MainDashboardController dashboardController;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -90,7 +92,9 @@ public final class MaceApplication extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainDashboard.fxml"));
         loader.setControllerFactory(type -> {
             if (type == MainDashboardController.class) {
-                return new MainDashboardController(dashboardViewModel);
+                dashboardController = new MainDashboardController(dashboardViewModel,
+                        BlackboxSettings.defaultDirectory(!adapters.isNative()));
+                return dashboardController;
             }
             try {
                 return type.getDeclaredConstructor().newInstance();
@@ -109,6 +113,9 @@ public final class MaceApplication extends Application {
 
     @Override
     public void stop() {
+        if (dashboardController != null) {
+            dashboardController.close();
+        }
         if (monitoringService != null) {
             monitoringService.close();
         }

@@ -7,9 +7,11 @@ import com.mace.domain.model.GpuAdapterId;
 import com.mace.domain.model.ProcessIdentity;
 import com.mace.domain.model.ResponsivenessResult;
 import com.mace.presentation.view.component.GpuCard;
+import com.mace.presentation.view.component.BlackboxHistoryPane;
 import com.mace.presentation.view.component.MetricCard;
 import com.mace.presentation.view.component.NavIcon;
 import com.mace.presentation.viewmodel.AlertItemViewModel;
+import com.mace.presentation.viewmodel.BlackboxHistoryViewModel;
 import com.mace.presentation.viewmodel.GpuCardViewModel;
 import com.mace.presentation.viewmodel.MainDashboardViewModel;
 import com.mace.presentation.viewmodel.MetricHistory;
@@ -45,6 +47,7 @@ import javafx.util.StringConverter;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -99,6 +102,7 @@ public final class MainDashboardController {
     @FXML private Label blackboxStatusLabel;
     @FXML private Label blackboxCountsLabel;
     @FXML private Label blackboxLocationLabel;
+    @FXML private VBox blackboxExplorerBox;
 
     @FXML private Label alertSummaryLabel;
     @FXML private Button alertsHelpButton;
@@ -118,6 +122,7 @@ public final class MainDashboardController {
     @FXML private Label ramCountLabel;
 
     private final MainDashboardViewModel dashboardViewModel;
+    private final BlackboxHistoryViewModel blackboxHistory;
     private final Map<GpuAdapterId, GpuCard> gpuCardsById = new HashMap<>();
     private final List<MetricCard> metricCards = new ArrayList<>();
     private ProcessTableViewModel procesosViewModel;
@@ -129,8 +134,10 @@ public final class MainDashboardController {
             renderChart(gpuTempChart, selectedGpu == null ? null : selectedGpu.temperatureHistory());
     private final ListChangeListener<MetricHistory.Point> selectedUsageListener = change ->
             renderChart(gpuUsageChart, selectedGpu == null ? null : selectedGpu.usageHistory());
-    public MainDashboardController(MainDashboardViewModel dashboardViewModel) {
+    public MainDashboardController(MainDashboardViewModel dashboardViewModel, Path blackboxDirectory) {
         this.dashboardViewModel = Objects.requireNonNull(dashboardViewModel, "dashboardViewModel no puede ser null");
+        this.blackboxHistory = new BlackboxHistoryViewModel(blackboxDirectory,
+                () -> dashboardViewModel.blackboxStatsProperty().get());
     }
 
     @FXML
@@ -164,7 +171,10 @@ public final class MainDashboardController {
         navCpu.setOnAction(e -> showSection(paneCpu));
         navGpu.setOnAction(e -> showSection(paneGpu));
         navRam.setOnAction(e -> showSection(paneRam));
-        navHistorial.setOnAction(e -> showSection(paneHistorial));
+        navHistorial.setOnAction(e -> {
+            showSection(paneHistorial);
+            blackboxHistory.refresh();
+        });
         navAlerts.setOnAction(e -> showSection(paneAlerts));
         navProcesos.setOnAction(e -> showSection(paneProcesos));
         group.selectedToggleProperty().addListener((obs, oldValue, next) -> {
@@ -335,6 +345,7 @@ public final class MainDashboardController {
     }
 
     private void configureHistory() {
+        blackboxExplorerBox.getChildren().add(new BlackboxHistoryPane(blackboxHistory));
         watchHistory(cpuUsageChart, dashboardViewModel.cpuUsagePoints());
         watchHistory(cpuTempChart, dashboardViewModel.cpuTemperaturePoints());
         gpuSelector.setItems(dashboardViewModel.gpuCards());
@@ -593,5 +604,11 @@ public final class MainDashboardController {
         blackboxStatusLabel.textProperty().bind(dashboardViewModel.blackboxStatusProperty());
         blackboxCountsLabel.textProperty().bind(dashboardViewModel.blackboxCountsProperty());
         blackboxLocationLabel.textProperty().bind(dashboardViewModel.blackboxLocationProperty());
+    }
+
+    public void close() {
+        blackboxHistory.close();
+        gpuCardsById.values().forEach(GpuCard::close);
+        metricCards.forEach(MetricCard::close);
     }
 }

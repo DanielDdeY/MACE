@@ -120,6 +120,7 @@
                         <Label fx:id="blackboxStatusLabel" text="Esperando el primer sondeo" />
                         <Label fx:id="blackboxCountsLabel" text="Registros: 0 · Perdidos: 0 · Huecos: 0" />
                         <Label fx:id="blackboxLocationLabel" text="Sin archivo" wrapText="true" />
+                        <VBox fx:id="blackboxExplorerBox" />
                     </VBox>
                     <VBox styleClass="chart-card">
                         <Label text="Uso de CPU" styleClass="chart-card-title" />

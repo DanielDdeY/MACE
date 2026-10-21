@@ -255,6 +255,18 @@
     -fx-padding: 3px;
 }
 
+.blackbox-tools {
+    -fx-alignment: center-left;
+}
+
+.blackbox-table {
+    -fx-background-color: -color-bg-subtle;
+}
+
+.blackbox-gap-row {
+    -fx-background-color: rgba(210, 153, 34, 0.18);
+}
+
 .list-view {
     -fx-background-color: -color-bg-subtle;
     -fx-border-color: -color-border-default;
