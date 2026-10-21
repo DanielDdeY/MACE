@@ -9,9 +9,14 @@ import com.mace.domain.model.AlertLevel;
 import com.mace.domain.model.BlackboxStats;
 import com.mace.domain.model.GpuAdapterId;
 import com.mace.domain.model.HardwareSnapshot;
+import com.mace.domain.model.HangAlert;
+import com.mace.domain.model.LeakAlert;
+import com.mace.domain.model.MemorySeries;
 import com.mace.domain.model.MetricState;
 import com.mace.domain.model.MonitoringSnapshot;
 import com.mace.domain.model.ProcessInventory;
+import com.mace.domain.model.ResponsivenessOutcome;
+import com.mace.domain.model.ResponsivenessResult;
 import com.mace.domain.model.TelemetrySnapshot;
 import com.mace.domain.model.ThermalAlert;
 import com.mace.domain.port.out.MonitoringPublisherPort;
@@ -27,6 +32,7 @@ import com.mace.infrastructure.telemetry.NoOpBlackboxSink;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +73,6 @@ class MainDashboardPresentationTest {
                     List.of(), List.of(), Map.of(), BlackboxStats.disabled()));
             assertEquals(2, intel.temperatureHistory().points().size());
             assertEquals(2, fixture.viewModel.cpuTemperaturePoints().points().size());
-            assertEquals(2, fixture.viewModel.getCpuTempHistory().getData().size());
             assertTrue(fixture.viewModel.processInventoryAvailableProperty().get());
             assertEquals(inventory.processes().size(), fixture.viewModel.getProcesses().size());
             assertEquals(3, fixture.viewModel.monitoringSequenceProperty().get());
@@ -82,7 +87,6 @@ class MainDashboardPresentationTest {
             HardwareSnapshot none = new MockSensorsAdapter(MockScenario.NO_GPU).fetchHardwareSnapshot();
             fixture.publish(snapshot(1, 1, none));
             assertTrue(fixture.viewModel.gpuCards().isEmpty());
-            assertFalse(fixture.viewModel.gpuDetectedProperty().get());
 
             HardwareSnapshot noSensor = new MockSensorsAdapter(MockScenario.GPU_NO_SENSOR).fetchHardwareSnapshot();
             fixture.publish(snapshot(2, 2, noSensor));
@@ -91,8 +95,7 @@ class MainDashboardPresentationTest {
             assertEquals(MetricState.NO_PROVIDER, temperature.state());
             assertFalse(temperature.value().isPresent());
             assertTrue(temperature.text().startsWith("N/D"));
-            assertTrue(fixture.viewModel.gpuDetectedProperty().get());
-            assertFalse(fixture.viewModel.gpuAvailableProperty().get());
+            assertFalse(fixture.viewModel.gpuCards().getFirst().temperatureProperty().get().isValid());
         }
     }
 
@@ -142,6 +145,28 @@ class MainDashboardPresentationTest {
             fixture.viewModel.close();
             fixture.flush();
             assertEquals(2, fixture.viewModel.monitoringSequenceProperty().get());
+        }
+    }
+
+    @Test
+    void publicaAlertasDeTresTiposYResultadosDeVentanaSinCerrarProcesos() {
+        try (Fixture fixture = new Fixture()) {
+            HardwareSnapshot hardware = new MockSensorsAdapter(MockScenario.NORMAL).fetchHardwareSnapshot();
+            var process = fixture.processes.enumerateProcesses().processes().getFirst();
+            Instant now = Instant.parse("2026-01-01T00:00:00Z");
+            var response = new ResponsivenessResult(process.identity(), ResponsivenessOutcome.HUNG, 1, 1, 0);
+            fixture.publish(new MonitoringSnapshot(1, 1, hardware,
+                    List.of(new ThermalAlert(AlertLevel.CRITICAL, "CPU", 90f, now)),
+                    Optional.empty(),
+                    List.of(new LeakAlert(process.identity(), process.name(), MemorySeries.WORKING_SET,
+                            1024 * 1024, 0.95, 10, Duration.ofMinutes(1), now)),
+                    List.of(new HangAlert(process.identity(), process.name(), 1, 1, now)),
+                    Map.of(process.identity(), response), BlackboxStats.disabled()));
+            assertEquals(List.of(AlertItemViewModel.Kind.THERMAL, AlertItemViewModel.Kind.MEMORY_LEAK,
+                    AlertItemViewModel.Kind.HUNG_PROCESS),
+                    fixture.viewModel.alerts().stream().map(AlertItemViewModel::kind).toList());
+            assertEquals(response, fixture.viewModel.responsivenessProperty().get().get(process.identity()));
+            assertTrue(fixture.processes.currentIdentityOf(process.pid().value()).isPresent());
         }
     }
 

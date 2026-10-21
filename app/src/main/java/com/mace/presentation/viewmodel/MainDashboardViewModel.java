@@ -14,9 +14,6 @@ import com.mace.domain.model.ProcessIdentity;
 import com.mace.domain.model.ResponsivenessResult;
 import com.mace.domain.port.out.MonitoringPublisherPort;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyLongProperty;
@@ -25,14 +22,10 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.chart.XYChart;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -43,34 +36,17 @@ import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-/** Estado de presentación del único flujo V2; las propiedades antiguas sostienen la vista actual. */
+/** Estado de presentación del único flujo V2 que comparten las secciones del dashboard. */
 public final class MainDashboardViewModel implements AutoCloseable {
 
     private static final int HISTORY_SIZE = 30;
     private static final double GIB = 1024.0 * 1024.0 * 1024.0;
 
-    // Compatibilidad temporal con MainDashboardController mientras se construye la vista de Dev 4.
-    private final DoubleProperty cpuTemp = new SimpleDoubleProperty(Double.NaN);
-    private final DoubleProperty cpuWatts = new SimpleDoubleProperty(Double.NaN);
-    private final DoubleProperty cpuUsage = new SimpleDoubleProperty(Double.NaN);
-    private final BooleanProperty cpuSensorAvailable = new SimpleBooleanProperty(false);
-    private final BooleanProperty cpuPowerAvailable = new SimpleBooleanProperty(false);
-    private final BooleanProperty cpuUsageAvailable = new SimpleBooleanProperty(false);
-    private final DoubleProperty gpuTemp = new SimpleDoubleProperty(Double.NaN);
-    private final DoubleProperty gpuWatts = new SimpleDoubleProperty(Double.NaN);
-    private final IntegerProperty gpuFanRpm = new SimpleIntegerProperty();
-    private final BooleanProperty gpuDetected = new SimpleBooleanProperty(false);
-    private final BooleanProperty gpuAvailable = new SimpleBooleanProperty(false);
-    private final BooleanProperty gpuPowerAvailable = new SimpleBooleanProperty(false);
-    private final BooleanProperty gpuFanAvailable = new SimpleBooleanProperty(false);
     private final StringProperty dataSourceDescription = new SimpleStringProperty();
     private final StringProperty blackboxStatus = new SimpleStringProperty("Esperando el primer sondeo");
     private final StringProperty blackboxCounts = new SimpleStringProperty("Registros: 0 · Perdidos: 0 · Huecos: 0");
     private final StringProperty blackboxLocation = new SimpleStringProperty("Sin archivo");
     private final ObservableList<ProcessRow> processes = FXCollections.observableArrayList();
-    private final XYChart.Series<Number, Number> cpuTempHistory = new XYChart.Series<>();
-    private final XYChart.Series<Number, Number> cpuUsageHistory = new XYChart.Series<>();
-    private final XYChart.Series<Number, Number> gpuTempHistory = new XYChart.Series<>();
 
     private final ReadOnlyStringWrapper cpuVendor = new ReadOnlyStringWrapper("Desconocido");
     private final ReadOnlyStringWrapper cpuProvider = new ReadOnlyStringWrapper("Ninguno");
@@ -109,7 +85,6 @@ public final class MainDashboardViewModel implements AutoCloseable {
     private volatile boolean closed;
     private long lastAppliedSequence;
     private long lastHardwareSequence;
-    private GpuAdapterId selectedLegacyGpuId;
 
     public MainDashboardViewModel(MonitoringService monitoringService,
                                   TerminateProcessService terminateProcessService,
@@ -133,9 +108,6 @@ public final class MainDashboardViewModel implements AutoCloseable {
         this.fxDispatcher = Objects.requireNonNull(fxDispatcher, "fxDispatcher no puede ser null");
         this.blackboxFailure = blackboxFailure;
         dataSourceDescription.set(Objects.requireNonNull(sourceDescription, "sourceDescription no puede ser null"));
-        cpuTempHistory.setName("Temp. CPU");
-        cpuUsageHistory.setName("Uso CPU");
-        gpuTempHistory.setName("Temp. GPU");
         if (blackboxFailure != null) {
             blackboxStatus.set("Desactivada: " + blackboxFailure);
         }
@@ -222,50 +194,11 @@ public final class MainDashboardViewModel implements AutoCloseable {
         }
         gpuCardsById.clear();
         gpuCardsById.putAll(nextCards);
-        mutableGpuCards.setAll(nextCards.values());
+        List<GpuCardViewModel> orderedCards = List.copyOf(nextCards.values());
+        if (!mutableGpuCards.equals(orderedCards)) {
+            mutableGpuCards.setAll(orderedCards);
+        }
 
-        // Estos campos solo alimentan el diseño anterior, que dibuja una GPU. La lista V2
-        // anterior retiene todas las tarjetas y sus estados individuales para la nueva vista.
-        // La vista antigua escucha disponibilidad y valor por separado: al recuperar un
-        // sensor debe recibir primero el número, y al perderlo primero el estado N/D.
-        if (!cpu.temperatureCelsius().isValid()) cpuSensorAvailable.set(false);
-        if (!cpu.powerWatts().isValid()) cpuPowerAvailable.set(false);
-        if (!cpu.usagePercent().isValid()) cpuUsageAvailable.set(false);
-        cpuTemp.set(cpu.temperatureCelsius().orElse(Double.NaN));
-        cpuWatts.set(cpu.powerWatts().orElse(Double.NaN));
-        cpuUsage.set(cpu.usagePercent().orElse(Double.NaN));
-        if (cpu.temperatureCelsius().isValid()) cpuSensorAvailable.set(true);
-        if (cpu.powerWatts().isValid()) cpuPowerAvailable.set(true);
-        if (cpu.usagePercent().isValid()) cpuUsageAvailable.set(true);
-
-        GpuReading legacyGpu = snapshot.gpus().stream()
-                .filter(reading -> reading.temperatureCelsius().isValid())
-                .findFirst().orElse(snapshot.gpus().isEmpty() ? null : snapshot.gpus().get(0));
-        GpuAdapterId currentLegacyId = legacyGpu == null ? null : legacyGpu.adapterId();
-        if (!Objects.equals(selectedLegacyGpuId, currentLegacyId)) {
-            gpuTempHistory.getData().clear();
-            selectedLegacyGpuId = currentLegacyId;
-        }
-        gpuDetected.set(legacyGpu != null);
-        if (legacyGpu == null || !legacyGpu.temperatureCelsius().isValid()) gpuAvailable.set(false);
-        if (legacyGpu == null || !legacyGpu.powerWatts().isValid()) gpuPowerAvailable.set(false);
-        if (legacyGpu == null || !legacyGpu.fanRpm().isValid()) gpuFanAvailable.set(false);
-        gpuTemp.set(legacyGpu == null ? Double.NaN : legacyGpu.temperatureCelsius().orElse(Double.NaN));
-        gpuWatts.set(legacyGpu == null ? Double.NaN : legacyGpu.powerWatts().orElse(Double.NaN));
-        gpuFanRpm.set(legacyGpu == null ? 0 : (int) Math.min(Integer.MAX_VALUE, legacyGpu.fanRpm().orElse(0)));
-        if (legacyGpu != null && legacyGpu.temperatureCelsius().isValid()) gpuAvailable.set(true);
-        if (legacyGpu != null && legacyGpu.powerWatts().isValid()) gpuPowerAvailable.set(true);
-        if (legacyGpu != null && legacyGpu.fanRpm().isValid()) gpuFanAvailable.set(true);
-
-        if (cpu.temperatureCelsius().isValid()) {
-            pushHistoryPoint(cpuTempHistory, sequence, cpu.temperatureCelsius().value());
-        }
-        if (cpu.usagePercent().isValid()) {
-            pushHistoryPoint(cpuUsageHistory, sequence, cpu.usagePercent().value());
-        }
-        if (legacyGpu != null && legacyGpu.temperatureCelsius().isValid()) {
-            pushHistoryPoint(gpuTempHistory, sequence, legacyGpu.temperatureCelsius().value());
-        }
     }
 
     private void applyBlackbox(BlackboxStats stats) {
@@ -274,13 +207,6 @@ public final class MainDashboardViewModel implements AutoCloseable {
         blackboxCounts.set("Registros: " + stats.recordsPersisted() + " · Perdidos: "
                 + stats.recordsLost() + " · Huecos: " + stats.gapCount());
         blackboxLocation.set(stats.location().isBlank() ? "Sin archivo" : stats.location());
-    }
-
-    private static void pushHistoryPoint(XYChart.Series<Number, Number> series, long sequence, double value) {
-        series.getData().add(new XYChart.Data<>(sequence, value));
-        if (series.getData().size() > HISTORY_SIZE) {
-            series.getData().remove(0);
-        }
     }
 
     private static ReadOnlyObjectWrapper<MetricDisplay> missing() {
@@ -313,28 +239,12 @@ public final class MainDashboardViewModel implements AutoCloseable {
     public ReadOnlyLongProperty monitoringSequenceProperty() { return monitoringSequence.getReadOnlyProperty(); }
     public ReadOnlyLongProperty hardwareSequenceProperty() { return hardwareSequence.getReadOnlyProperty(); }
 
-    // API temporal consumida por MainDashboardController.
-    public DoubleProperty cpuTempProperty() { return cpuTemp; }
-    public DoubleProperty cpuWattsProperty() { return cpuWatts; }
-    public DoubleProperty cpuUsageProperty() { return cpuUsage; }
-    public BooleanProperty cpuSensorAvailableProperty() { return cpuSensorAvailable; }
-    public BooleanProperty cpuPowerAvailableProperty() { return cpuPowerAvailable; }
-    public BooleanProperty cpuUsageAvailableProperty() { return cpuUsageAvailable; }
-    public DoubleProperty gpuTempProperty() { return gpuTemp; }
-    public DoubleProperty gpuWattsProperty() { return gpuWatts; }
-    public IntegerProperty gpuFanRpmProperty() { return gpuFanRpm; }
-    public BooleanProperty gpuDetectedProperty() { return gpuDetected; }
-    public BooleanProperty gpuAvailableProperty() { return gpuAvailable; }
-    public BooleanProperty gpuPowerAvailableProperty() { return gpuPowerAvailable; }
-    public BooleanProperty gpuFanAvailableProperty() { return gpuFanAvailable; }
+    // Descripción y estado de la caja negra consumidos por la vista.
     public StringProperty dataSourceDescriptionProperty() { return dataSourceDescription; }
     public StringProperty blackboxStatusProperty() { return blackboxStatus; }
     public StringProperty blackboxCountsProperty() { return blackboxCounts; }
     public StringProperty blackboxLocationProperty() { return blackboxLocation; }
     public ObservableList<ProcessRow> getProcesses() { return processes; }
-    public XYChart.Series<Number, Number> getCpuTempHistory() { return cpuTempHistory; }
-    public XYChart.Series<Number, Number> getCpuUsageHistory() { return cpuUsageHistory; }
-    public XYChart.Series<Number, Number> getGpuTempHistory() { return gpuTempHistory; }
 
     @Override
     public void close() {

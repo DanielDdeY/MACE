@@ -2,98 +2,123 @@ package com.mace.presentation.view;
 
 import com.mace.application.usecase.TerminationResult;
 import com.mace.application.usecase.TerminationStatus;
-import com.mace.presentation.view.component.GaugeDial;
+import com.mace.domain.model.AlertLevel;
+import com.mace.domain.model.GpuAdapterId;
+import com.mace.domain.model.ProcessIdentity;
+import com.mace.domain.model.ResponsivenessResult;
+import com.mace.presentation.view.component.GpuCard;
+import com.mace.presentation.view.component.MetricCard;
 import com.mace.presentation.view.component.NavIcon;
+import com.mace.presentation.viewmodel.AlertItemViewModel;
+import com.mace.presentation.viewmodel.GpuCardViewModel;
 import com.mace.presentation.viewmodel.MainDashboardViewModel;
+import com.mace.presentation.viewmodel.MetricHistory;
+import com.mace.presentation.viewmodel.ProcessMemorySummary;
 import com.mace.presentation.viewmodel.ProcessRow;
 import com.mace.presentation.viewmodel.ProcessTableViewModel;
+import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
-/**
- * Controlador del dashboard principal.
- *
- * La interfaz se organiza en apartados independientes (CPU, GPU, Historial,
- * y Procesos) navegables desde el menu lateral. Solo un apartado esta
- * visible a la vez.
- *
- * El ViewModel se inyecta por constructor (ver controllerFactory en
- * MaceApplication) y ya viene conectado a los servicios reales de dominio;
- * este controlador no crea ningun dato, solo lo muestra.
- *
- * Regla de seguridad del proyecto: la accion de finalizar un proceso vive
- * en el apartado Procesos y siempre exige confirmacion explicita.
- */
+/** Vista del único flujo V2: cada tarjeta y gráfico reutiliza datos del mismo sondeo. */
 public final class MainDashboardController {
 
-    /** Mismos umbrales que domain/service/ThermalAlertEvaluator.java, para mostrar el mismo criterio en la UI. */
-    private static final float WARNING_THRESHOLD = 75.0f;
-    private static final float CRITICAL_THRESHOLD = 85.0f;
+    private static final int PIE_PROCESS_LIMIT = 8;
+    private static final DateTimeFormatter ALERT_TIME = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-    // ---- Navegacion ----
     @FXML private ToggleButton navCpu;
     @FXML private ToggleButton navGpu;
     @FXML private ToggleButton navHistorial;
+    @FXML private ToggleButton navAlerts;
     @FXML private ToggleButton navProcesos;
     @FXML private Label dataSourceLabel;
 
-    // ---- Apartados ----
-    @FXML private VBox paneCpu;
-    @FXML private VBox paneGpu;
-    @FXML private VBox paneHistorial;
+    @FXML private ScrollPane paneCpu;
+    @FXML private ScrollPane paneGpu;
+    @FXML private ScrollPane paneHistorial;
+    @FXML private VBox paneAlerts;
     @FXML private VBox paneProcesos;
 
-    // ---- CPU / GPU ----
-    @FXML private HBox cpuGaugesBox;
-    @FXML private HBox gpuGaugesBox;
+    @FXML private Label cpuVendorLabel;
+    @FXML private Label cpuProviderLabel;
+    @FXML private FlowPane cpuMetricsPane;
     @FXML private Label cpuStatusLabel;
     @FXML private Label cpuMaxLabel;
     @FXML private Label cpuAvgLabel;
-    @FXML private Label gpuStatusLabel;
-    @FXML private Label gpuFanLabel;
-    @FXML private Label gpuAvailableLabel;
-    @FXML private Label gpuMaxLabel;
+    @FXML private Label gpuEmptyLabel;
+    @FXML private VBox gpuCardsBox;
 
-    // ---- Historial ----
     @FXML private LineChart<Number, Number> cpuTempChart;
     @FXML private LineChart<Number, Number> cpuUsageChart;
     @FXML private LineChart<Number, Number> gpuTempChart;
+    @FXML private LineChart<Number, Number> gpuUsageChart;
+    @FXML private LineChart<Number, Number> gpuPowerChart;
+    @FXML private ComboBox<GpuCardViewModel> gpuSelector;
     @FXML private Label blackboxStatusLabel;
     @FXML private Label blackboxCountsLabel;
     @FXML private Label blackboxLocationLabel;
 
-    // ---- Procesos ----
+    @FXML private Label alertSummaryLabel;
+    @FXML private ListView<AlertItemViewModel> alertList;
+
     @FXML private TextField searchProcesos;
+    @FXML private Label inventoryStatusLabel;
     @FXML private TableView<ProcessRow> tablaProcesos;
     @FXML private TableColumn<ProcessRow, Number> procPidColumn;
     @FXML private TableColumn<ProcessRow, String> procNombreColumn;
     @FXML private TableColumn<ProcessRow, String> procRutaColumn;
     @FXML private TableColumn<ProcessRow, Number> procMemoriaColumn;
+    @FXML private TableColumn<ProcessRow, String> procResponseColumn;
     @FXML private TableColumn<ProcessRow, Void> procAccionColumn;
-
-    // ---- Resumen de procesos ----
     @FXML private PieChart memoryPieChart;
     @FXML private Label ramTotalLabel;
     @FXML private Label ramCountLabel;
 
     private final MainDashboardViewModel dashboardViewModel;
+    private final Map<GpuAdapterId, GpuCard> gpuCardsById = new HashMap<>();
+    private final List<MetricCard> cpuMetricCards = new ArrayList<>();
     private ProcessTableViewModel procesosViewModel;
+    private GpuCardViewModel selectedGpu;
+    private GpuAdapterId selectedGpuId;
 
-    private GaugeDial cpuTempGauge;
-    private GaugeDial cpuWattsGauge;
-    private GaugeDial cpuUsageGauge;
-    private GaugeDial gpuTempGauge;
-    private GaugeDial gpuWattsGauge;
+    private final ListChangeListener<MetricHistory.Point> selectedTempListener = change ->
+            renderChart(gpuTempChart, selectedGpu == null ? null : selectedGpu.temperatureHistory());
+    private final ListChangeListener<MetricHistory.Point> selectedUsageListener = change ->
+            renderChart(gpuUsageChart, selectedGpu == null ? null : selectedGpu.usageHistory());
+    private final ListChangeListener<MetricHistory.Point> selectedPowerListener = change ->
+            renderChart(gpuPowerChart, selectedGpu == null ? null : selectedGpu.powerHistory());
 
     public MainDashboardController(MainDashboardViewModel dashboardViewModel) {
         this.dashboardViewModel = Objects.requireNonNull(dashboardViewModel, "dashboardViewModel no puede ser null");
@@ -101,232 +126,87 @@ public final class MainDashboardController {
 
     @FXML
     public void initialize() {
-        buildGauges();
-        buildNavIcons();
         configureNavigation();
-        configureHistoryCharts();
-        configureProcesosTable();
-        bindTelemetry();
-        bindProcessSummary();
-        bindStatsPanels();
+        configureCpu();
+        configureGpus();
+        configureHistory();
+        configureAlerts();
+        configureProcesses();
         bindBlackbox();
-
         dashboardViewModel.start();
     }
 
-    // ==================== NAVEGACION ====================
-
-    private void buildNavIcons() {
+    private void configureNavigation() {
         navCpu.setGraphic(NavIcon.cpu());
         navGpu.setGraphic(NavIcon.gpu());
         navHistorial.setGraphic(NavIcon.historial());
+        navAlerts.setGraphic(NavIcon.alerts());
         navProcesos.setGraphic(NavIcon.procesos());
-    }
-
-    private void configureNavigation() {
         ToggleGroup group = new ToggleGroup();
-        navCpu.setToggleGroup(group);
-        navGpu.setToggleGroup(group);
-        navHistorial.setToggleGroup(group);
-        navProcesos.setToggleGroup(group);
-
+        for (ToggleButton button : List.of(navCpu, navGpu, navHistorial, navAlerts, navProcesos)) {
+            button.setToggleGroup(group);
+        }
         navCpu.setOnAction(e -> showSection(paneCpu));
         navGpu.setOnAction(e -> showSection(paneGpu));
         navHistorial.setOnAction(e -> showSection(paneHistorial));
+        navAlerts.setOnAction(e -> showSection(paneAlerts));
         navProcesos.setOnAction(e -> showSection(paneProcesos));
-
-        // Evita que el usuario pueda dejar los botones sin seleccionar.
-        group.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
-            if (newToggle == null && oldToggle != null) {
-                oldToggle.setSelected(true);
-            }
+        group.selectedToggleProperty().addListener((obs, oldValue, next) -> {
+            if (next == null && oldValue != null) oldValue.setSelected(true);
         });
-
         navCpu.setSelected(true);
         showSection(paneCpu);
     }
 
-    /** Muestra un unico apartado y oculta el resto (sin dejar espacio en blanco). */
-    private void showSection(Region target) {
-        List<Region> sections = List.of(paneCpu, paneGpu, paneHistorial, paneProcesos);
-        for (Region section : sections) {
-            boolean visible = section == target;
-            section.setVisible(visible);
-            section.setManaged(visible);
+    private void showSection(Node section) {
+        for (Node node : List.of(paneCpu, paneGpu, paneHistorial, paneAlerts, paneProcesos)) {
+            boolean visible = node == section;
+            node.setVisible(visible);
+            node.setManaged(visible);
         }
     }
 
-    // ==================== CPU / GPU ====================
-
-    private void buildGauges() {
-        cpuTempGauge = new GaugeDial("Temp. CPU", "°C", 100);
-        cpuWattsGauge = new GaugeDial("Consumo CPU", "W", 65);
-        cpuUsageGauge = new GaugeDial("Uso CPU", "%", 100);
-        cpuGaugesBox.getChildren().addAll(cpuUsageGauge, cpuTempGauge, cpuWattsGauge);
-
-        gpuTempGauge = new GaugeDial("Temp. GPU", "°C", 100);
-        gpuWattsGauge = new GaugeDial("Consumo GPU", "W", 200);
-        gpuGaugesBox.getChildren().addAll(gpuTempGauge, gpuWattsGauge);
+    private void configureCpu() {
+        cpuVendorLabel.textProperty().bind(dashboardViewModel.cpuVendorProperty().map(v -> "Fabricante: " + v));
+        cpuProviderLabel.textProperty().bind(dashboardViewModel.cpuProviderProperty().map(v -> "Proveedor: " + v));
+        cpuMetricCards.addAll(List.of(
+                new MetricCard("Temperatura CPU", dashboardViewModel.cpuTemperatureDisplayProperty()),
+                new MetricCard("Uso CPU", dashboardViewModel.cpuUsageDisplayProperty()),
+                new MetricCard("Potencia CPU", dashboardViewModel.cpuPowerDisplayProperty(),
+                        dashboardViewModel.cpuPowerScopeProperty()),
+                new MetricCard("RAM física total", dashboardViewModel.memoryTotalDisplayProperty()),
+                new MetricCard("RAM en uso", dashboardViewModel.memoryUsedDisplayProperty()),
+                new MetricCard("RAM disponible", dashboardViewModel.memoryAvailableDisplayProperty()),
+                new MetricCard("Uso de RAM", dashboardViewModel.memoryUsedPercentDisplayProperty())));
+        cpuMetricsPane.getChildren().addAll(cpuMetricCards);
+        dashboardViewModel.cpuTemperaturePoints().points().addListener(
+                (ListChangeListener<MetricHistory.Point>) change -> updateCpuStats());
+        dashboardViewModel.cpuTemperatureDisplayProperty().addListener((obs, oldValue, next) -> updateCpuStatus());
+        dashboardViewModel.alerts().addListener((ListChangeListener<AlertItemViewModel>) change -> updateCpuStatus());
+        updateCpuStatus();
+        updateCpuStats();
     }
 
-    private void bindTelemetry() {
-        dashboardViewModel.cpuTempProperty().addListener((obs, o, n) -> {
-            if (dashboardViewModel.cpuSensorAvailableProperty().get()) {
-                cpuTempGauge.setValue(n.doubleValue());
-            }
-        });
-        dashboardViewModel.cpuWattsProperty().addListener((obs, o, n) -> {
-            if (dashboardViewModel.cpuPowerAvailableProperty().get()) {
-                cpuWattsGauge.setValue(n.doubleValue());
-            }
-        });
-        dashboardViewModel.cpuUsageProperty().addListener((obs, o, n) -> {
-            if (dashboardViewModel.cpuUsageAvailableProperty().get()) {
-                cpuUsageGauge.setValue(n.doubleValue());
-            }
-        });
-        dashboardViewModel.gpuTempProperty().addListener((obs, o, n) -> {
-            if (dashboardViewModel.gpuAvailableProperty().get()) {
-                gpuTempGauge.setValue(n.doubleValue());
-            }
-        });
-        dashboardViewModel.gpuWattsProperty().addListener((obs, o, n) -> {
-            if (dashboardViewModel.gpuPowerAvailableProperty().get()) {
-                gpuWattsGauge.setValue(n.doubleValue());
-            }
-        });
-
-        dashboardViewModel.cpuUsageAvailableProperty().addListener((obs, o, available) -> {
-            if (!available) cpuUsageGauge.setUnavailable();
-            else cpuUsageGauge.setValue(dashboardViewModel.cpuUsageProperty().get());
-        });
-        dashboardViewModel.cpuPowerAvailableProperty().addListener((obs, o, available) -> {
-            if (!available) cpuWattsGauge.setUnavailable();
-            else cpuWattsGauge.setValue(dashboardViewModel.cpuWattsProperty().get());
-        });
-        dashboardViewModel.gpuPowerAvailableProperty().addListener((obs, o, available) -> {
-            if (!available) gpuWattsGauge.setUnavailable();
-            else gpuWattsGauge.setValue(dashboardViewModel.gpuWattsProperty().get());
-        });
-
-        dashboardViewModel.gpuAvailableProperty().addListener((obs, o, available) -> {
-            if (!available) {
-                gpuTempGauge.setUnavailable();
-            } else {
-                gpuTempGauge.setValue(dashboardViewModel.gpuTempProperty().get());
-            }
-        });
-
-        // Cada sensor informa su disponibilidad por separado. Un valor no leído se
-        // muestra como N/D en vez de un cero que parecería una lectura real.
-        dashboardViewModel.cpuSensorAvailableProperty().addListener((obs, o, available) -> {
-            if (!available) {
-                cpuTempGauge.setUnavailable();
-            } else {
-                cpuTempGauge.setValue(dashboardViewModel.cpuTempProperty().get());
-            }
-            updateCpuStats();
-        });
-
-        // Hasta el primer sondeo no hay lectura válida de ningún fabricante.
-        cpuTempGauge.setUnavailable();
-        cpuWattsGauge.setUnavailable();
-        cpuUsageGauge.setUnavailable();
-        gpuTempGauge.setUnavailable();
-        gpuWattsGauge.setUnavailable();
-    }
-
-    // ==================== HISTORIAL (graficos separados) ====================
-
-    private void configureHistoryCharts() {
-        cpuTempChart.getData().add(dashboardViewModel.getCpuTempHistory());
-        cpuUsageChart.getData().add(dashboardViewModel.getCpuUsageHistory());
-        gpuTempChart.getData().add(dashboardViewModel.getGpuTempHistory());
-    }
-
-    // ==================== ESTADISTICAS EN VIVO (CPU / GPU) ====================
-
-    /**
-     * Se apoya en el mismo historial que alimenta los graficos de linea, asi que
-     * no pide nada nuevo al backend: solo calcula sobre datos reales ya recibidos.
-     */
-    private void bindStatsPanels() {
-        dashboardViewModel.getCpuTempHistory().getData()
-                .addListener((ListChangeListener<XYChart.Data<Number, Number>>) change -> updateCpuStats());
-
-        dashboardViewModel.getGpuTempHistory().getData()
-                .addListener((ListChangeListener<XYChart.Data<Number, Number>>) change -> updateGpuStats());
-
-        dashboardViewModel.gpuFanRpmProperty().addListener((obs, o, n) ->
-                gpuFanLabel.setText(dashboardViewModel.gpuFanAvailableProperty().get()
-                        ? n.intValue() + " RPM" : "N/D"));
-        dashboardViewModel.gpuFanAvailableProperty().addListener((obs, o, available) ->
-                gpuFanLabel.setText(available ? dashboardViewModel.gpuFanRpmProperty().get() + " RPM" : "N/D"));
-
-        dashboardViewModel.gpuDetectedProperty().addListener((obs, o, detected) -> updateGpuAvailability());
-        dashboardViewModel.gpuAvailableProperty().addListener((obs, o, available) -> {
-            updateGpuAvailability();
-            updateGpuStats();
-        });
-
-        updateGpuAvailability();
-        gpuFanLabel.setText("N/D");
-        gpuStatusLabel.setText("N/D");
-        gpuMaxLabel.setText("N/D");
-    }
-
-    private void updateGpuAvailability() {
-        gpuAvailableLabel.setText(!dashboardViewModel.gpuDetectedProperty().get() ? "No detectada"
-                : dashboardViewModel.gpuAvailableProperty().get() ? "Temperatura disponible" : "Sensor N/D");
-    }
-
-    private void bindBlackbox() {
-        dataSourceLabel.textProperty().bind(dashboardViewModel.dataSourceDescriptionProperty());
-        blackboxStatusLabel.textProperty().bind(dashboardViewModel.blackboxStatusProperty());
-        blackboxCountsLabel.textProperty().bind(dashboardViewModel.blackboxCountsProperty());
-        blackboxLocationLabel.textProperty().bind(dashboardViewModel.blackboxLocationProperty());
-    }
-
-    private void updateCpuStats() {
-        List<XYChart.Data<Number, Number>> points = dashboardViewModel.getCpuTempHistory().getData();
-        if (!dashboardViewModel.cpuSensorAvailableProperty().get()) {
-            cpuStatusLabel.getStyleClass().removeAll("status-ok", "status-warning", "status-critical");
-            cpuStatusLabel.setText("N/D");
-            cpuMaxLabel.setText("N/D");
-            cpuAvgLabel.setText("N/D");
+    private void updateCpuStatus() {
+        cpuStatusLabel.getStyleClass().removeAll("status-ok", "status-warning", "status-critical", "status-muted");
+        var temperature = dashboardViewModel.cpuTemperatureDisplayProperty().get();
+        if (!temperature.isValid()) {
+            cpuStatusLabel.setText(temperature.text());
+            cpuStatusLabel.getStyleClass().add("status-muted");
             return;
         }
-        if (points.isEmpty()) {
-            return;
-        }
-        double current = dashboardViewModel.cpuTempProperty().get();
-        applyStatusLabel(cpuStatusLabel, current);
-        applyMinMaxAvg(points, cpuMaxLabel, cpuAvgLabel);
+        AlertLevel level = dashboardViewModel.alerts().stream()
+                .filter(alert -> alert.kind() == AlertItemViewModel.Kind.THERMAL && alert.gpuId().isEmpty())
+                .flatMap(alert -> alert.thermalLevel().stream())
+                .max(Enum::compareTo).orElse(AlertLevel.NONE);
+        setThermalLabel(cpuStatusLabel, level);
     }
 
-    private void updateGpuStats() {
-        List<XYChart.Data<Number, Number>> points = dashboardViewModel.getGpuTempHistory().getData();
-        if (!dashboardViewModel.gpuAvailableProperty().get()) {
-            gpuStatusLabel.getStyleClass().removeAll("status-ok", "status-warning", "status-critical");
-            gpuStatusLabel.setText("N/D");
-            gpuMaxLabel.setText("N/D");
-            return;
-        }
-        if (points.isEmpty()) {
-            return;
-        }
-        double current = dashboardViewModel.gpuTempProperty().get();
-        applyStatusLabel(gpuStatusLabel, current);
-        applyMinMaxAvg(points, gpuMaxLabel, null);
-    }
-
-    /** Mismo criterio que domain/service/ThermalAlertEvaluator: NONE / WARNING / CRITICAL. */
-    private void applyStatusLabel(Label label, double temperature) {
-        label.getStyleClass().removeAll("status-ok", "status-warning", "status-critical");
-        if (temperature > CRITICAL_THRESHOLD) {
+    private static void setThermalLabel(Label label, AlertLevel level) {
+        if (level == AlertLevel.CRITICAL) {
             label.setText("Crítico");
             label.getStyleClass().add("status-critical");
-        } else if (temperature > WARNING_THRESHOLD) {
+        } else if (level == AlertLevel.WARNING) {
             label.setText("Advertencia");
             label.getStyleClass().add("status-warning");
         } else {
@@ -335,108 +215,285 @@ public final class MainDashboardController {
         }
     }
 
-    private void applyMinMaxAvg(List<XYChart.Data<Number, Number>> points, Label maxLabel, Label avgLabel) {
-        double max = Double.NEGATIVE_INFINITY;
-        double sum = 0;
-        for (XYChart.Data<Number, Number> point : points) {
-            double value = point.getYValue().doubleValue();
-            max = Math.max(max, value);
-            sum += value;
+    private void updateCpuStats() {
+        List<Double> valid = dashboardViewModel.cpuTemperaturePoints().points().stream()
+                .filter(MetricHistory.Point::isValid).map(point -> point.value().orElseThrow()).toList();
+        cpuMaxLabel.setText(valid.isEmpty() ? "N/D" : String.format(Locale.ROOT, "%.1f °C",
+                valid.stream().mapToDouble(Double::doubleValue).max().orElseThrow()));
+        cpuAvgLabel.setText(valid.isEmpty() ? "N/D" : String.format(Locale.ROOT, "%.1f °C",
+                valid.stream().mapToDouble(Double::doubleValue).average().orElseThrow()));
+    }
+
+    private void configureGpus() {
+        dashboardViewModel.gpuCards().addListener((ListChangeListener<GpuCardViewModel>) change -> syncGpuCards());
+        dashboardViewModel.alerts().addListener((ListChangeListener<AlertItemViewModel>) change -> updateGpuStatuses());
+        dashboardViewModel.hardwareSequenceProperty().addListener((obs, previous, next) -> updateGpuEmptyState());
+        syncGpuCards();
+    }
+
+    private void syncGpuCards() {
+        List<GpuCardViewModel> models = dashboardViewModel.gpuCards();
+        Map<GpuAdapterId, GpuCard> next = new HashMap<>();
+        List<GpuCard> ordered = new ArrayList<>();
+        for (GpuCardViewModel model : models) {
+            GpuCard card = gpuCardsById.get(model.id());
+            if (card == null || card.model() != model) {
+                if (card != null) card.close();
+                card = new GpuCard(model);
+            }
+            next.put(model.id(), card);
+            ordered.add(card);
         }
-        maxLabel.setText(String.format("%.0f°C", max));
-        if (avgLabel != null) {
-            avgLabel.setText(String.format("%.0f°C", sum / points.size()));
+        gpuCardsById.forEach((id, card) -> {
+            if (!next.containsKey(id)) card.close();
+        });
+        gpuCardsById.clear();
+        gpuCardsById.putAll(next);
+        if (!gpuCardsBox.getChildren().equals(ordered)) {
+            gpuCardsBox.getChildren().setAll(ordered);
+        }
+        updateGpuEmptyState();
+        updateGpuStatuses();
+        restoreGpuSelection();
+    }
+
+    private void updateGpuEmptyState() {
+        boolean empty = dashboardViewModel.gpuCards().isEmpty();
+        gpuEmptyLabel.setVisible(empty);
+        gpuEmptyLabel.setManaged(empty);
+        gpuEmptyLabel.setText(dashboardViewModel.hardwareSequenceProperty().get() == 0
+                ? "Esperando la primera detección" : "No se detectaron GPU físicas");
+    }
+
+    private void updateGpuStatuses() {
+        for (GpuCard card : gpuCardsById.values()) {
+            AlertLevel level = dashboardViewModel.alerts().stream()
+                    .filter(alert -> alert.kind() == AlertItemViewModel.Kind.THERMAL)
+                    .filter(alert -> alert.gpuId().filter(card.model().id()::equals).isPresent())
+                    .flatMap(alert -> alert.thermalLevel().stream())
+                    .max(Enum::compareTo).orElse(AlertLevel.NONE);
+            card.setThermalStatus(level);
         }
     }
 
-    // ==================== PROCESOS ====================
+    private void configureHistory() {
+        watchHistory(cpuUsageChart, dashboardViewModel.cpuUsagePoints());
+        watchHistory(cpuTempChart, dashboardViewModel.cpuTemperaturePoints());
+        gpuSelector.setItems(dashboardViewModel.gpuCards());
+        gpuSelector.setConverter(new StringConverter<>() {
+            @Override public String toString(GpuCardViewModel card) {
+                return card == null ? "" : card.nameProperty().get();
+            }
+            @Override public GpuCardViewModel fromString(String text) { return null; }
+        });
+        gpuSelector.valueProperty().addListener((obs, previous, next) -> {
+            if (next != null) selectedGpuId = next.id();
+            selectGpuHistory(next);
+        });
+        restoreGpuSelection();
+    }
 
-    private void configureProcesosTable() {
+    private void restoreGpuSelection() {
+        if (gpuSelector == null) return;
+        GpuCardViewModel target = dashboardViewModel.gpuCards().stream()
+                .filter(card -> selectedGpuId != null && card.id().equals(selectedGpuId))
+                .findFirst().orElse(null);
+        if (target == null && selectedGpuId == null && !dashboardViewModel.gpuCards().isEmpty()) {
+            target = dashboardViewModel.gpuCards().getFirst();
+        }
+        if (target == null) {
+            gpuSelector.getSelectionModel().clearSelection();
+            selectGpuHistory(null);
+        } else {
+            gpuSelector.getSelectionModel().select(target);
+            selectGpuHistory(target);
+        }
+    }
+
+    private void selectGpuHistory(GpuCardViewModel next) {
+        if (selectedGpu == next) return;
+        if (selectedGpu != null) {
+            selectedGpu.temperatureHistory().points().removeListener(selectedTempListener);
+            selectedGpu.usageHistory().points().removeListener(selectedUsageListener);
+            selectedGpu.powerHistory().points().removeListener(selectedPowerListener);
+        }
+        selectedGpu = next;
+        if (next != null) {
+            next.temperatureHistory().points().addListener(selectedTempListener);
+            next.usageHistory().points().addListener(selectedUsageListener);
+            next.powerHistory().points().addListener(selectedPowerListener);
+        }
+        renderChart(gpuTempChart, next == null ? null : next.temperatureHistory());
+        renderChart(gpuUsageChart, next == null ? null : next.usageHistory());
+        renderChart(gpuPowerChart, next == null ? null : next.powerHistory());
+    }
+
+    private static void watchHistory(LineChart<Number, Number> chart, MetricHistory history) {
+        history.points().addListener((ListChangeListener<MetricHistory.Point>) change -> renderChart(chart, history));
+        renderChart(chart, history);
+    }
+
+    /** Cada tramo válido es una serie separada: JavaFX no une puntos a través de N/D. */
+    private static void renderChart(LineChart<Number, Number> chart, MetricHistory history) {
+        if (chart == null) return;
+        List<XYChart.Series<Number, Number>> series = new ArrayList<>();
+        if (history != null) {
+            for (List<MetricHistory.Point> segment : history.validSegments()) {
+                XYChart.Series<Number, Number> line = new XYChart.Series<>();
+                for (MetricHistory.Point point : segment) {
+                    line.getData().add(new XYChart.Data<>(point.hardwareSequence(), point.value().orElseThrow()));
+                }
+                series.add(line);
+            }
+        }
+        chart.getData().setAll(series);
+    }
+
+    private void configureAlerts() {
+        alertList.setItems(dashboardViewModel.alerts());
+        alertList.setPlaceholder(new Label("Sin alertas activas"));
+        alertList.setCellFactory(list -> new ListCell<>() {
+            @Override protected void updateItem(AlertItemViewModel item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+                String time = ALERT_TIME.format(item.timestamp().atZone(ZoneId.systemDefault()));
+                String kind = switch (item.kind()) {
+                    case THERMAL -> switch (item.thermalLevel().orElse(AlertLevel.NONE)) {
+                        case CRITICAL -> "Temperatura crítica";
+                        case WARNING -> "Advertencia térmica";
+                        case NONE -> "Aviso térmico";
+                    };
+                    case MEMORY_LEAK -> "Posible fuga de memoria";
+                    case HUNG_PROCESS -> "Ventana sin respuesta";
+                };
+                setText(time + " · " + kind + " · " + item.source() + " · " + item.message());
+                setGraphic(null);
+            }
+        });
+        dashboardViewModel.alerts().addListener((ListChangeListener<AlertItemViewModel>) change -> updateAlertSummary());
+        updateAlertSummary();
+    }
+
+    private void updateAlertSummary() {
+        int count = dashboardViewModel.alerts().size();
+        alertSummaryLabel.setText(count == 0 ? "Sin alertas activas" : count + " alerta(s) activas");
+        navAlerts.setText(count == 0 ? "Alertas" : "Alertas (" + count + ")");
+    }
+
+    private void configureProcesses() {
         procesosViewModel = new ProcessTableViewModel(dashboardViewModel.getProcesses());
-
         procPidColumn.setCellValueFactory(data ->
                 new javafx.beans.property.SimpleLongProperty(data.getValue().pid()));
         procNombreColumn.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(data.getValue().name()));
+                new ReadOnlyStringWrapper(data.getValue().name()));
         procRutaColumn.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(data.getValue().fullPath()));
+                new ReadOnlyStringWrapper(data.getValue().fullPath()));
         procMemoriaColumn.setCellValueFactory(data ->
                 new javafx.beans.property.SimpleDoubleProperty(data.getValue().workingSetMb()));
-        procMemoriaColumn.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Number value, boolean empty) {
+        procMemoriaColumn.setCellFactory(column -> new TableCell<>() {
+            @Override protected void updateItem(Number value, boolean empty) {
                 super.updateItem(value, empty);
                 setText(empty || value == null ? null : Double.isFinite(value.doubleValue())
-                        ? String.format("%.1f MB", value.doubleValue()) : "N/D");
+                        ? String.format(Locale.ROOT, "%.1f MiB", value.doubleValue()) : "N/D");
             }
         });
-
-        procAccionColumn.setCellFactory(col -> new TableCell<>() {
+        procResponseColumn.setCellValueFactory(data ->
+                new ReadOnlyStringWrapper(responseText(data.getValue())));
+        dashboardViewModel.responsivenessProperty().addListener((obs, previous, next) -> tablaProcesos.refresh());
+        procAccionColumn.setCellFactory(column -> new TableCell<>() {
             private final Button terminateButton = new Button("Finalizar Proceso");
             {
                 terminateButton.getStyleClass().add("danger-button");
-                terminateButton.setOnAction(e -> {
-                    int index = getIndex();
-                    if (index >= 0 && index < getTableView().getItems().size()) {
-                        procesosViewModel.requestTerminate(getTableView().getItems().get(index));
-                    }
+                terminateButton.setOnAction(event -> {
+                    ProcessRow row = getTableRow() == null ? null : getTableRow().getItem();
+                    if (row != null) procesosViewModel.requestTerminate(row);
                 });
             }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
+            @Override protected void updateItem(Void value, boolean empty) {
+                super.updateItem(value, empty);
                 setGraphic(empty ? null : terminateButton);
             }
         });
-
-        searchProcesos.textProperty().addListener((obs, oldVal, newVal) ->
-                procesosViewModel.searchTextProperty().set(newVal));
-
+        searchProcesos.textProperty().addListener((obs, previous, next) -> {
+            procesosViewModel.searchTextProperty().set(next);
+            restoreProcessSelectionLater();
+        });
         tablaProcesos.setItems(procesosViewModel.getSortedProcesses());
         procesosViewModel.getSortedProcesses().comparatorProperty().bind(tablaProcesos.comparatorProperty());
+        tablaProcesos.setOnMouseClicked(event -> rememberExplicitSelection());
+        tablaProcesos.setOnKeyReleased(event -> rememberExplicitSelection());
         procesosViewModel.setOnTerminateRequested(this::confirmAndTerminate);
+
+        dashboardViewModel.getProcesses().addListener((ListChangeListener<ProcessRow>) change -> {
+            refreshProcessSummary();
+            restoreProcessSelectionLater();
+        });
+        dashboardViewModel.processInventoryAvailableProperty().addListener((obs, previous, available) ->
+                updateInventoryStatus());
+        dashboardViewModel.monitoringSequenceProperty().addListener((obs, previous, next) ->
+                updateInventoryStatus());
+        refreshProcessSummary();
+        updateInventoryStatus();
     }
 
-    private void bindProcessSummary() {
-        refreshProcessSummary();
-        dashboardViewModel.getProcesses().addListener(
-                (ListChangeListener<ProcessRow>) change -> refreshProcessSummary());
+    private String responseText(ProcessRow row) {
+        ResponsivenessResult result = dashboardViewModel.responsivenessProperty().get().get(row.identity());
+        if (result == null) return "Sin consultar";
+        if (result.isHung()) {
+            return result.outcome().label() + " (" + result.windowsHung() + "/" + result.windowsExamined() + ")";
+        }
+        return result.outcome().label() + (result.win32Error() == 0 ? ""
+                : " (Win32 " + Integer.toUnsignedString(result.win32Error()) + ")");
+    }
+
+    private void rememberExplicitSelection() {
+        ProcessRow row = tablaProcesos.getSelectionModel().getSelectedItem();
+        if (row != null) procesosViewModel.rememberSelection(row);
+    }
+
+    private void restoreProcessSelectionLater() {
+        Platform.runLater(() -> {
+            ProcessRow row = procesosViewModel.selectedVisibleRow().orElse(null);
+            if (row == null) {
+                tablaProcesos.getSelectionModel().clearSelection();
+            } else {
+                tablaProcesos.getSelectionModel().select(row);
+            }
+        });
+    }
+
+    private void updateInventoryStatus() {
+        if (dashboardViewModel.monitoringSequenceProperty().get() == 0) {
+            inventoryStatusLabel.setText("Esperando inventario");
+        } else if (dashboardViewModel.processInventoryAvailableProperty().get()) {
+            inventoryStatusLabel.setText("Inventario actualizado");
+        } else {
+            inventoryStatusLabel.setText("Inventario N/D; se muestran los últimos procesos conocidos");
+        }
     }
 
     private void refreshProcessSummary() {
-        memoryPieChart.getData().setAll(
-                dashboardViewModel.getProcesses().stream()
-                        .filter(ProcessRow::hasWorkingSet)
-                        .map(p -> new PieChart.Data(p.name(), p.workingSetMb()))
-                        .toList()
-        );
-
-        double totalMb = dashboardViewModel.getProcesses().stream()
-                .filter(ProcessRow::hasWorkingSet)
-                .mapToDouble(ProcessRow::workingSetMb)
-                .sum();
-        ramTotalLabel.setText(String.format("%.0f MB", totalMb));
-        ramCountLabel.setText(String.valueOf(dashboardViewModel.getProcesses().size()));
+        List<ProcessRow> rows = List.copyOf(dashboardViewModel.getProcesses());
+        memoryPieChart.getData().setAll(ProcessMemorySummary.topSlices(rows, PIE_PROCESS_LIMIT).stream()
+                .map(slice -> new PieChart.Data(slice.label(), slice.mebibytes())).toList());
+        ramTotalLabel.setText(String.format(Locale.ROOT, "%.0f MiB", ProcessMemorySummary.totalListedMebibytes(rows)));
+        ramCountLabel.setText(String.valueOf(rows.size()));
     }
 
-    /**
-     * Regla de seguridad del proyecto: NUNCA terminar un proceso sin confirmacion
-     * explicita del usuario (nada de auto-kill). Si el caso de uso real rechaza o
-     * falla la terminacion, se informa al usuario en vez de fallar en silencio.
-     */
+    /** La identidad de la fila queda capturada antes del diálogo modal, incluso si la tabla cambia. */
     private void confirmAndTerminate(ProcessRow row) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirmar finalización");
         confirm.setHeaderText("¿Finalizar el proceso \"" + row.name() + "\" (PID " + row.pid() + ")?");
         confirm.setContentText("Esta acción no se puede deshacer.");
-
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 TerminationResult result = dashboardViewModel.terminateProcess(row);
-                if (result.status() != TerminationStatus.SUCCESS) {
-                    showTerminationError(row, result);
-                }
+                if (result.status() != TerminationStatus.SUCCESS) showTerminationError(row, result);
             }
         });
     }
@@ -461,5 +518,12 @@ public final class MainDashboardController {
         }
         error.setContentText(message);
         error.showAndWait();
+    }
+
+    private void bindBlackbox() {
+        dataSourceLabel.textProperty().bind(dashboardViewModel.dataSourceDescriptionProperty());
+        blackboxStatusLabel.textProperty().bind(dashboardViewModel.blackboxStatusProperty());
+        blackboxCountsLabel.textProperty().bind(dashboardViewModel.blackboxCountsProperty());
+        blackboxLocationLabel.textProperty().bind(dashboardViewModel.blackboxLocationProperty());
     }
 }

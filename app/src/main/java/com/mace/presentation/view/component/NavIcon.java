@@ -54,6 +54,14 @@ public final class NavIcon {
         return icon(trend, baseline);
     }
 
+    public static Node alerts() {
+        Polygon triangle = new Polygon(9, 2, 17, 16, 1, 16);
+        style(triangle);
+        Line mark = line(9, 6, 9, 11);
+        Circle dot = dot(9, 14);
+        return icon(triangle, mark, dot);
+    }
+
     public static Node procesos() {
         Circle bullet1 = dot(2, 5);
         Circle bullet2 = dot(2, 9);
