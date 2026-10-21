@@ -29,6 +29,7 @@
 
             <Label text="MACE" styleClass="sidebar-brand" />
             <Label text="Monitor de sistema" styleClass="sidebar-subtitle" />
+            <Label fx:id="dataSourceLabel" text="Fuente de datos" wrapText="true" styleClass="sidebar-subtitle" />
 
             <VBox spacing="4" styleClass="sidebar-nav">
                 <padding>
@@ -101,6 +102,13 @@
             <VBox fx:id="paneHistorial" spacing="12" styleClass="section-pane">
                 <Label text="Historial en tiempo real" styleClass="section-title" />
                 <Label text="Evolución de los últimos 30 segundos, por componente" styleClass="section-subtitle" />
+
+                <VBox spacing="4" styleClass="chart-card">
+                    <Label text="Caja negra persistente" styleClass="chart-card-title" />
+                    <Label fx:id="blackboxStatusLabel" text="Esperando el primer sondeo" />
+                    <Label fx:id="blackboxCountsLabel" text="Registros: 0 · Perdidos: 0 · Huecos: 0" />
+                    <Label fx:id="blackboxLocationLabel" text="Sin archivo" wrapText="true" />
+                </VBox>
 
                 <VBox styleClass="chart-card" VBox.vgrow="ALWAYS">
                     <Label text="Uso de CPU" styleClass="chart-card-title" />

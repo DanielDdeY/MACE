@@ -45,6 +45,7 @@ public final class MainDashboardController {
     @FXML private ToggleButton navGpu;
     @FXML private ToggleButton navHistorial;
     @FXML private ToggleButton navProcesos;
+    @FXML private Label dataSourceLabel;
 
     // ---- Apartados ----
     @FXML private VBox paneCpu;
@@ -67,6 +68,9 @@ public final class MainDashboardController {
     @FXML private LineChart<Number, Number> cpuTempChart;
     @FXML private LineChart<Number, Number> cpuUsageChart;
     @FXML private LineChart<Number, Number> gpuTempChart;
+    @FXML private Label blackboxStatusLabel;
+    @FXML private Label blackboxCountsLabel;
+    @FXML private Label blackboxLocationLabel;
 
     // ---- Procesos ----
     @FXML private TextField searchProcesos;
@@ -105,6 +109,7 @@ public final class MainDashboardController {
         bindTelemetry();
         bindProcessSummary();
         bindStatsPanels();
+        bindBlackbox();
 
         dashboardViewModel.start();
     }
@@ -171,43 +176,64 @@ public final class MainDashboardController {
             }
         });
         dashboardViewModel.cpuWattsProperty().addListener((obs, o, n) -> {
-            if (dashboardViewModel.cpuSensorAvailableProperty().get()) {
+            if (dashboardViewModel.cpuPowerAvailableProperty().get()) {
                 cpuWattsGauge.setValue(n.doubleValue());
             }
         });
-        dashboardViewModel.cpuUsageProperty().addListener((obs, o, n) -> cpuUsageGauge.setValue(n.doubleValue()));
-        dashboardViewModel.gpuTempProperty().addListener((obs, o, n) -> gpuTempGauge.setValue(n.doubleValue()));
-        dashboardViewModel.gpuWattsProperty().addListener((obs, o, n) -> gpuWattsGauge.setValue(n.doubleValue()));
+        dashboardViewModel.cpuUsageProperty().addListener((obs, o, n) -> {
+            if (dashboardViewModel.cpuUsageAvailableProperty().get()) {
+                cpuUsageGauge.setValue(n.doubleValue());
+            }
+        });
+        dashboardViewModel.gpuTempProperty().addListener((obs, o, n) -> {
+            if (dashboardViewModel.gpuAvailableProperty().get()) {
+                gpuTempGauge.setValue(n.doubleValue());
+            }
+        });
+        dashboardViewModel.gpuWattsProperty().addListener((obs, o, n) -> {
+            if (dashboardViewModel.gpuPowerAvailableProperty().get()) {
+                gpuWattsGauge.setValue(n.doubleValue());
+            }
+        });
+
+        dashboardViewModel.cpuUsageAvailableProperty().addListener((obs, o, available) -> {
+            if (!available) cpuUsageGauge.setUnavailable();
+            else cpuUsageGauge.setValue(dashboardViewModel.cpuUsageProperty().get());
+        });
+        dashboardViewModel.cpuPowerAvailableProperty().addListener((obs, o, available) -> {
+            if (!available) cpuWattsGauge.setUnavailable();
+            else cpuWattsGauge.setValue(dashboardViewModel.cpuWattsProperty().get());
+        });
+        dashboardViewModel.gpuPowerAvailableProperty().addListener((obs, o, available) -> {
+            if (!available) gpuWattsGauge.setUnavailable();
+            else gpuWattsGauge.setValue(dashboardViewModel.gpuWattsProperty().get());
+        });
 
         dashboardViewModel.gpuAvailableProperty().addListener((obs, o, available) -> {
             if (!available) {
                 gpuTempGauge.setUnavailable();
-                gpuWattsGauge.setUnavailable();
             } else {
                 gpuTempGauge.setValue(dashboardViewModel.gpuTempProperty().get());
-                gpuWattsGauge.setValue(dashboardViewModel.gpuWattsProperty().get());
             }
         });
 
-        // Sin WinRing0 (o en CPU no Intel) la temperatura y el consumo de CPU no son
-        // legibles: se muestra N/D en lugar de un 0 que parecería una lectura real.
+        // Cada sensor informa su disponibilidad por separado. Un valor no leído se
+        // muestra como N/D en vez de un cero que parecería una lectura real.
         dashboardViewModel.cpuSensorAvailableProperty().addListener((obs, o, available) -> {
             if (!available) {
                 cpuTempGauge.setUnavailable();
-                cpuWattsGauge.setUnavailable();
             } else {
                 cpuTempGauge.setValue(dashboardViewModel.cpuTempProperty().get());
-                cpuWattsGauge.setValue(dashboardViewModel.cpuWattsProperty().get());
             }
             updateCpuStats();
         });
 
-        // En una Radeon/AMD gpuAvailable empieza y permanece en false; inicializamos
-        // explícitamente el estado para que la UI muestre N/D desde el primer frame.
-        if (!dashboardViewModel.gpuAvailableProperty().get()) {
-            gpuTempGauge.setUnavailable();
-            gpuWattsGauge.setUnavailable();
-        }
+        // Hasta el primer sondeo no hay lectura válida de ningún fabricante.
+        cpuTempGauge.setUnavailable();
+        cpuWattsGauge.setUnavailable();
+        cpuUsageGauge.setUnavailable();
+        gpuTempGauge.setUnavailable();
+        gpuWattsGauge.setUnavailable();
     }
 
     // ==================== HISTORIAL (graficos separados) ====================
@@ -232,21 +258,33 @@ public final class MainDashboardController {
                 .addListener((ListChangeListener<XYChart.Data<Number, Number>>) change -> updateGpuStats());
 
         dashboardViewModel.gpuFanRpmProperty().addListener((obs, o, n) ->
-                gpuFanLabel.setText(n.intValue() + " RPM"));
+                gpuFanLabel.setText(dashboardViewModel.gpuFanAvailableProperty().get()
+                        ? n.intValue() + " RPM" : "N/D"));
+        dashboardViewModel.gpuFanAvailableProperty().addListener((obs, o, available) ->
+                gpuFanLabel.setText(available ? dashboardViewModel.gpuFanRpmProperty().get() + " RPM" : "N/D"));
 
+        dashboardViewModel.gpuDetectedProperty().addListener((obs, o, detected) -> updateGpuAvailability());
         dashboardViewModel.gpuAvailableProperty().addListener((obs, o, available) -> {
-            gpuAvailableLabel.setText(available ? "Disponible" : "No detectada");
-            if (!available) {
-                gpuFanLabel.setText("N/D");
-            }
+            updateGpuAvailability();
+            updateGpuStats();
         });
 
-        gpuAvailableLabel.setText(dashboardViewModel.gpuAvailableProperty().get() ? "Disponible" : "No detectada");
-        if (!dashboardViewModel.gpuAvailableProperty().get()) {
-            gpuFanLabel.setText("N/D");
-            gpuStatusLabel.setText("N/D");
-            gpuMaxLabel.setText("N/D");
-        }
+        updateGpuAvailability();
+        gpuFanLabel.setText("N/D");
+        gpuStatusLabel.setText("N/D");
+        gpuMaxLabel.setText("N/D");
+    }
+
+    private void updateGpuAvailability() {
+        gpuAvailableLabel.setText(!dashboardViewModel.gpuDetectedProperty().get() ? "No detectada"
+                : dashboardViewModel.gpuAvailableProperty().get() ? "Temperatura disponible" : "Sensor N/D");
+    }
+
+    private void bindBlackbox() {
+        dataSourceLabel.textProperty().bind(dashboardViewModel.dataSourceDescriptionProperty());
+        blackboxStatusLabel.textProperty().bind(dashboardViewModel.blackboxStatusProperty());
+        blackboxCountsLabel.textProperty().bind(dashboardViewModel.blackboxCountsProperty());
+        blackboxLocationLabel.textProperty().bind(dashboardViewModel.blackboxLocationProperty());
     }
 
     private void updateCpuStats() {
@@ -268,12 +306,13 @@ public final class MainDashboardController {
 
     private void updateGpuStats() {
         List<XYChart.Data<Number, Number>> points = dashboardViewModel.getGpuTempHistory().getData();
-        if (points.isEmpty()) {
-            return;
-        }
         if (!dashboardViewModel.gpuAvailableProperty().get()) {
+            gpuStatusLabel.getStyleClass().removeAll("status-ok", "status-warning", "status-critical");
             gpuStatusLabel.setText("N/D");
             gpuMaxLabel.setText("N/D");
+            return;
+        }
+        if (points.isEmpty()) {
             return;
         }
         double current = dashboardViewModel.gpuTempProperty().get();
@@ -327,7 +366,8 @@ public final class MainDashboardController {
             @Override
             protected void updateItem(Number value, boolean empty) {
                 super.updateItem(value, empty);
-                setText(empty || value == null ? null : String.format("%.1f MB", value.doubleValue()));
+                setText(empty || value == null ? null : Double.isFinite(value.doubleValue())
+                        ? String.format("%.1f MB", value.doubleValue()) : "N/D");
             }
         });
 
@@ -367,11 +407,13 @@ public final class MainDashboardController {
     private void refreshProcessSummary() {
         memoryPieChart.getData().setAll(
                 dashboardViewModel.getProcesses().stream()
+                        .filter(ProcessRow::hasWorkingSet)
                         .map(p -> new PieChart.Data(p.name(), p.workingSetMb()))
                         .toList()
         );
 
         double totalMb = dashboardViewModel.getProcesses().stream()
+                .filter(ProcessRow::hasWorkingSet)
                 .mapToDouble(ProcessRow::workingSetMb)
                 .sum();
         ramTotalLabel.setText(String.format("%.0f MB", totalMb));
@@ -393,19 +435,31 @@ public final class MainDashboardController {
             if (response == ButtonType.OK) {
                 TerminationResult result = dashboardViewModel.terminateProcess(row);
                 if (result.status() != TerminationStatus.SUCCESS) {
-                    showTerminationError(row, result.status());
+                    showTerminationError(row, result);
                 }
             }
         });
     }
 
-    private void showTerminationError(ProcessRow row, TerminationStatus status) {
-        Alert error = new Alert(Alert.AlertType.ERROR);
+    private void showTerminationError(ProcessRow row, TerminationResult result) {
+        TerminationStatus status = result.status();
+        Alert error = new Alert(status.requiresRefresh() ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR);
         error.setTitle("No se pudo finalizar el proceso");
         error.setHeaderText(row.name() + " (PID " + row.pid() + ")");
-        error.setContentText(status == TerminationStatus.REJECTED_SYSTEM_PROCESS
-                ? "MACE bloqueó la operación porque el PID está protegido por seguridad."
-                : "Windows rechazó la operación, el proceso ya terminó o no hay permisos suficientes.");
+        String message = switch (status) {
+            case REJECTED_SYSTEM_PROCESS -> "MACE bloqueó la operación porque es un proceso del sistema o el propio MACE.";
+            case REJECTED_PROTECTED_PROCESS -> "La DLL protegió este proceso; no se intentará cerrarlo por PID.";
+            case ACCESS_DENIED -> "Windows denegó el acceso. Puede requerirse ejecutar MACE como administrador.";
+            case PROCESS_EXITED -> "El proceso ya terminó. La lista se actualizará.";
+            case PID_REUSED -> "El PID ahora pertenece a otro proceso. La lista se actualizará sin reintentar.";
+            case IDENTITY_REQUIRED -> "La fila no conserva la identidad completa; actualiza la lista.";
+            case FAILED -> "Windows no pudo completar la operación.";
+            case SUCCESS -> "El proceso se finalizó.";
+        };
+        if (result.win32Error() != 0) {
+            message += " Código Win32: " + Integer.toUnsignedString(result.win32Error()) + ".";
+        }
+        error.setContentText(message);
         error.showAndWait();
     }
 }
