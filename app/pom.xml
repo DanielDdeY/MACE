@@ -24,7 +24,7 @@
         <junit.version>5.10.2</junit.version>
         <mockito.version>5.12.0</mockito.version>
 
-        <app.mainClass>com.mace.presentation.MaceApplication</app.mainClass>
+        <app.mainClass>com.mace.presentation.MaceLauncher</app.mainClass>
     </properties>
 
     <dependencyManagement>

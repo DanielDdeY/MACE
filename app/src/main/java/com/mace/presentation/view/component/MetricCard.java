@@ -1,57 +1,53 @@
 package com.mace.presentation.view.component;
 
+import com.mace.presentation.viewmodel.MetricDisplay;
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
 
-/**
- * Tarjeta reutilizable para mostrar una metrica de hardware (ej: Temp. CPU, Watts GPU).
- * Uso:
- *   MetricCard card = new MetricCard("Temp. CPU", "°C");
- *   card.updateValue(67.4, 100.0); // valor actual, valor maximo esperado (para la barra)
- */
-public class MetricCard extends VBox {
+import java.util.Objects;
 
-    private final Label titleLabel;
-    private final Label valueLabel;
-    private final ProgressBar progressBar;
-    private final String unit;
+/** Tarjeta que muestra el valor V2 o el motivo exacto por el que no está disponible. */
+public final class MetricCard extends VBox implements AutoCloseable {
 
-    public MetricCard(String title, String unit) {
-        this.unit = unit;
+    private final Label value = new Label();
+    private final Label caption = new Label();
+
+    public MetricCard(String title, ObservableValue<MetricDisplay> reading) {
+        this(title, reading, null);
+    }
+
+    public MetricCard(String title, ObservableValue<MetricDisplay> reading,
+                      ObservableValue<String> captionText) {
+        Objects.requireNonNull(title, "title no puede ser null");
+        Objects.requireNonNull(reading, "reading no puede ser null");
         getStyleClass().add("metric-card");
         setAlignment(Pos.CENTER_LEFT);
         setSpacing(6);
+        setMinWidth(190);
+        setPrefWidth(210);
 
-        titleLabel = new Label(title);
-        titleLabel.getStyleClass().add("metric-card-title");
-
-        valueLabel = new Label("--" + unit);
-        valueLabel.getStyleClass().add("metric-card-value");
-
-        progressBar = new ProgressBar(0);
-        progressBar.getStyleClass().add("metric-card-bar");
-        progressBar.setMaxWidth(Double.MAX_VALUE);
-
-        getChildren().addAll(titleLabel, valueLabel, progressBar);
-    }
-
-    public void updateValue(double currentValue, double maxExpected) {
-        valueLabel.setText(String.format("%.1f%s", currentValue, unit));
-        double ratio = maxExpected <= 0 ? 0 : Math.min(1.0, currentValue / maxExpected);
-        progressBar.setProgress(ratio);
-
-        progressBar.getStyleClass().removeAll("metric-warning", "metric-critical");
-        if (ratio >= 0.85) {
-            progressBar.getStyleClass().add("metric-critical");
-        } else if (ratio >= 0.7) {
-            progressBar.getStyleClass().add("metric-warning");
+        Label name = new Label(title);
+        name.getStyleClass().add("metric-card-title");
+        value.getStyleClass().add("metric-card-value");
+        value.setWrapText(true);
+        value.textProperty().bind(Bindings.createStringBinding(
+                () -> reading.getValue() == null ? "N/D" : reading.getValue().text(), reading));
+        if (captionText != null) {
+            caption.getStyleClass().add("metric-card-caption");
+            caption.setWrapText(true);
+            caption.textProperty().bind(captionText);
+            getChildren().addAll(name, value, caption);
+        } else {
+            getChildren().addAll(name, value);
         }
     }
 
-    public void setUnavailable() {
-        valueLabel.setText("N/D");
-        progressBar.setProgress(0);
+    @Override
+    public void close() {
+        value.textProperty().unbind();
+        caption.textProperty().unbind();
     }
 }

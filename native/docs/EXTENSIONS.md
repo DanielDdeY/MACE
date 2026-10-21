@@ -1,17 +1,17 @@
-# Integración de las tres extensiones previstas
+# Estado de las extensiones
 
-El panel móvil queda fuera del alcance acordado. La capa nativa ofrece datos y buffers para detector de fugas/cuelgues, caja negra y Micro-HUD; no crea pantallas ni decide alertas.
+El panel móvil quedó fuera del alcance. Las otras tres extensiones usan el contrato nativo V2; la presentación y las reglas de negocio residen en Java.
 
-## Detector de fugas y cuelgues
+## Fugas de memoria y cuelgues
 
-Dev 2 conserva las últimas 30 `MaceProcessSampleV2` por identidad completa (`pid` y `creation_time_100ns_utc`), descarta muestras con estado distinto de `MACE_METRIC_VALID` y calcula la tendencia de Working Set y Private Bytes por separado. La identidad evita unir la serie de un proceso finalizado con otro que reutilice el PID. Dev 3 enlaza las funciones FFM de consulta y Dev 4 presenta la alerta. Para cuelgues, Dev 2 usa `CP_CheckProcessResponsivenessV2` y diferencia `NO_WINDOW`, `PROCESS_EXITED` y `ERROR` de `RESPONDING`.
+La DLL entrega muestras de memoria por identidad completa del proceso (PID y hora de creación) y un resultado estructurado sobre la respuesta de su ventana. Java conserva las series, calcula tendencias y muestra avisos. Una lectura ausente o un proceso finalizado no se trata como cero ni como prueba de cuelgue. MACE no finaliza procesos por una alerta; el usuario debe iniciar y confirmar esa acción.
 
-## Caja negra
+## Caja Negra
 
-Dev 3 crea un único buffer con `CP_BlackboxCreateV2(NULL, capacidad, ...)`, registra muestras CPU/GPU/proceso/memoria mediante `CP_BlackboxAppendV2`, lee por secuencia con `CP_BlackboxReadV2` y copia los datos al sink persistente Java. Debe cerrar el token con `CP_BlackboxCloseV2`, o dejar que el apagado global limpie como recuperación. El archivo histórico tiene un solo propietario: el sink Java. Si la lectura observa una brecha de secuencias, debe marcar registros perdidos; la memoria circular por sí sola no sobrevive al cierre del último handle. Un nombre de mapping se reserva para un requisito explícito de acceso entre procesos: los nombres existentes se rechazan y la lectura concurrente solo se ofrece a través de la API de la DLL. Dev 3 no usa `CP_InitSharedTelemetryBuffer`, cuyo puntero heredado exige detener y esperar a todos sus lectores antes de cerrar o apagar.
+La DLL ofrece un anillo V2 con token de control para registrar y leer eventos por secuencia. Java es el propietario del archivo persistente y registra lecturas, avisos y acciones. La vista «Caja Negra» permite consultar sesiones anteriores y detectar huecos o pérdidas. El puntero heredado del buffer compartido no se usa como fuente de persistencia.
 
 ## Micro-HUD
 
-Dev 4 consume los snapshots ya sondeados por la aplicación y los estados de disponibilidad por métrica de las funciones de telemetría V2. El uso de GPU por adaptador y la memoria global están disponibles cuando su proveedor/Windows los expone. La DLL no crea overlay, ventana ni otro ciclo de sondeo; el HUD JavaFX reutiliza el flujo existente. La interfaz debe mostrar «No disponible» si una métrica no tiene `state == MACE_METRIC_VALID`.
+La navegación ya reserva una pestaña vacía. El HUD visual todavía no está implementado. Cuando se agregue, debe reutilizar los snapshots existentes del monitor Java, respetar el estado de disponibilidad de cada métrica y evitar un segundo ciclo de sondeo o un proveedor de sensores independiente.
 
-Para todos los módulos, Dev 3 comprueba primero `CP_GetAbiInfo` (`abi_major=1`, `abi_minor>=4` y el bit de capacidad correspondiente). Los registros de salida usan `struct_size`, `version=2` y capacidades explícitas. No debe suponer que una capacidad compilada garantiza que un sensor o una ventana estén disponibles en cada equipo.
+La app comprueba ABI y capacidades de la DLL antes de usar V2. Una capacidad compilada no garantiza que el sensor físico exista o que el proveedor pueda leerlo en cada equipo.

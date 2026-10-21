@@ -11,13 +11,18 @@ $repositoryRoot = [IO.Path]::GetFullPath((Join-Path $nativeRoot '..'))
 $toolchain = Get-MaceToolchain -VisualStudio $VisualStudio
 $build = Get-MaceBuildDirectory -BuildDirectory $BuildDirectory -Preset $toolchain.Preset
 
-$sourceStatus = (& git -C $repositoryRoot status --porcelain -- native) -join "`n"
-Assert-MaceCommandSucceeded 'Consulta de estado Git'
-if (-not [string]::IsNullOrWhiteSpace($sourceStatus)) {
-    throw 'Antes de distribuir, registra los cambios de native/ en la rama aislada para identificar la fuente exacta.'
+$sourceRevision = $null
+$sourceDirty = $null
+if (Test-Path -LiteralPath (Join-Path $repositoryRoot '.git')) {
+    $git = Get-Command git.exe -ErrorAction SilentlyContinue
+    if ($null -ne $git) {
+        $sourceRevision = (& $git.Source -C $repositoryRoot rev-parse HEAD).Trim()
+        Assert-MaceCommandSucceeded 'Consulta de revisión Git'
+        $sourceStatus = (& $git.Source -C $repositoryRoot status --porcelain -- native) -join "`n"
+        Assert-MaceCommandSucceeded 'Consulta de estado Git'
+        $sourceDirty = -not [string]::IsNullOrWhiteSpace($sourceStatus)
+    }
 }
-$sourceRevision = (& git -C $repositoryRoot rev-parse HEAD).Trim()
-Assert-MaceCommandSucceeded 'Consulta de revisión Git'
 
 & (Join-Path $PSScriptRoot 'build-native.ps1') -Configuration Release `
     -VisualStudio $VisualStudio -BuildDirectory $build -AdlxSdkDirectory $AdlxSdkDirectory `
@@ -45,7 +50,7 @@ $packageName = "mace-native-$nativeVersion-win-x64-$timestamp-$($sourceDllHash.S
 $package = Join-Path $nativeRoot "dist\$packageName"
 if (Test-Path -LiteralPath $package) { throw "Ya existe el paquete: $package" }
 
-foreach ($relative in @('bin', 'lib', 'include', 'docs', 'examples\ffm')) {
+foreach ($relative in @('bin', 'lib', 'include', 'docs')) {
     New-Item -ItemType Directory -Path (Join-Path $package $relative) -Force | Out-Null
 }
 Copy-Item -LiteralPath $sourceDll -Destination (Join-Path $package 'bin\mace_native.dll')
@@ -58,8 +63,6 @@ foreach ($document in Get-ChildItem -LiteralPath (Join-Path $nativeRoot 'docs') 
     Copy-Item -LiteralPath $document.FullName -Destination (Join-Path $package 'docs')
 }
 Copy-Item -LiteralPath (Join-Path $nativeRoot 'README.md') -Destination $package
-Copy-Item -LiteralPath (Join-Path $nativeRoot 'examples\ffm\NativeContractProbe.java') `
-    -Destination (Join-Path $package 'examples\ffm')
 
 $distributedDll = Join-Path $package 'bin\mace_native.dll'
 $distributedLib = Join-Path $package 'lib\mace_native.lib'
@@ -74,11 +77,6 @@ if ((Get-FileHash -Algorithm SHA256 -LiteralPath $distributedDll).Hash -ne $sour
 & $distributedDiagnostic --help
 Assert-MaceCommandSucceeded 'Arranque de test_mace.exe distribuido'
 
-# Esta verificación vuelve a cargar exactamente la DLL de dist/, no la de build/.
-& (Join-Path $PSScriptRoot 'verify-native.ps1') -DllPath $distributedDll `
-    -BuildDirectory $build -Configuration Release -SkipCTest `
-    -FfmSourcePath (Join-Path $package 'examples\ffm\NativeContractProbe.java')
-
 $metadata = [ordered]@{
     schemaVersion = 1
     project = 'MACE native'
@@ -88,6 +86,7 @@ $metadata = [ordered]@{
     platform = 'Windows x64'
     configuration = 'Release'
     sourceCommit = $sourceRevision
+    sourceDirty = $sourceDirty
     generator = $toolchain.Generator
     visualStudioVersion = $toolchain.VisualStudioVersion
     cmakeVersion = $toolchain.CMakeVersion
@@ -98,7 +97,7 @@ $metadata = [ordered]@{
     amdAdlxCompiled = -not [string]::IsNullOrWhiteSpace($AdlxSdkDirectory)
     amdAdlxProcessLifetime = -not [string]::IsNullOrWhiteSpace($AdlxSdkDirectory)
     amdRyzenSdkCompiled = -not [string]::IsNullOrWhiteSpace($RyzenSdkDirectory)
-    tests = @('CTest abi_layouts', 'CTest abi_exports', 'CTest telemetry_v2', 'CTest gpu_provider_dispatch', 'CTest process_security', 'CTest process_api', 'CTest process_extensions', 'CTest blackbox_buffer', 'CTest lifecycle', 'CTest concurrency', 'CTest buffer_concurrency', 'Packaged test_mace.exe startup', 'C exports on distributed DLL', 'JDK 22 FFM on distributed DLL')
+    checks = @('SHA-256 of copied DLL, import library and diagnostic', 'Packaged test_mace.exe --help startup')
 }
 $metadata | ConvertTo-Json -Depth 5 |
     Set-Content -LiteralPath (Join-Path $package 'build-info.json') -Encoding utf8

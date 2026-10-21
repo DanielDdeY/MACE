@@ -65,7 +65,7 @@ set "APP_VERSION=1.0.0"
 set "APP_VENDOR=MACE Team"
 set "APP_DESCRIPTION=MACE - Telemetria de hardware y gestor de procesos"
 set "APP_UPGRADE_UUID=7f3c2a1e-9b4d-4c6e-8a1f-2d5e6b7c8d90"
-set "MAIN_CLASS=com.mace.presentation.MaceApplication"
+set "MAIN_CLASS=com.mace.presentation.MaceLauncher"
 set "MAIN_JAR=mace-app-1.0.0-SNAPSHOT.jar"
 
 REM Modulos del JDK que necesita la app (JavaFX se agrega si hay JAVAFX_JMODS)
@@ -336,6 +336,13 @@ if not defined MT_EXE (
 )
 
 if defined MT_EXE (
+    REM jpackage marca los launchers como solo lectura; mt.exe no puede actualizar
+    REM el recurso #1 hasta quitar ese atributo del ejecutable real.
+    attrib -R "%LAUNCHER_EXE%"
+    if errorlevel 1 (
+        echo [ERROR] No se pudo habilitar la escritura de %LAUNCHER_EXE%.
+        exit /b 1
+    )
     "!MT_EXE!" -nologo -manifest "%PACKAGING_DIR%\app.manifest" -outputresource:"%LAUNCHER_EXE%;#1"
     if errorlevel 1 (
         echo [ERROR] mt.exe no pudo incrustar el manifiesto.
@@ -343,8 +350,9 @@ if defined MT_EXE (
     )
     echo [OK] Manifiesto requireAdministrator incrustado con !MT_EXE!
 ) else (
-    echo [WARN] mt.exe no encontrado. Instala el Windows 10/11 SDK para incrustar el manifiesto UAC.
-    echo        Mientras tanto, ejecuta %APP_NAME%.exe con "Ejecutar como administrador".
+    echo [ERROR] mt.exe no encontrado. Instala el Windows 10/11 SDK: el launcher
+    echo         real requiere el manifiesto UAC para considerarse empaquetado.
+    exit /b 1
 )
 
 REM ---------------------------------------------------------------------------

@@ -97,6 +97,17 @@ class MonitoringServiceTest {
     }
 
     @Test
+    void persisteLasMuestrasDeProcesosDelMismoInventario() {
+        MonitoringSnapshot snapshot = monitor.tick();
+
+        ProcessInventory inventory = snapshot.processes().orElseThrow();
+        assertEquals(inventory.processes().size(), blackbox.samples.size());
+        assertEquals(inventory.monotonicNanos(), blackbox.samples.get(0).monotonicNanos());
+        assertEquals(inventory.processes().get(0).identity(), blackbox.samples.get(0).identity());
+        assertEquals(1, sensors.polls.get(), "registrar muestras no debe repetir el sondeo físico");
+    }
+
+    @Test
     void refrescarProcesosNoGeneraOtroSondeoDeHardware() {
         MonitoringSnapshot tick = monitor.tick();
 
@@ -271,6 +282,7 @@ class MonitoringServiceTest {
 
     private static final class RecordingBlackbox implements BlackboxSinkPort {
         private final List<BlackboxEvent> events = new ArrayList<>();
+        private final List<ProcessSample> samples = new ArrayList<>();
         private int flushes;
 
         @Override
@@ -279,6 +291,7 @@ class MonitoringServiceTest {
 
         @Override
         public void record(ProcessSample sample) {
+            samples.add(sample);
         }
 
         @Override

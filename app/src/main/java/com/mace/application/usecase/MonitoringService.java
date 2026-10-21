@@ -10,6 +10,7 @@ import com.mace.domain.model.MetricState;
 import com.mace.domain.model.MonitoringSnapshot;
 import com.mace.domain.model.ProcessIdentity;
 import com.mace.domain.model.ProcessInventory;
+import com.mace.domain.model.ProcessSample;
 import com.mace.domain.model.ResponsivenessOutcome;
 import com.mace.domain.model.ResponsivenessResult;
 import com.mace.domain.model.SystemMemoryReading;
@@ -204,6 +205,7 @@ public final class MonitoringService implements AutoCloseable {
     private MonitoringSnapshot publish(HardwarePoll hardware, Optional<ProcessInventory> inventory) {
         Instant now = clock.instant();
         List<LeakAlert> leakAlerts = inventory.map(leakDetector::observe).orElseGet(() -> leakDetector.evaluateAll(now));
+        inventory.ifPresent(this::recordProcessSamples);
         inventory.ifPresent(this::checkResponsiveness);
         List<HangAlert> hangAlerts = hangDetector.activeAlerts(now);
         recordNewAlerts(leakAlerts, hangAlerts);
@@ -288,6 +290,17 @@ public final class MonitoringService implements AutoCloseable {
             blackbox.recordEvent(event);
         } catch (RuntimeException e) {
             LOG.log(Level.WARNING, "No se pudo registrar el evento en la caja negra", e);
+        }
+    }
+
+    /** Persiste las mismas lecturas del inventario usadas para las tendencias, sin otro sondeo. */
+    private void recordProcessSamples(ProcessInventory inventory) {
+        for (var entry : inventory.processes()) {
+            try {
+                blackbox.record(ProcessSample.fromInventory(entry, inventory.monotonicNanos()));
+            } catch (RuntimeException e) {
+                LOG.log(Level.WARNING, "No se pudo registrar la muestra de " + entry.identity(), e);
+            }
         }
     }
 }
