@@ -62,6 +62,8 @@ set "NATIVE_REPORT=%DIST_DIR%\MACE-native-report.txt"
 
 set "APP_NAME=MACE"
 set "APP_VERSION=1.0.0"
+REM La version puede venir del tag de la Release (GitHub Actions): MACE_APP_VERSION=1.2.0
+if defined MACE_APP_VERSION set "APP_VERSION=%MACE_APP_VERSION%"
 set "APP_VENDOR=MACE Team"
 set "APP_DESCRIPTION=MACE - Telemetria de hardware y gestor de procesos"
 set "APP_UPGRADE_UUID=7f3c2a1e-9b4d-4c6e-8a1f-2d5e6b7c8d90"

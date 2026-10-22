@@ -76,10 +76,25 @@ class MonitoringServiceTest {
     }
 
     private MonitoringService newMonitor(HardwareSensorsPort sensorsPort, ProcessLifecyclePort processPort) {
+        return newMonitor(sensorsPort, processPort, ProcessSamplingPolicy.defaults());
+    }
+
+    private MonitoringService newMonitor(HardwareSensorsPort sensorsPort, ProcessLifecyclePort processPort,
+                                         ProcessSamplingPolicy policy) {
         PollSystemMetricsService poll = new PollSystemMetricsService(sensorsPort, new NoOpLegacyPublisher(), blackbox,
                 new ThermalAlertEvaluator());
         return new MonitoringService(poll, new ListProcessesService(processPort), new ProcessInspectionService(processPort),
-                new MemoryLeakDetector(), new HangDetector(), blackbox, publisher, clock, nanos::get, Duration.ofSeconds(1));
+                new MemoryLeakDetector(), new HangDetector(), blackbox, publisher, clock, nanos::get, Duration.ofSeconds(1),
+                policy);
+    }
+
+    private void useSamplingPolicy(Duration allProcesses, Duration alerted) {
+        monitor.close();
+        monitor = newMonitor(sensors, processes, new ProcessSamplingPolicy(allProcesses, alerted));
+    }
+
+    private static ProcessIdentity hungIdentity() {
+        return MockProcessAdapter.identityOf(MockProcessAdapter.HUNG_PROCESS_PID, MockProcessAdapter.HUNG_PROCESS_PID % 3600);
     }
 
     @Test
@@ -105,6 +120,45 @@ class MonitoringServiceTest {
         assertEquals(inventory.monotonicNanos(), blackbox.samples.get(0).monotonicNanos());
         assertEquals(inventory.processes().get(0).identity(), blackbox.samples.get(0).identity());
         assertEquals(1, sensors.polls.get(), "registrar muestras no debe repetir el sondeo físico");
+    }
+
+    @Test
+    void noGuardaTodosLosProcesosEnCadaCiclo() {
+        int firstInventory = monitor.tick().processes().orElseThrow().processes().size();
+        monitor.tick();
+        monitor.tick();
+
+        assertEquals(firstInventory, blackbox.samples.size(),
+                "entre muestras completas (60 s) no se repite el inventario cada segundo");
+    }
+
+    @Test
+    void vuelveAGuardarTodosLosProcesosTrasElIntervalo() {
+        useSamplingPolicy(Duration.ofSeconds(3), Duration.ofSeconds(100));
+
+        int first = monitor.tick().processes().orElseThrow().processes().size();   // t = 1 s: completa
+        monitor.tick();                                                            // t = 2 s
+        monitor.tick();                                                            // t = 3 s
+        int fourth = monitor.tick().processes().orElseThrow().processes().size();  // t = 4 s: completa
+
+        assertEquals(first + fourth, blackbox.samples.size());
+    }
+
+    @Test
+    void losProcesosConAlertaSeGuardanMasSeguido() {
+        useSamplingPolicy(Duration.ofSeconds(60), Duration.ofSeconds(2));
+
+        MonitoringSnapshot first = monitor.tick();
+        for (int i = 0; i < 4; i++) {
+            monitor.tick();                                                        // t = 2..5 s
+        }
+
+        assertTrue(first.hangAlerts().stream().anyMatch(alert -> alert.identity().equals(hungIdentity())));
+        long hungSamples = blackbox.samples.stream().filter(s -> s.identity().equals(hungIdentity())).count();
+        long chromeSamples = blackbox.samples.stream()
+                .filter(s -> s.identity().pid().value() == 4120L).count();
+        assertEquals(3, hungSamples, "proceso colgado: t = 1, 3 y 5 s");
+        assertEquals(1, chromeSamples, "proceso sin alerta: solo la muestra completa");
     }
 
     @Test

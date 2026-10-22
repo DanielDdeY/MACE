@@ -36,10 +36,11 @@ public record BlackboxSettings(Path directory, int ringCapacityRecords, int file
 
     /**
      * Valores por defecto: anillo de 4 096 registros, archivos de 8 192 registros (≈1,5 MiB),
-     * 20 archivos y 64 MiB como máximo.
+     * 40 archivos y 64 MiB como máximo (≈60 MiB en uso). Con el muestreo de procesos por defecto
+     * del monitor (~5 registros/s) cubre unas 18 horas de historial.
      */
     public static BlackboxSettings defaults(Path directory) {
-        return new BlackboxSettings(directory, 4_096, 8_192, 20, 64L * 1024 * 1024);
+        return new BlackboxSettings(directory, 4_096, 8_192, 40, 64L * 1024 * 1024);
     }
 
     /**
