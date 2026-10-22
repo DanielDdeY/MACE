@@ -1,20 +1,31 @@
 package com.mace.domain.port.out;
 
-import com.mace.domain.model.TelemetrySnapshot;
+import com.mace.domain.model.BlackboxEvent;
+import com.mace.domain.model.BlackboxStats;
+import com.mace.domain.model.HardwareSnapshot;
+import com.mace.domain.model.ProcessSample;
 
 /**
- * Puerto de salida para el volcado de telemetría a la "caja negra" (persistencia
- * en disco de snapshots críticos).
+ * Puerto de salida hacia la caja negra: historial persistente de telemetría y eventos.
  *
- * En el MVP la implementación es un no-op; el puerto existe como punto de
- * extensión para la fase futura de caja negra completa.
+ * <p>La implementación es dueña exclusiva del archivo histórico. Las muestras de hardware pueden
+ * pasar antes por un anillo temporal en RAM (nativo o simulado); si ese anillo sobrescribe
+ * registros antes de copiarlos, el sink marca el hueco de secuencia en lugar de ocultarlo.</p>
  */
 public interface BlackboxSinkPort {
 
-    /**
-     * Persiste un snapshot considerado crítico.
-     *
-     * @param snapshot lectura de telemetría a volcar
-     */
-    void dump(TelemetrySnapshot snapshot);
+    /** Registra las lecturas de CPU, cada GPU y memoria global de un sondeo. */
+    void record(HardwareSnapshot snapshot);
+
+    /** Registra una muestra de memoria de un proceso (p. ej. el seleccionado o el que alerta). */
+    void record(ProcessSample sample);
+
+    /** Registra un evento de aplicación (alertas, solicitudes y resultados de terminación). */
+    void recordEvent(BlackboxEvent event);
+
+    /** Copia al almacenamiento persistente lo que aún esté en memoria temporal. */
+    default void flush() {
+    }
+
+    BlackboxStats stats();
 }
