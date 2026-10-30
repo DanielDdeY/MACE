@@ -9,7 +9,18 @@ El empaquetado `app-image` genera dos accesos en `packaging/dist/MACE/`:
 - `MACE.exe`: datos reales con la DLL verificada; solicita permisos de administrador mediante su manifiesto.
 - `MACE-Preview.exe`: escenario simulado para revisar la interfaz sin DLL ni permisos de administrador.
 
-Distribuya la **carpeta MACE completa** o comprímala como ZIP; los ejecutables solos no contienen el runtime ni las dependencias. Los binarios generados se excluyen del repositorio Git. Para ofrecer una descarga en GitHub, adjunte ese ZIP a una *Release*; el repositorio conserva el código fuente.
+Distribuya la **carpeta MACE completa** o comprímala como ZIP; los ejecutables solos no contienen el runtime ni las dependencias. Los binarios generados se excluyen del repositorio Git.
+
+## Descarga y publicación de versiones
+
+La página de descarga es <https://danielddey.github.io/MACE/> (carpeta `docs/`). Ofrece el `MACE-Setup.exe` de la última *Release*. Para publicar una versión basta con subir un tag:
+
+```powershell
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+El flujo `.github/workflows/release-installer.yml` crea la Release y adjunta `MACE-Setup.exe`, `MACE-portable.zip` y sus hashes. Si la Release ya trae el paquete nativo verificado (`mace-native-*.zip`), se empaqueta esa DLL; si no, se compila en GitHub Actions sin los SDK de AMD.
 
 ## Compilar desde el código fuente
 
