@@ -2,12 +2,17 @@ package com.mace.presentation;
 
 import atlantafx.base.theme.PrimerDark;
 import com.mace.application.usecase.ListProcessesService;
+import com.mace.application.usecase.MonitoringService;
 import com.mace.application.usecase.PollSystemMetricsService;
+import com.mace.application.usecase.ProcessInspectionService;
 import com.mace.application.usecase.TerminateProcessService;
+import com.mace.domain.port.out.BlackboxSinkPort;
+import com.mace.domain.service.HangDetector;
+import com.mace.domain.service.MemoryLeakDetector;
 import com.mace.domain.service.SystemProcessGuard;
 import com.mace.domain.service.ThermalAlertEvaluator;
 import com.mace.infrastructure.InfrastructureAdapters;
-import com.mace.infrastructure.telemetry.NoOpBlackboxSink;
+import com.mace.infrastructure.telemetry.BlackboxSettings;
 import com.mace.infrastructure.telemetry.SubmissionTelemetryPublisher;
 import com.mace.presentation.view.MainDashboardController;
 import com.mace.presentation.viewmodel.MainDashboardViewModel;
@@ -17,12 +22,16 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.time.Clock;
+
 /** Punto de composición de MACE. */
 public final class MaceApplication extends Application {
 
     private InfrastructureAdapters adapters;
     private SubmissionTelemetryPublisher telemetryPublisher;
+    private MonitoringService monitoringService;
     private MainDashboardViewModel dashboardViewModel;
+    private MainDashboardController dashboardController;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -65,19 +74,27 @@ public final class MaceApplication extends Application {
 
         telemetryPublisher = new SubmissionTelemetryPublisher();
 
+        BlackboxSinkPort blackbox = adapters.openBlackbox();
         PollSystemMetricsService pollService = new PollSystemMetricsService(
-                adapters.sensors(), telemetryPublisher, new NoOpBlackboxSink(), new ThermalAlertEvaluator());
+                adapters.sensors(), telemetryPublisher, blackbox, new ThermalAlertEvaluator());
         ListProcessesService listProcessesService = new ListProcessesService(adapters.processes());
+        ProcessInspectionService inspectionService = new ProcessInspectionService(adapters.processes());
         TerminateProcessService terminateProcessService = new TerminateProcessService(
-                adapters.processes(), new SystemProcessGuard());
+                adapters.processes(), new SystemProcessGuard(), blackbox, Clock.systemUTC());
+
+        monitoringService = new MonitoringService(pollService, listProcessesService, inspectionService,
+                new MemoryLeakDetector(), new HangDetector(), blackbox, telemetryPublisher);
 
         dashboardViewModel = new MainDashboardViewModel(
-                pollService, listProcessesService, terminateProcessService, telemetryPublisher);
+                monitoringService, terminateProcessService, telemetryPublisher,
+                adapters.dataSourceDescription(), adapters.blackboxFailure().orElse(null));
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainDashboard.fxml"));
         loader.setControllerFactory(type -> {
             if (type == MainDashboardController.class) {
-                return new MainDashboardController(dashboardViewModel);
+                dashboardController = new MainDashboardController(dashboardViewModel,
+                        BlackboxSettings.defaultDirectory(!adapters.isNative()));
+                return dashboardController;
             }
             try {
                 return type.getDeclaredConstructor().newInstance();
@@ -96,6 +113,12 @@ public final class MaceApplication extends Application {
 
     @Override
     public void stop() {
+        if (dashboardController != null) {
+            dashboardController.close();
+        }
+        if (monitoringService != null) {
+            monitoringService.close();
+        }
         if (dashboardViewModel != null) {
             dashboardViewModel.close();
         }

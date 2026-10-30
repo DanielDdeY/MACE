@@ -3,13 +3,13 @@
 # ==========================================
 app/target/
 **/target/
+/target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
 release.properties
 hs_err_pid*
 replay_pid*
-
 # ==========================================
 # 2. C y CMake / MSVC / Ninja (native/)
 # ==========================================
@@ -17,18 +17,22 @@ replay_pid*
 native/build/
 **/cmake-build-*/
 native/out/
-# OJO: nunca usar patrones genericos como **/out/ o **/build/ aqui:
-# se tragan paquetes Java legitimos como app/src/main/java/com/mace/domain/port/out/
-
+native/dist/
+native/bin/
+# Metadatos de un paquete copiados fuera de native/dist/ por flujos antiguos
+native/build-info.json
+native/SHA256SUMS.txt
+/build/
+/out/
 # Archivos de caché y configuración local de CMake
 CMakeCache.txt
+CMakeUserPresets.json
 CMakeFiles/
 cmake_install.cmake
 Makefile
 *.ninja
 .ninja_deps
 .ninja_log
-
 # Objetos y artefactos generados por MSVC
 *.obj
 *.o
@@ -37,11 +41,9 @@ Makefile
 *.exp
 *.lib
 *.manifest
-
-# Binario nativo generado (debe compilarse vía CMake o CI, no versionarse)
-mace_native.dll
-**/mace_native.dll
-
+# Binarios nativos generados o copiados localmente; publicar ZIP en Releases
+*.dll
+*.sys
 # ==========================================
 # 3. Empaquetado y Distribución (packaging/)
 # ==========================================
@@ -49,11 +51,18 @@ packaging/dist/
 packaging/output/
 packaging/runtime/
 *.msi
+*.msix
+*.msixbundle
 *.exe
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
 # Permitir scripts y manifiestos de packaging
 !packaging/package-windows.bat
 !packaging/app.manifest
-
 # ==========================================
 # 4. Entornos de Desarrollo (IDEs)
 # ==========================================
@@ -62,18 +71,16 @@ packaging/runtime/
 *.iml
 *.iws
 *.ipr
-
-# Visual Studio / VS Code
 .vs/
 *.VC.db
 *.opendb
 .vscode/
-
+*.suo
+*.user
 # Eclipse
 .classpath
 .project
 .settings/
-
 # ==========================================
 # 5. Sistema Operativo y Logs
 # ==========================================
@@ -81,3 +88,9 @@ Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 *.log
+*.tmp
+*.bak
+.env
+.env.*
+!.env.example
+!.env.sample

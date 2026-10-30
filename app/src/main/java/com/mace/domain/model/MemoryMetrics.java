@@ -1,23 +1,46 @@
 package com.mace.domain.model;
 
+import java.util.Objects;
+
 /**
- * Métricas de memoria de un proceso, expresadas en bytes.
+ * Métricas de memoria de un proceso, con estado independiente por serie.
  *
- * @param workingSetBytes memoria física residente (Working Set / RSS)
- * @param privateBytes memoria privada exclusiva del proceso (no compartida)
+ * <p>Working Set y Private Bytes son series distintas: {@code privateBytes} puede superar al
+ * Working Set (memoria comprometida no residente), por lo que no se impone ninguna relación.</p>
+ *
+ * @param workingSetReading   memoria física residente (Working Set)
+ * @param privateBytesReading memoria privada comprometida (Private Bytes / PrivateUsage)
  */
-public record MemoryMetrics(long workingSetBytes, long privateBytes) {
+public record MemoryMetrics(LongMetricReading workingSetReading, LongMetricReading privateBytesReading) {
 
     public MemoryMetrics {
-        if (workingSetBytes < 0) {
-            throw new IllegalArgumentException("workingSetBytes no puede ser negativo: " + workingSetBytes);
-        }
-        if (privateBytes < 0) {
-            throw new IllegalArgumentException("privateBytes no puede ser negativo: " + privateBytes);
-        }
+        Objects.requireNonNull(workingSetReading, "workingSetReading no puede ser null");
+        Objects.requireNonNull(privateBytesReading, "privateBytesReading no puede ser null");
     }
 
-    public static MemoryMetrics zero() {
-        return new MemoryMetrics(0L, 0L);
+    /** Ambas series válidas, en bytes. */
+    public MemoryMetrics(long workingSetBytes, long privateBytes) {
+        this(LongMetricReading.valid(workingSetBytes), LongMetricReading.valid(privateBytes));
+    }
+
+    /** Ninguna serie disponible por {@code state}. */
+    public static MemoryMetrics unavailable(MetricState state) {
+        LongMetricReading missing = LongMetricReading.unavailable(state);
+        return new MemoryMetrics(missing, missing);
+    }
+
+    /**
+     * Compatibilidad: Working Set en bytes o 0 si no es válido. Preferir
+     * {@link #workingSetReading()} para distinguir «0» de «no disponible».
+     */
+    public long workingSetBytes() {
+        return workingSetReading.orElse(0L);
+    }
+
+    /**
+     * Compatibilidad: Private Bytes o 0 si no es válido. Preferir {@link #privateBytesReading()}.
+     */
+    public long privateBytes() {
+        return privateBytesReading.orElse(0L);
     }
 }

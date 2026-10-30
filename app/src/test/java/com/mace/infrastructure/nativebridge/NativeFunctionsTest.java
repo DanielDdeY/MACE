@@ -7,10 +7,12 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
+import java.lang.foreign.SymbolLookup;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,7 +50,7 @@ class NativeFunctionsTest {
         Files.writeString(falsa, "esto no es una DLL", StandardCharsets.UTF_8);
 
         NativeLibraryException error = assertThrows(NativeLibraryException.class,
-                () -> NativeFunctions.load(falsa));
+                () -> NativeFunctions.load(falsa, Optional.empty()));
 
         assertTrue(error.getMessage().contains("No se pudo cargar"), error.getMessage());
     }
@@ -62,9 +64,42 @@ class NativeFunctionsTest {
         assumeTrue(Files.isRegularFile(kernel32), "kernel32.dll no encontrada");
 
         NativeLibraryException error = assertThrows(NativeLibraryException.class,
-                () -> NativeFunctions.load(kernel32));
+                () -> NativeFunctions.load(kernel32, Optional.empty()));
 
-        assertTrue(error.getMessage().contains(NativeFunctions.SYMBOL_INITIALIZE_TELEMETRY), error.getMessage());
+        assertTrue(error.getMessage().contains(NativeFunctions.SYMBOL_GET_ABI_INFO), error.getMessage());
+    }
+
+    @Test
+    void unaDllAnteriorSinCpGetAbiInfoSeRechazaAntesDeEnlazarNada() {
+        // Una DLL heredada exporta los siete símbolos antiguos pero no CP_GetAbiInfo.
+        SymbolLookup soloHeredados = name -> Optional.empty();
+
+        NativeLibraryException error = assertThrows(NativeLibraryException.class,
+                () -> new NativeFunctions(Path.of("mace_native.dll"), "ABC", soloHeredados));
+
+        assertTrue(error.getMessage().contains("CP_GetAbiInfo"), error.getMessage());
+        assertTrue(error.getMessage().contains("anterior"), error.getMessage());
+    }
+
+    @Test
+    void unaDllConHashDistintoSeRechazaSinCargarla(@TempDir Path dir) throws IOException {
+        Path dll = dir.resolve("mace_native.dll");
+        Files.writeString(dll, "contenido", StandardCharsets.UTF_8);
+
+        NativeLibraryException error = assertThrows(NativeLibraryException.class,
+                () -> NativeFunctions.load(dll, Optional.of("00".repeat(32))));
+
+        assertTrue(error.getMessage().contains("SHA-256"), error.getMessage());
+        assertTrue(error.getMessage().contains(NativeLibraryIntegrity.sha256(dll)), error.getMessage());
+    }
+
+    @Test
+    void elHashSeCalculaEnElFormatoDeGetFileHash(@TempDir Path dir) throws IOException {
+        Path file = dir.resolve("abc.bin");
+        Files.writeString(file, "abc", StandardCharsets.US_ASCII);
+
+        assertEquals("BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD",
+                NativeLibraryIntegrity.sha256(file));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.mace.application.usecase;
 
 import com.mace.domain.model.ProcessEntry;
+import com.mace.domain.model.ProcessInventory;
 import com.mace.domain.port.out.ProcessLifecyclePort;
 
 import java.util.List;
@@ -14,7 +15,13 @@ public final class ListProcessesService {
         this.processLifecyclePort = Objects.requireNonNull(processLifecyclePort, "processLifecyclePort no puede ser null");
     }
 
+    /** Inventario completo: procesos con identidad, cantidad omitida por permisos y marca temporal. */
+    public ProcessInventory inventory() {
+        return processLifecyclePort.enumerateProcesses();
+    }
+
+    /** Compatibilidad: solo la lista de procesos. */
     public List<ProcessEntry> list() {
-        return processLifecyclePort.listUserlandProcesses();
+        return inventory().processes();
     }
 }
