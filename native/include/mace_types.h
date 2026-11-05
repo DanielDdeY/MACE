@@ -21,7 +21,9 @@ typedef struct {
     float    gpu_watts;
     uint32_t gpu_fan_rpm;
     uint8_t  is_gpu_available;
-    uint8_t  _padding[3];  // Alineación a 4/8 bytes
+    uint8_t  is_cpu_sensor_available; // 1 si cpu_temp/cpu_watts vienen de sensores reales (MSR).
+                                      // Ocupa un byte del antiguo padding: no cambia el tamaño.
+    uint8_t  _padding[2];  // Alineación a 4/8 bytes
     float    cpu_usage;    // Uso de CPU en porcentaje [0..100], real vía GetSystemTimes().
                            // Se añade al final para no alterar los offsets previos.
 } TelemetryData;

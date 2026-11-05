@@ -1,11 +1,14 @@
 package com.mace.presentation.viewmodel;
 
+import com.mace.domain.model.ProcessIdentity;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -18,6 +21,7 @@ public class ProcessTableViewModel {
     private final StringProperty searchText = new SimpleStringProperty("");
     private final FilteredList<ProcessRow> filteredProcesses;
     private final SortedList<ProcessRow> sortedProcesses;
+    private ProcessIdentity selectedIdentity;
 
     /** Accion que ejecuta el caso de uso real de terminacion (inyectada desde el controller). */
     private Consumer<ProcessRow> onTerminateRequested = row -> { /* no-op por defecto */ };
@@ -44,8 +48,20 @@ public class ProcessTableViewModel {
     }
 
     public void setOnTerminateRequested(Consumer<ProcessRow> handler) {
-        this.onTerminateRequested = handler;
+        this.onTerminateRequested = Objects.requireNonNull(handler, "handler no puede ser null");
     }
+
+    /** Recuerda la selección explícita sin depender del índice cambiante de la tabla. */
+    public void rememberSelection(ProcessRow row) {
+        selectedIdentity = row == null ? null : row.identity();
+    }
+
+    public Optional<ProcessRow> selectedVisibleRow() {
+        if (selectedIdentity == null) return Optional.empty();
+        return sortedProcesses.stream().filter(row -> row.identity().equals(selectedIdentity)).findFirst();
+    }
+
+    public void forgetSelection() { selectedIdentity = null; }
 
     public StringProperty searchTextProperty() { return searchText; }
 

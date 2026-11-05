@@ -28,3 +28,5 @@ jobs:
         run: cmake -S native -B native/build -A x64
       - name: Build native library
         run: cmake --build native/build --config Release
+      - name: Check diagnostic launcher
+        run: .\native\build\Release\test_mace.exe --help

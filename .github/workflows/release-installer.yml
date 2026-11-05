@@ -1,0 +1,143 @@
+name: Instalador de Windows
+
+# Genera MACE-Setup.exe y la version portatil y los publica en una Release, que es lo que
+# ofrece la pagina de descarga (docs/). Basta con subir un tag de version:
+#
+#     git tag v1.0.0
+#     git push origin v1.0.0
+#
+# El flujo crea la Release si no existe. Tambien se ejecuta al publicar una Release desde
+# GitHub o a mano (Actions > Instalador de Windows > Run workflow) indicando el tag.
+#
+# DLL nativa: si la Release ya trae el paquete verificado de Dev 1 (mace-native-*.zip con
+# bin/mace_native.dll y build-info.json) se empaqueta exactamente esa DLL. Si no lo trae, se
+# compila aqui con native/scripts/package-native.ps1 (sin los SDK de AMD ADLX y Ryzen Master,
+# que no estan en el servidor) y el ZIP resultante se adjunta a la Release. En ambos casos
+# packaging/verify-native-dll.ps1 comprueba su SHA-256 y su ABI antes de jpackage.
+
+on:
+  push:
+    tags: [ 'v*' ]
+  release:
+    types: [ published ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag de la version (ej. v1.0.0)"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: instalador-${{ github.event.release.tag_name || inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  instalador:
+    # windows-2022 trae MSVC, CMake y el Windows SDK (mt.exe) que necesita el manifiesto de administrador.
+    runs-on: windows-2022
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '22'
+          cache: maven
+
+      - name: Version de la aplicacion desde el tag
+        shell: pwsh
+        run: |
+          $version = $env:TAG -replace '^[vV]', ''
+          if ($version -notmatch '^\d+(\.\d+){0,2}$') {
+            throw "El tag '$env:TAG' debe ser una version numerica como v1.0.0 (requisito de jpackage)."
+          }
+          "MACE_APP_VERSION=$version" >> $env:GITHUB_ENV
+
+      - name: Paquete nativo de la Release o compilado aqui
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force native-release | Out-Null
+          gh release view $env:TAG -R $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) {
+            "RELEASE_EXISTS=1" >> $env:GITHUB_ENV
+            gh release download $env:TAG -R $env:GITHUB_REPOSITORY -p 'mace-native-*.zip' -D native-release 2>$null
+          }
+          $global:LASTEXITCODE = 0
+          $zip = Get-ChildItem native-release -Filter 'mace-native-*.zip' | Select-Object -First 1
+          if ($zip) {
+            Write-Host "Paquete nativo de la Release: $($zip.Name)"
+          } else {
+            Write-Host 'La Release no trae mace-native-*.zip: se compila la DLL en el servidor.'
+            .\native\scripts\package-native.ps1
+            $pkg = Get-ChildItem native\dist -Directory -Filter 'mace-native-*' |
+                Sort-Object Name -Descending | Select-Object -First 1
+            if (-not $pkg) { throw 'package-native.ps1 no genero el paquete en native\dist.' }
+            $zip = Join-Path (Resolve-Path native-release) "$($pkg.Name).zip"
+            Compress-Archive -Path $pkg.FullName -DestinationPath $zip
+            $zip = Get-Item $zip
+            "NATIVE_ZIP_BUILT=$($zip.FullName)" >> $env:GITHUB_ENV
+          }
+          Expand-Archive -LiteralPath $zip.FullName -DestinationPath native-release\pkg
+          $dll = Get-ChildItem native-release\pkg -Recurse -Filter mace_native.dll |
+              Where-Object { $_.Directory.Name -eq 'bin' } | Select-Object -First 1
+          if (-not $dll) { throw "El ZIP $($zip.Name) no contiene bin\mace_native.dll." }
+          "MACE_NATIVE_LIB=$($dll.FullName)" >> $env:GITHUB_ENV
+
+      - name: WiX Toolset 3 para el instalador
+        shell: pwsh
+        run: |
+          $wix = Get-ChildItem 'C:\Program Files (x86)' -Directory -Filter 'WiX Toolset v3*' -ErrorAction SilentlyContinue |
+              Sort-Object Name -Descending | Select-Object -First 1
+          if (-not $wix) {
+            choco install wixtoolset --no-progress -y
+            $wix = Get-ChildItem 'C:\Program Files (x86)' -Directory -Filter 'WiX Toolset v3*' | Select-Object -First 1
+          }
+          if (-not $wix) { throw "No se pudo instalar WiX Toolset 3." }
+          Join-Path $wix.FullName 'bin' >> $env:GITHUB_PATH
+
+      - name: Empaquetar (verifica hash y ABI antes de jpackage)
+        shell: cmd
+        run: call packaging\package-windows.bat exe
+
+      - name: Preparar archivos de descarga
+        shell: pwsh
+        run: |
+          $dist = 'packaging\dist'
+          $installer = Get-ChildItem $dist -Filter 'MACE-*.exe' | Select-Object -First 1
+          if (-not $installer) { throw "jpackage no genero el instalador en $dist." }
+          Copy-Item $installer.FullName "$dist\MACE-Setup.exe"
+          Compress-Archive -Path "$dist\MACE" -DestinationPath "$dist\MACE-portable.zip" -Force
+          $files = 'MACE-Setup.exe', 'MACE-portable.zip', 'MACE-native-report.txt'
+          $files | ForEach-Object {
+            "{0}  {1}" -f (Get-FileHash -Algorithm SHA256 "$dist\$_").Hash.ToLowerInvariant(), $_
+          } | Set-Content "$dist\SHA256SUMS-MACE.txt" -Encoding utf8
+          Get-Content "$dist\SHA256SUMS-MACE.txt"
+
+      - name: Publicar en la Release
+        shell: pwsh
+        run: |
+          $files = @(
+            'packaging\dist\MACE-Setup.exe',
+            'packaging\dist\MACE-portable.zip',
+            'packaging\dist\MACE-native-report.txt',
+            'packaging\dist\SHA256SUMS-MACE.txt'
+          )
+          if ($env:NATIVE_ZIP_BUILT) { $files += $env:NATIVE_ZIP_BUILT }
+          if ($env:RELEASE_EXISTS) {
+            gh release upload $env:TAG -R $env:GITHUB_REPOSITORY --clobber @files
+          } else {
+            $notes = "Descarga **MACE-Setup.exe** e instalalo. Windows 10 y 11 de 64 bits."
+            if ($env:NATIVE_ZIP_BUILT) {
+              $notes += "`n`nLa DLL nativa se compilo en GitHub Actions sin los SDK de AMD ADLX y Ryzen Master: algunas lecturas AMD pueden figurar como 'sin proveedor'."
+            }
+            gh release create $env:TAG -R $env:GITHUB_REPOSITORY --verify-tag `
+              --title "MACE $env:MACE_APP_VERSION" --notes $notes @files
+          }
+          if ($LASTEXITCODE -ne 0) { throw 'No se pudo publicar en la Release.' }

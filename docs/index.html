@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Descargar MACE para Windows</title>
+  <meta name="description" content="MACE lee la CPU, cada GPU, la memoria y los procesos de tu PC con Windows. Si un sensor no está disponible, lo dice en lugar de inventar un número.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #edf1f5;
+      --paper-raised: #f7f9fb;
+      --ink: #14212f;
+      --ink-soft: #4a5a6b;
+      --rule: #c9d3de;
+      --signal: #2563c9;
+      --signal-ink: #ffffff;
+      --caution-bg: #fff4db;
+      --caution-ink: #6b4500;
+      --panel: #121c28;
+      --panel-ink: #e6edf5;
+      --panel-soft: #8b9bb0;
+      --panel-grid: #22303f;
+      --trace: #4c8df6;
+      --nd: #e0b45c;
+      --focus: #f2a900;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #0f1722;
+        --paper-raised: #162130;
+        --ink: #e6edf5;
+        --ink-soft: #a3b1c2;
+        --rule: #2a394a;
+        --signal: #4c8df6;
+        --signal-ink: #0b1420;
+        --caution-bg: #2e2412;
+        --caution-ink: #f3d08a;
+        --panel: #0a121c;
+        --panel-grid: #1c2938;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Archivo", system-ui, "Segoe UI", sans-serif;
+      font-stretch: 100%;
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+    a { color: var(--signal); text-underline-offset: 0.18em; }
+    a:focus-visible, button:focus-visible, .button:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+    .wrap { max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
+    .measure { max-width: 66ch; }
+
+    /* Encabezado */
+    .hero { padding: 3.5rem 0 3rem; }
+    .hero-grid { display: grid; gap: 2.5rem; align-items: end; }
+    @media (min-width: 60rem) { .hero-grid { grid-template-columns: 1fr 1.15fr; } }
+    .wordmark {
+      margin: 0;
+      font-size: clamp(4.5rem, 14vw, 8.5rem);
+      font-weight: 800;
+      font-stretch: 125%;
+      line-height: 0.85;
+      letter-spacing: -0.02em;
+    }
+    .hero .lede {
+      margin: 1.25rem 0 0.75rem;
+      font-size: clamp(1.35rem, 2.6vw, 1.7rem);
+      font-weight: 600;
+      font-stretch: 112%;
+      line-height: 1.25;
+      color: var(--ink);
+    }
+    .hero p { margin: 0 0 1.5rem; color: var(--ink-soft); }
+
+    .button {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.95rem 1.5rem;
+      border-radius: 0.4rem;
+      background: var(--signal); color: var(--signal-ink);
+      font-weight: 700; font-stretch: 108%; font-size: 1.1rem;
+      text-decoration: none;
+    }
+    .button[aria-disabled="true"] { background: var(--rule); color: var(--ink-soft); pointer-events: none; }
+    .button svg { width: 1.2rem; height: 1.2rem; }
+    .hero .release-line { margin: 0.75rem 0 0; font-size: 0.95rem; color: var(--ink-soft); }
+
+    /* Panel de instrumento: lo único llamativo de la página */
+    .instrument {
+      margin: 0;
+      background: var(--panel); color: var(--panel-ink);
+      border-radius: 0.6rem;
+      padding: 1.25rem 1.25rem 1rem;
+    }
+    .instrument figcaption { font-size: 0.85rem; color: var(--panel-soft); margin-top: 0.75rem; }
+    .trace { width: 100%; height: auto; display: block; }
+    .trace .grid line { stroke: var(--panel-grid); stroke-width: 1; }
+    .trace .line {
+      fill: none; stroke: var(--trace); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round;
+      stroke-dasharray: 1200; stroke-dashoffset: 1200;
+      animation: draw 2.4s ease-out 0.2s forwards;
+    }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    @media (prefers-reduced-motion: reduce) { .trace .line { animation: none; stroke-dashoffset: 0; } }
+    .readouts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 1rem 0 0; }
+    .readouts div { border-top: 1px solid var(--panel-grid); padding-top: 0.6rem; }
+    .readouts dt { font-size: 0.85rem; color: var(--panel-soft); }
+    .readouts dd { margin: 0.15rem 0 0; font-size: 1.6rem; font-weight: 700; font-stretch: 112%;
+                   font-variant-numeric: tabular-nums; line-height: 1.1; }
+    .readouts dd.nd { color: var(--nd); }
+    .readouts dd small { display: block; font-size: 0.8rem; font-weight: 400; font-stretch: 100%; color: var(--panel-soft); }
+    @media (max-width: 30rem) { .readouts { grid-template-columns: 1fr; } }
+
+    /* Secciones */
+    section { padding: 3rem 0; border-top: 1px solid var(--rule); }
+    h2 { margin: 0 0 1rem; font-size: 1.75rem; font-weight: 700; font-stretch: 115%; line-height: 1.2; }
+    h3 { margin: 0 0 0.35rem; font-size: 1.1rem; font-weight: 700; }
+
+    .steps { list-style: none; counter-reset: step; padding: 0; margin: 1.5rem 0 0; display: grid; gap: 1.5rem; }
+    @media (min-width: 52rem) { .steps { grid-template-columns: repeat(3, 1fr); } }
+    .steps li { counter-increment: step; }
+    .steps li::before {
+      content: counter(step);
+      display: block; margin-bottom: 0.4rem;
+      font-size: 2.6rem; font-weight: 800; font-stretch: 125%; line-height: 1; color: var(--signal);
+    }
+    .steps p { margin: 0; color: var(--ink-soft); }
+
+    .note {
+      margin: 1.75rem 0 0; padding: 1rem 1.15rem;
+      background: var(--caution-bg); color: var(--caution-ink);
+      border-radius: 0.4rem; max-width: 66ch;
+    }
+    .note strong { display: block; margin-bottom: 0.2rem; }
+
+    .table-scroll { overflow-x: auto; margin-top: 1.25rem; }
+    table { border-collapse: collapse; width: 100%; min-width: 40rem; background: var(--paper-raised); }
+    th, td { text-align: left; vertical-align: top; padding: 0.75rem 0.9rem; border-bottom: 1px solid var(--rule); }
+    th { font-size: 0.9rem; font-stretch: 108%; }
+    td:first-child { font-weight: 600; white-space: nowrap; }
+
+    .shot { margin: 2rem 0 0; }
+    .shot img { width: 100%; max-width: 56rem; height: auto; display: block; border-radius: 0.4rem;
+                border: 1px solid var(--rule); }
+    .shot figcaption { margin-top: 0.6rem; font-size: 0.95rem; color: var(--ink-soft); max-width: 66ch; }
+
+    .facts { display: grid; gap: 1.5rem; margin-top: 1.25rem; }
+    @media (min-width: 52rem) { .facts { grid-template-columns: repeat(3, 1fr); } }
+    .facts p { margin: 0; color: var(--ink-soft); }
+
+    code, .hash { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.9em; overflow-wrap: anywhere; }
+    pre { background: var(--paper-raised); border: 1px solid var(--rule); border-radius: 0.4rem; padding: 0.8rem 1rem; overflow-x: auto; }
+
+    footer { padding: 2rem 0 3rem; border-top: 1px solid var(--rule); color: var(--ink-soft); font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <h1 class="wordmark">MACE</h1>
+        <p class="lede">Monitor de hardware y procesos para Windows</p>
+        <p class="measure">Lee la CPU, cada tarjeta gráfica, la memoria y los programas abiertos de tu PC. Si un sensor no está disponible, lo dice en lugar de inventar un número, y nunca cierra un programa sin que tú lo confirmes.</p>
+        <a class="button" id="download" href="https://github.com/DanielDdeY/MACE/releases">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16"/></svg>
+          <span id="download-label">Descargar para Windows</span>
+        </a>
+        <p class="release-line" id="release-line" aria-live="polite">Windows 10 y 11 de 64 bits.</p>
+      </div>
+
+      <figure class="instrument" aria-label="Ejemplo de lecturas reales de MACE">
+        <svg class="trace" viewBox="0 0 580 190" role="img" aria-label="Uso de CPU durante 30 segundos, entre 3 y 24 por ciento">
+          <g class="grid">
+            <line x1="0" y1="10" x2="580" y2="10"/><line x1="0" y1="55" x2="580" y2="55"/>
+            <line x1="0" y1="100" x2="580" y2="100"/><line x1="0" y1="145" x2="580" y2="145"/>
+            <line x1="0" y1="185" x2="580" y2="185"/>
+          </g>
+          <polyline class="line" points="0,88 20,159 40,155 60,163 80,161 100,159 120,151 140,130 160,147 180,138 200,155 220,136 240,138 260,142 280,163 300,147 320,159 340,163 360,157 380,140 400,130 420,155 440,168 460,155 480,138 500,163 520,168 540,170 560,155 580,152"/>
+        </svg>
+        <dl class="readouts">
+          <div><dt>Uso de CPU</dt><dd>5,4 %</dd></div>
+          <div><dt>RAM en uso</dt><dd>74 %</dd></div>
+          <div><dt>Temperatura de CPU</dt><dd class="nd">N/D<small>sin proveedor de sensor</small></dd></div>
+        </dl>
+        <figcaption>Lecturas reales de un Intel Core Ultra 7 265 sin permisos de administrador.</figcaption>
+      </figure>
+    </div>
+  </header>
+
+  <main>
+    <section id="instalar">
+      <div class="wrap">
+        <h2>Instalar en tu PC</h2>
+        <ol class="steps">
+          <li>
+            <h3>Descarga el instalador</h3>
+            <p>Pulsa «Descargar para Windows» y guarda <code>MACE-Setup.exe</code>. Incluye todo lo necesario: no hace falta instalar Java.</p>
+          </li>
+          <li>
+            <h3>Ejecútalo</h3>
+            <p>Elige la carpeta de instalación y termina. MACE queda en el menú Inicio y en el escritorio.</p>
+          </li>
+          <li>
+            <h3>Abre MACE como administrador</h3>
+            <p>Windows te pedirá permiso al abrirlo. Con él, MACE ve los procesos de otros usuarios y los sensores que requieren elevación.</p>
+          </li>
+        </ol>
+        <div class="note">
+          <strong>Si Windows dice «Windows protegió tu PC»</strong>
+          El instalador no está firmado con un certificado comercial. Pulsa «Más información» y luego «Ejecutar de todas formas». Puedes comprobar que el archivo es el original con su SHA-256, más abajo.
+        </div>
+        <p class="measure">¿Solo quieres ver la interfaz? Abre <strong>MACE-Preview</strong> desde el menú Inicio: muestra datos simulados y no pide permisos de administrador.</p>
+      </div>
+    </section>
+
+    <section id="que-mide">
+      <div class="wrap">
+        <h2>Qué mide y de qué depende</h2>
+        <p class="measure">Cada lectura llega con su estado. Cuando falta el controlador o el fabricante no expone un sensor, verás «N/D» y el motivo.</p>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th scope="col">Componente</th><th scope="col">Qué muestra</th><th scope="col">Qué necesita</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>CPU</td><td>Uso, temperatura y potencia</td><td>El uso funciona siempre. En Intel, la temperatura requiere el controlador WinRing0, que MACE no instala. En AMD Ryzen, requiere Ryzen Master Monitoring SDK y abrir MACE como administrador.</td></tr>
+              <tr><td>GPU NVIDIA</td><td>Temperatura, uso, potencia, ventilador y memoria de vídeo</td><td>El controlador de NVIDIA.</td></tr>
+              <tr><td>GPU AMD Radeon</td><td>Temperatura, uso, potencia, ventilador y memoria de vídeo</td><td>Un controlador AMD compatible con ADLX.</td></tr>
+              <tr><td>GPU Intel</td><td>Uso y potencia; temperatura según el modelo</td><td>El controlador gráfico de Intel.</td></tr>
+              <tr><td>Memoria</td><td>RAM total, disponible y en uso</td><td>Nada adicional.</td></tr>
+              <tr><td>Programas</td><td>Lista con memoria usada, si responden y botón para cerrarlos con confirmación</td><td>Permiso de administrador para ver todos.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <figure class="shot">
+          <img src="img/mace-panel.png" width="1116" height="739" loading="lazy"
+               alt="Panel principal de MACE: CPU Intel, una GPU detectada, 22,8 GiB de RAM en uso y 99 procesos; las temperaturas aparecen como N/D, sin proveedor.">
+          <figcaption>Panel principal en un equipo Intel. Las temperaturas aparecen como N/D porque ese equipo no tiene un proveedor de sensores instalado.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="avisos">
+      <div class="wrap">
+        <h2>Avisos e historial</h2>
+        <div class="facts">
+          <div>
+            <h3>Temperatura alta</h3>
+            <p>Te avisa cuando la CPU o una tarjeta gráfica pasa de 75 °C, y en rojo a partir de 85 °C.</p>
+          </div>
+          <div>
+            <h3>Programas con problemas</h3>
+            <p>Detecta programas cuya memoria crece sin parar o cuya ventana deja de responder. Solo avisa: cerrarlos siempre es decisión tuya.</p>
+          </div>
+          <div>
+            <h3>Caja negra</h3>
+            <p>Guarda en tu equipo las lecturas y los avisos de las últimas horas, para revisar qué pasó después de un cuelgue.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="requisitos">
+      <div class="wrap">
+        <h2>Requisitos y comprobación</h2>
+        <div class="facts">
+          <div>
+            <h3>Sistema</h3>
+            <p>Windows 10 u 11 de 64 bits. Para datos completos, permiso de administrador.</p>
+          </div>
+          <div>
+            <h3>Linux y macOS</h3>
+            <p>No están disponibles: la parte que lee el hardware usa funciones exclusivas de Windows.</p>
+          </div>
+          <div>
+            <h3>Archivo original</h3>
+            <p id="hash-text">El SHA-256 del instalador aparecerá aquí cuando haya una versión publicada.</p>
+          </div>
+        </div>
+        <p class="measure">Para comprobarlo, abre PowerShell en la carpeta de descargas y compara el resultado con el valor de arriba:</p>
+        <pre><code>Get-FileHash .\MACE-Setup.exe</code></pre>
+        <p class="measure" id="other-downloads">También puedes ver <a href="https://github.com/DanielDdeY/MACE/releases">todas las versiones publicadas</a>.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      MACE es un proyecto académico de la UTP. El código está en <a href="https://github.com/DanielDdeY/MACE">GitHub</a>.
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var REPO = 'DanielDdeY/MACE';
+      var download = document.getElementById('download');
+      var label = document.getElementById('download-label');
+      var line = document.getElementById('release-line');
+      var hash = document.getElementById('hash-text');
+      var others = document.getElementById('other-downloads');
+
+      function megabytes(bytes) {
+        return (bytes / 1048576).toFixed(0) + ' MB';
+      }
+
+      function noRelease(message) {
+        download.setAttribute('aria-disabled', 'true');
+        download.removeAttribute('href');
+        label.textContent = 'Próximamente';
+        line.textContent = message;
+      }
+
+      fetch('https://api.github.com/repos/' + REPO + '/releases/latest', {
+        headers: { Accept: 'application/vnd.github+json' }
+      }).then(function (response) {
+        if (response.status === 404) { throw 'none'; }
+        if (!response.ok) { throw 'error'; }
+        return response.json();
+      }).then(function (release) {
+        var assets = release.assets || [];
+        var setup = assets.filter(function (a) { return a.name === 'MACE-Setup.exe'; })[0];
+        var portable = assets.filter(function (a) { return a.name === 'MACE-portable.zip'; })[0];
+        if (!setup) {
+          noRelease('La versión ' + release.tag_name + ' se está preparando. Vuelve en unos minutos.');
+          return;
+        }
+        download.href = setup.browser_download_url;
+        var date = new Date(release.published_at).toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' });
+        line.textContent = 'Versión ' + release.tag_name.replace(/^v/i, '') + ', ' + megabytes(setup.size)
+            + ', publicada el ' + date + '. Windows 10 y 11 de 64 bits.';
+        if (setup.digest && setup.digest.indexOf('sha256:') === 0) {
+          hash.innerHTML = '';
+          hash.appendChild(document.createTextNode('SHA-256 de MACE-Setup.exe: '));
+          var code = document.createElement('span');
+          code.className = 'hash';
+          code.textContent = setup.digest.slice(7).toUpperCase();
+          hash.appendChild(code);
+        } else {
+          hash.textContent = 'Consulta el archivo SHA256SUMS-MACE.txt de la versión publicada.';
+        }
+        if (portable) {
+          others.innerHTML = '';
+          others.appendChild(document.createTextNode('¿Prefieres no instalar? Descarga la '));
+          var link = document.createElement('a');
+          link.href = portable.browser_download_url;
+          link.textContent = 'versión portátil (ZIP)';
+          others.appendChild(link);
+          others.appendChild(document.createTextNode(', o revisa todas las versiones en GitHub.'));
+        }
+      }).catch(function (reason) {
+        if (reason === 'none') {
+          noRelease('Todavía no hay una versión publicada. El instalador aparecerá aquí en cuanto el equipo publique la primera.');
+        } else {
+          line.textContent = 'No se pudo consultar la última versión. El botón abre la lista de versiones en GitHub.';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

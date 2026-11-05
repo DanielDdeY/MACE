@@ -1,11 +1,18 @@
 package com.mace.infrastructure.mock;
 
-import com.mace.domain.model.MemoryMetrics;
+import com.mace.domain.model.MetricState;
 import com.mace.domain.model.ProcessEntry;
-import com.mace.domain.model.ProcessId;
+import com.mace.domain.model.ProcessIdentity;
+import com.mace.domain.model.ProcessInventory;
+import com.mace.domain.model.ProcessQueryStatus;
+import com.mace.domain.model.ResponsivenessOutcome;
+import com.mace.domain.model.TerminationOutcome;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -13,86 +20,106 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MockProcessAdapterTest {
 
-    @Test
-    void listaProcesosDeEjemploValidosParaElDominio() {
-        List<ProcessEntry> processes = new MockProcessAdapter(1L).listUserlandProcesses();
+    private final AtomicLong nanos = new AtomicLong();
+    private final MockProcessAdapter adapter = new MockProcessAdapter(5L,
+            Clock.fixed(Instant.parse("2026-09-08T12:00:00Z"), ZoneOffset.UTC), () -> nanos.addAndGet(1_000_000_000L));
 
-        assertFalse(processes.isEmpty());
-        for (ProcessEntry p : processes) {
-            assertTrue(p.name().toLowerCase().endsWith(".exe"), p.name());
-            assertTrue(p.fullPath().endsWith(p.name()), p.fullPath());
-            assertTrue(p.memory().workingSetBytes() >= 0);
-            assertTrue(p.memory().privateBytes() <= p.memory().workingSetBytes(), "private <= working set");
+    private static ProcessIdentity identity(long pid) {
+        return MockProcessAdapter.identityOf(pid, pid % 3600);
+    }
+
+    private ProcessInventory enumerate(int times) {
+        ProcessInventory last = null;
+        for (int i = 0; i < times; i++) {
+            last = adapter.enumerateProcesses();
         }
-        assertEquals(processes.size(), processes.stream().map(ProcessEntry::pid).distinct().count(), "PIDs unicos");
+        return last;
     }
 
     @Test
-    void terminarEliminaElProcesoDeLaTablaSimulada() {
-        MockProcessAdapter adapter = new MockProcessAdapter(1L);
-        ProcessEntry victim = adapter.listUserlandProcesses().get(0);
+    void cadaProcesoTieneIdentidadCompleta() {
+        ProcessInventory inventory = adapter.enumerateProcesses();
 
-        assertTrue(adapter.terminateProcess(victim.pid()));
-
-        assertTrue(adapter.listUserlandProcesses().stream().noneMatch(p -> p.pid().equals(victim.pid())));
-        assertFalse(adapter.terminateProcess(victim.pid()), "segunda terminacion del mismo PID devuelve false");
+        assertTrue(inventory.processes().size() > 10);
+        assertEquals(MockProcessAdapter.SKIPPED_COUNT, inventory.skippedCount());
+        assertTrue(inventory.processes().stream().allMatch(entry -> entry.identity().creationTime100nsUtc() != 0));
     }
 
     @Test
-    void terminarUnProcesoInexistenteDevuelveFalse() {
-        assertFalse(new MockProcessAdapter(1L).terminateProcess(new ProcessId(999_999L)));
+    void colgadoSinVentanaYRespondiendoSonResultadosDistintos() {
+        assertEquals(ResponsivenessOutcome.HUNG,
+                adapter.checkResponsiveness(identity(MockProcessAdapter.HUNG_PROCESS_PID)).outcome());
+        assertEquals(ResponsivenessOutcome.NO_WINDOW,
+                adapter.checkResponsiveness(identity(MockProcessAdapter.NO_WINDOW_PID)).outcome());
+        assertEquals(ResponsivenessOutcome.RESPONDING, adapter.checkResponsiveness(identity(4120)).outcome());
     }
 
     @Test
-    void nuncaTerminaLosPidsProtegidosDelSistema() {
-        MockProcessAdapter adapter = new MockProcessAdapter(List.of(
-                entry(0L, "System Idle Process"),
-                entry(4L, "System"),
-                entry(1234L, "app.exe")), 1L);
+    void unProcesoDeVidaCortaTerminaYSeInformaComoFinalizado() {
+        ProcessIdentity shortLived = identity(MockProcessAdapter.SHORT_LIVED_PID);
+        assertTrue(enumerate(MockProcessAdapter.SHORT_LIVED_ENUMERATIONS).find(shortLived).isPresent());
 
-        assertFalse(adapter.terminateProcess(new ProcessId(0L)));
-        assertFalse(adapter.terminateProcess(new ProcessId(4L)));
-        assertEquals(3, adapter.listUserlandProcesses().size());
-        assertTrue(adapter.terminateProcess(new ProcessId(1234L)));
+        ProcessInventory after = adapter.enumerateProcesses();
+
+        assertTrue(after.find(shortLived).isEmpty());
+        assertEquals(ResponsivenessOutcome.PROCESS_EXITED, adapter.checkResponsiveness(shortLived).outcome());
+        assertEquals(TerminationOutcome.PROCESS_EXITED, adapter.terminate(shortLived).outcome());
     }
 
     @Test
-    void soloElProcesoCongeladoNoResponde() {
-        MockProcessAdapter adapter = new MockProcessAdapter(1L);
+    void unPidReutilizadoRechazaLaIdentidadAnterior() {
+        ProcessIdentity old = identity(MockProcessAdapter.REUSED_PID);
+        ProcessInventory inventory = enumerate(MockProcessAdapter.REUSE_AFTER_ENUMERATIONS + 1);
 
-        assertFalse(adapter.isWindowResponsive(new ProcessId(MockProcessAdapter.HUNG_PROCESS_PID)));
-        for (ProcessEntry p : adapter.listUserlandProcesses()) {
-            if (p.pid().value() != MockProcessAdapter.HUNG_PROCESS_PID) {
-                assertTrue(adapter.isWindowResponsive(p.pid()), p.name());
-            } else {
-                assertEquals(MockProcessAdapter.HUNG_PROCESS_NAME, p.name());
-            }
-        }
+        ProcessEntry reused = inventory.processes().stream()
+                .filter(entry -> entry.pid().value() == MockProcessAdapter.REUSED_PID).findFirst().orElseThrow();
+        assertEquals(MockProcessAdapter.REUSED_NEW_NAME, reused.name());
+        assertFalse(reused.identity().equals(old));
+        assertEquals(TerminationOutcome.PID_REUSED, adapter.terminate(old).outcome());
+        assertEquals(ProcessQueryStatus.PID_REUSED, adapter.sample(old).status());
+        assertTrue(adapter.enumerateProcesses().find(reused.identity()).isPresent(), "el proceso nuevo no se toca");
     }
 
     @Test
-    void laMemoriaFluctuaPeroLaIdentidadDeLosProcesosSeMantiene() {
-        MockProcessAdapter adapter = new MockProcessAdapter(99L);
-        List<ProcessEntry> first = adapter.listUserlandProcesses();
-        List<ProcessEntry> second = adapter.listUserlandProcesses();
-
-        assertEquals(first.size(), second.size());
-        boolean anyMemoryChanged = false;
-        for (int i = 0; i < first.size(); i++) {
-            assertEquals(first.get(i).pid(), second.get(i).pid());
-            assertEquals(first.get(i).name(), second.get(i).name());
-            anyMemoryChanged |= !first.get(i).memory().equals(second.get(i).memory());
-        }
-        assertTrue(anyMemoryChanged, "la memoria simulada debe variar entre consultas");
+    void protegidoYSinPermisosRechazanLaTerminacion() {
+        assertEquals(TerminationOutcome.PROTECTED_PROCESS,
+                adapter.terminate(identity(MockProcessAdapter.PROTECTED_PID)).outcome());
+        assertEquals(TerminationOutcome.ACCESS_DENIED,
+                adapter.terminate(identity(MockProcessAdapter.ELEVATED_PID)).outcome());
+        assertEquals(TerminationOutcome.PROTECTED_PROCESS, adapter.terminate(ProcessIdentity.of(4, 1)).outcome());
     }
 
     @Test
-    void esDeterministaConLaMismaSemilla() {
-        assertEquals(new MockProcessAdapter(5L).listUserlandProcesses(),
-                new MockProcessAdapter(5L).listUserlandProcesses());
+    void sinPermisosLaRutaYLaMemoriaNoSeInventan() {
+        ProcessEntry elevated = adapter.enumerateProcesses().find(identity(MockProcessAdapter.ELEVATED_PID)).orElseThrow();
+
+        assertEquals(ProcessQueryStatus.ACCESS_DENIED, elevated.imagePath().status());
+        assertEquals(MetricState.ACCESS_DENIED, elevated.memory().workingSetReading().state());
     }
 
-    private static ProcessEntry entry(long pid, String name) {
-        return new ProcessEntry(new ProcessId(pid), name, "C:\\" + name, new MemoryMetrics(1024L, 512L));
+    @Test
+    void terminarUnProcesoNormalLoQuitaDeLaTabla() {
+        ProcessIdentity chrome = identity(4120);
+
+        assertEquals(TerminationOutcome.TERMINATED, adapter.terminate(chrome).outcome());
+        assertTrue(adapter.enumerateProcesses().find(chrome).isEmpty());
+        assertEquals(TerminationOutcome.PROCESS_EXITED, adapter.terminate(chrome).outcome());
+    }
+
+    @Test
+    void elProcesoConFugaCreceDeFormaSostenida() {
+        ProcessIdentity leaky = identity(MockProcessAdapter.LEAKY_PID);
+        long first = adapter.enumerateProcesses().find(leaky).orElseThrow().memory().privateBytes();
+        long later = enumerate(10).find(leaky).orElseThrow().memory().privateBytes();
+
+        assertTrue(later - first > 10L * 1024 * 1024);
+    }
+
+    @Test
+    void laMismaSemillaProduceLaMismaMemoria() {
+        MockProcessAdapter a = new MockProcessAdapter(9L);
+        MockProcessAdapter b = new MockProcessAdapter(9L);
+
+        assertEquals(a.enumerateProcesses().processes(), b.enumerateProcesses().processes());
     }
 }

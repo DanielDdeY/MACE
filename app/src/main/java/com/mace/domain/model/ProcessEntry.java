@@ -3,23 +3,37 @@ package com.mace.domain.model;
 import java.util.Objects;
 
 /**
- * Representa un proceso de espacio de usuario ("userland") detectado en el sistema.
+ * Proceso de espacio de usuario ("userland") detectado en el inventario V2.
  *
- * @param pid identificador único del proceso
- * @param name nombre corto del ejecutable (p. ej. "chrome.exe")
- * @param fullPath ruta completa al ejecutable en disco
- * @param memory métricas de memoria asociadas al proceso
+ * <p>La identidad completa ({@link ProcessIdentity}) es la clave de la fila: la UI debe
+ * conservarla y entregarla tal cual al pedir una terminación manual.</p>
+ *
+ * @param identity  PID + fecha de creación
+ * @param name      nombre corto del ejecutable (p. ej. "chrome.exe")
+ * @param imagePath ruta completa, o el motivo por el que no está disponible
+ * @param memory    Working Set y Private Bytes con estado individual
  */
-public record ProcessEntry(ProcessId pid, String name, String fullPath, MemoryMetrics memory) {
+public record ProcessEntry(ProcessIdentity identity, String name, ImagePath imagePath, MemoryMetrics memory) {
 
     public ProcessEntry {
-        Objects.requireNonNull(pid, "pid no puede ser null");
+        Objects.requireNonNull(identity, "identity no puede ser null");
+        Objects.requireNonNull(imagePath, "imagePath no puede ser null");
         Objects.requireNonNull(memory, "memory no puede ser null");
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("name no puede estar vacío");
         }
-        if (fullPath == null || fullPath.isBlank()) {
-            throw new IllegalArgumentException("fullPath no puede estar vacío");
-        }
+    }
+
+    /** Atajo para el PID de la identidad. */
+    public ProcessId pid() {
+        return identity.pid();
+    }
+
+    /**
+     * Compatibilidad con la tabla actual: ruta completa o cadena vacía si no está disponible.
+     * Preferir {@link #imagePath()} para mostrar el motivo.
+     */
+    public String fullPath() {
+        return imagePath.asOptional().orElse("");
     }
 }
