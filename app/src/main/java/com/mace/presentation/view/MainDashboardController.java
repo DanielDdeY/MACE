@@ -10,6 +10,7 @@ import com.mace.presentation.view.component.GpuCard;
 import com.mace.presentation.view.component.BlackboxHistoryPane;
 import com.mace.presentation.view.component.MetricCard;
 import com.mace.presentation.view.component.NavIcon;
+import com.mace.presentation.view.hud.HudPane;
 import com.mace.presentation.viewmodel.AlertItemViewModel;
 import com.mace.presentation.viewmodel.BlackboxHistoryViewModel;
 import com.mace.presentation.viewmodel.GpuCardViewModel;
@@ -131,6 +132,7 @@ public final class MainDashboardController {
     private final Map<GpuAdapterId, GpuCard> gpuCardsById = new HashMap<>();
     private final List<MetricCard> metricCards = new ArrayList<>();
     private ProcessTableViewModel procesosViewModel;
+    private HudPane hudPane;
     private GpuCardViewModel selectedGpu;
     private GpuAdapterId selectedGpuId;
     private boolean hasReceivedInventory;
@@ -156,6 +158,8 @@ public final class MainDashboardController {
         configureAlerts();
         configureProcesses();
         configureBlackbox();
+        hudPane = new HudPane(dashboardViewModel);
+        paneHud.getChildren().add(hudPane);
         bindBlackbox();
         dashboardViewModel.start();
     }
@@ -633,6 +637,7 @@ public final class MainDashboardController {
     }
 
     public void close() {
+        if (hudPane != null) hudPane.close();
         blackboxHistory.close();
         gpuCardsById.values().forEach(GpuCard::close);
         metricCards.forEach(MetricCard::close);
