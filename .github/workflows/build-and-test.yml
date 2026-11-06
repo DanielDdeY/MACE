@@ -2,7 +2,7 @@ name: MACE CI - Build & Test Suite
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop , 'ci/**' ]
   pull_request:
     branches: [ main, develop ]
 
