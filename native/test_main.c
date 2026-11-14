@@ -34,6 +34,7 @@ static const char* provider_name(MaceProviderId provider) {
         case MACE_PROVIDER_NVIDIA_NVML: return "NVIDIA NVML";
         case MACE_PROVIDER_AMD_ADLX: return "AMD ADLX";
         case MACE_PROVIDER_INTEL_IGCL: return "Intel IGCL";
+        case MACE_PROVIDER_LHM: return "LibreHardwareMonitor";
         default: return "Ninguno";
     }
 }

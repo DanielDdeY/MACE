@@ -33,6 +33,10 @@ set(MACE_NATIVE_SOURCES
     src/telemetry/igcl_provider.c
     src/telemetry/gpu_providers.c
     src/telemetry/cpu_sensors.c
+    src/telemetry/legacy_telemetry.c
+    src/telemetry/lhm_wire.c
+    src/telemetry/lhm_transport.c
+    src/telemetry/lhm_receiver.c
     src/hardware/gpu_inventory.c
     src/extensions/hang_detector.c
     src/extensions/shared_buffer.c
@@ -85,7 +89,7 @@ endif()
 target_compile_definitions(mace_native PRIVATE MACE_EXPORTS
     _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE)
 target_compile_options(mace_native PRIVATE /W4 /WX /utf-8)
-target_link_libraries(mace_native PRIVATE kernel32 psapi user32 dxgi dxguid gdi32 shell32 ole32)
+target_link_libraries(mace_native PRIVATE kernel32 psapi user32 dxgi dxguid gdi32 shell32 ole32 advapi32 bcrypt)
 set_target_properties(mace_native PROPERTIES
     OUTPUT_NAME mace_native
     PREFIX ""
@@ -94,6 +98,16 @@ set_target_properties(mace_native PROPERTIES
 
 # Demostración manual de telemetría V2 y procesos; depende del equipo.
 add_executable(test_mace test_main.c)
+add_executable(Test_MACE_new test_main.c)
+target_include_directories(Test_MACE_new PRIVATE include)
+target_compile_options(Test_MACE_new PRIVATE /W4 /WX /utf-8)
+target_link_libraries(Test_MACE_new PRIVATE mace_native advapi32)
+set_target_properties(Test_MACE_new PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+add_executable(test_lhm_live tests/test_lhm_live.c)
+target_include_directories(test_lhm_live PRIVATE include)
+target_compile_options(test_lhm_live PRIVATE /W4 /WX /utf-8)
+target_link_libraries(test_lhm_live PRIVATE mace_native)
+set_target_properties(test_lhm_live PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 target_include_directories(test_mace PRIVATE include)
 target_compile_options(test_mace PRIVATE /W4 /WX /utf-8)
 target_link_libraries(test_mace PRIVATE mace_native advapi32)
@@ -102,6 +116,39 @@ set_target_properties(test_mace PROPERTIES
 
 include(CTest)
 if (BUILD_TESTING)
+    # Real API/runtime/receiver with deterministic inventory/providers; never installed.
+    set(LHM_FIXTURE_SOURCES ${MACE_NATIVE_SOURCES})
+    list(REMOVE_ITEM LHM_FIXTURE_SOURCES src/telemetry/nvml_loader.c
+        src/telemetry/igcl_provider.c src/telemetry/gpu_providers.c src/hardware/gpu_inventory.c
+        src/telemetry/cpu_sensors.c)
+    add_library(mace_native_lhm_test SHARED ${LHM_FIXTURE_SOURCES}
+        tests/lhm_fixture_providers.c tests/lhm_fixture_cpu.c)
+    target_include_directories(mace_native_lhm_test PRIVATE include src/process
+        "${CMAKE_CURRENT_BINARY_DIR}/generated")
+    target_compile_definitions(mace_native_lhm_test PRIVATE MACE_EXPORTS _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE)
+    target_link_libraries(mace_native_lhm_test PRIVATE psapi user32 dxgi dxguid gdi32 shell32 ole32 advapi32 bcrypt)
+    add_executable(lhm_fake_helper tests/lhm_fake_helper.c src/telemetry/lhm_wire.c)
+    target_include_directories(lhm_fake_helper PRIVATE include)
+    target_link_libraries(lhm_fake_helper PRIVATE advapi32)
+    add_executable(test_lhm_receiver tests/test_lhm_receiver.c)
+    target_include_directories(test_lhm_receiver PRIVATE include)
+    target_link_libraries(test_lhm_receiver PRIVATE mace_native_lhm_test)
+    foreach(target mace_native_lhm_test lhm_fake_helper test_lhm_receiver)
+        target_compile_options(${target} PRIVATE /W4 /WX /utf-8)
+        target_compile_definitions(${target} PRIVATE UNICODE _UNICODE)
+        set_target_properties(${target} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endforeach()
+    foreach(scenario slow valid stale stale-arrival bad-pid wrong-client malformed disconnect
+        no-elevation driver-missing zero-cpu zero-unprivileged unknown-power unknown-gpu duplicate-pci replay nan fragmented fallback
+        gpu-zero bad-server-pid hash-mismatch init-race)
+        add_test(NAME lhm_${scenario} COMMAND test_lhm_receiver "$<TARGET_FILE:lhm_fake_helper>" ${scenario})
+        set_tests_properties(lhm_${scenario} PROPERTIES TIMEOUT 25)
+    endforeach()
+    add_executable(test_lhm_wire tests/test_lhm_wire.c src/telemetry/lhm_wire.c)
+    target_include_directories(test_lhm_wire PRIVATE include)
+    target_compile_options(test_lhm_wire PRIVATE /W4 /WX /utf-8)
+    set_target_properties(test_lhm_wire PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    add_test(NAME lhm_wire COMMAND test_lhm_wire)
     add_executable(test_abi_layouts tests/test_abi_layouts.c)
     target_include_directories(test_abi_layouts PRIVATE include)
     target_compile_options(test_abi_layouts PRIVATE /W4 /WX /utf-8)

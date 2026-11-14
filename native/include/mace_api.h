@@ -38,6 +38,8 @@ CP_API MaceStatus CP_PollSystemMemoryV2(MaceSystemMemoryV2* out_data,
                                        uint32_t out_capacity);
 
 // Ciclo de vida del subsistema de telemetría
+/* Inicio asíncrono: 0 si iniciado/ya activo; MACE_E_BUSY si otro ciclo de vida
+ * está en curso. No espera al helper/SDK. Cerrar antes de descargar la DLL. */
 CP_API int  CP_InitializeTelemetry(void);
 CP_API void CP_ShutdownTelemetry(void);
 CP_API int  CP_PollTelemetry(TelemetryData* out_data);

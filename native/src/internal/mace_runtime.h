@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include "mace_status.h"
 
-/* The runtime lock serializes differential provider state and prevents module
- * unloading while any telemetry call is using its functions or handles. */
+/* Poll lock owns GetSystemTimes differential state and cache readers.
+ * Lifecycle lock owns worker start/join; provider IO never holds the poll lock. */
 int MaceRuntime_Initialize(uint32_t cpu_vendor);
 void MaceRuntime_Shutdown(void);
 MaceStatus MaceRuntime_BeginPoll(void);

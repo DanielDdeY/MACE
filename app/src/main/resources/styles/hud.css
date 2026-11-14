@@ -1,0 +1,7 @@
+.hud-settings { -fx-background-color: #080d14; }
+.hud-settings-card { -fx-background-color: #111c28; -fx-border-color: #294154; -fx-border-width: 1; }
+.hud-heading { -fx-text-fill: #eaf3fa; -fx-font-size: 15px; -fx-font-weight: bold; }
+.hud-line { -fx-text-fill: #44e7ef; -fx-font-family: "Consolas"; -fx-font-size: 12px; }
+.hud-handle { -fx-text-fill: #86a9bc; -fx-font-size: 10px; -fx-font-weight: bold; }
+.hud-close { -fx-background-color: transparent; -fx-text-fill: #86a9bc; -fx-padding: 0 3 0 8; }
+.hud-close:hover { -fx-text-fill: #44e7ef; }

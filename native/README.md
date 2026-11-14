@@ -1,5 +1,7 @@
 # MACE native
 
+La integración LHM 1B usa un receptor C en segundo plano y caché, sin esperar al helper desde CP_Poll. Las instrucciones y evidencias están en [RESULTADOS-1B](../helper/RESULTADOS-1B.md). Para ejecutar sus pruebas desde la raíz: `powershell -NoProfile -ExecutionPolicy Bypass -File .\native\scripts\test-lhm1b.ps1`. Se genera también `Release\Test_MACE_new.exe` para CPU/GPU/RAM/procesos. El empaquetado Java del helper sigue pendiente; este trabajo se detiene en 1B.
+
 Biblioteca C17/C++17 para Windows 10/11 x64. La versión nativa 1.4.2 conserva la API usada por Java y añade telemetría V2, gestión protegida de procesos, bases nativas de las extensiones y un ciclo de vida sincronizado. Véanse [ABI](docs/ABI.md), [fase 5](docs/PHASE5.md), [extensiones](docs/EXTENSIONS.md), [guía de prueba para el grupo](docs/TEAM_DIAGNOSTIC_GUIDE.md) y [entrega a los demás desarrolladores](docs/HANDOFF.md).
 
 Desde la raíz del repositorio, con Visual Studio 2022 o 2026 y las herramientas C++/Windows SDK instaladas:
