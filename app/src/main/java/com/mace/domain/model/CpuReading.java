@@ -4,8 +4,8 @@ import java.util.Objects;
 
 /**
  * Lectura de CPU de un sondeo ({@code MaceCpuTelemetryV2}) con estado independiente por
- * métrica. En CPU AMD la temperatura depende del Ryzen Master Monitoring SDK instalado y de
- * elevación; la potencia AMD no tiene proveedor. Intel depende del acceso opcional a MSR.
+ * métrica. LHM requiere elevación y PawnIO para temperatura/potencia CPU.
+ * El uso global continúa procediendo de Windows; los proveedores anteriores se conservan.
  *
  * @param vendor             fabricante detectado
  * @param provider           proveedor de temperatura/potencia ({@link SensorProvider#WINDOWS} si solo hay uso)

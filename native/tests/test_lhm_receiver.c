@@ -61,6 +61,7 @@ int wmain(int argc,wchar_t** argv) {
                 CHECK(gpu.power_w.state==MACE_METRIC_UNSUPPORTED && gpu.power_w.value==0 && gpu.power_scope==MACE_POWER_SCOPE_UNKNOWN);
             } else if (wcscmp(argv[2],L"gpu-zero")==0) CHECK(gpu.power_w.state==MACE_METRIC_VALID && gpu.power_w.value==0);
             else CHECK(gpu.power_w.state==MACE_METRIC_VALID && gpu.power_w.value>0 && gpu.power_w.value<1);
+            if (wcscmp(argv[2],L"amd-chip")==0) CHECK(gpu.power_scope==MACE_POWER_SCOPE_GPU_CHIP);
         } else CHECK(gpu.temperature_c.value==0 && gpu.power_w.value==0 && gpu.fan_rpm.value==0 &&
             gpu.power_w.state==MACE_METRIC_UNSUPPORTED && gpu.usage_percent.state==MACE_METRIC_UNSUPPORTED &&
             gpu.fan_rpm.state==MACE_METRIC_UNSUPPORTED && gpu.fan_percent.state==MACE_METRIC_UNSUPPORTED &&

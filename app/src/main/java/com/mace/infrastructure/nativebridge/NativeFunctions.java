@@ -249,18 +249,19 @@ public final class NativeFunctions implements NativeApi, AutoCloseable {
     /**
      * Inicializa la telemetría una sola vez aunque varios adaptadores compartan esta instancia.
      *
-     * @return código devuelto por la DLL en la primera inicialización, o 0 si ya estaba lista
+     * @return 0 tras inicialización correcta; BUSY si hay otro ciclo de vida en curso.
+     * Solo el éxito se conserva; BUSY permite reintento y no adquiere el cierre del runtime.
      */
     @Override
     public int ensureTelemetryInitialized() {
-        lifecycle.writeLock().lock();
+        if (!lifecycle.writeLock().tryLock()) return NativeStatus.BUSY;
         try {
             ensureOpen();
             if (telemetryInitialized) {
                 return 0;
             }
             int result = (int) initializeTelemetryHandle.invokeExact();
-            telemetryInitialized = true;
+            telemetryInitialized = result == NativeStatus.OK;
             return result;
         } catch (IllegalStateException e) {
             throw e;

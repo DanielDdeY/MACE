@@ -7,6 +7,26 @@ using System.Text.Json;
 using Mace.Lhm.Helper;
 using Mace.Lhm.Protocol;
 
+if (args is ["--amd-power-report"])
+{
+    var computer=new LibreHardwareMonitor.Hardware.Computer { IsGpuEnabled=true };
+    computer.Open();
+    try
+    {
+    foreach (var hardware in computer.Hardware.Where(h => h.HardwareType==LibreHardwareMonitor.Hardware.HardwareType.GpuAmd))
+    {
+        for (int i=0;i<3;i++) { hardware.Update(); await Task.Delay(1000); }
+        Console.WriteLine("LHM "+typeof(LibreHardwareMonitor.Hardware.Computer).Assembly.GetName().Version);
+        Console.WriteLine(hardware.Name+" "+((LibreHardwareMonitor.Hardware.Gpu.GenericGpu)hardware).DeviceId);
+        foreach (var sensor in hardware.Sensors.Where(s => s.SensorType==LibreHardwareMonitor.Hardware.SensorType.Power))
+            Console.WriteLine($"POWER name={sensor.Name} id={sensor.Identifier} value={sensor.Value}");
+        Console.WriteLine(hardware.GetReport());
+    }
+    }
+    finally { computer.Close(); }
+    return;
+}
+
 int passed = 0;
 void Check(bool condition, string label)
 {
@@ -24,6 +44,26 @@ DeviceSample Cpu() => new(DeviceKind.Cpu, IdentityKind.Cpu, new(0,0,0,0),
     Enumerable.Range(0,7).Select(_ => Reading.Missing()).ToArray());
 Snapshot Sample() => new(1, 10000, 123, DriverState.Running, HelperState.Ready, [Cpu()]);
 Snapshot Decode(byte[] data) => WireProtocol.Decode(data,123,0,10000);
+
+string asicReport="Overdrive Caps\n Status: ADL_OK\n Version: 8\nOverdrive5 Parameters\n"
+    +" Sensor[ADL_PMLOG_ASIC_POWER].Supported: True\n Sensor[ADL_PMLOG_ASIC_POWER].Value: 5\n Sensor[ADL_PMLOG_BOARD_POWER].Supported: False\n";
+PciIdentity rx5500=new(0x1002,0x7340,0x38221462,0xC5);
+Meaning Scope(PciIdentity pci,string report)=>AmdPowerPolicy.Classify(pci,new Version(0,9,6,0),"GPU Package",3,report);
+Check(Scope(rx5500,asicReport)==Meaning.GpuChip,"RX5500 identified ASIC power is chip");
+Check(Scope(rx5500,asicReport.Replace("BOARD_POWER].Supported: False","BOARD_POWER].Supported: True"))==Meaning.UnknownPower,"board fallback remains unknown");
+Check(Scope(rx5500,asicReport.Replace("ASIC_POWER].Supported: True","ASIC_POWER].Supported: False"))==Meaning.UnknownPower,"missing ASIC evidence");
+Check(Scope(rx5500,asicReport.Replace("Version: 8","Version: 7"))==Meaning.UnknownPower,"other backend remains unknown");
+Check(Scope(rx5500 with { Device=0x744C },asicReport)==Meaning.UnknownPower,"unvalidated AMD model remains unknown");
+Check(AmdPowerPolicy.Classify(rx5500,new Version(0,9,7,0),"GPU Package",3,asicReport)==Meaning.UnknownPower,"other LHM version remains unknown");
+Check(AmdPowerPolicy.Classify(rx5500,new Version(0,9,6,0),"GPU Power",3,asicReport)==Meaning.UnknownPower,"label alone insufficient");
+Check(AmdPowerPolicy.Classify(rx5500,new Version(0,9,6,0),"GPU Package",0,asicReport)==Meaning.UnknownPower,"sensor index required");
+Reading unknownPower=new(9,ReadingState.NumericReported,Meaning.UnknownPower);
+Reading Resolve(string report)=>AmdPowerPolicy.Resolve(rx5500,new Version(0,9,6,0),"GPU Package",3,unknownPower,report);
+Check(Resolve(asicReport)==new Reading(5,ReadingState.NumericReported,Meaning.GpuChip),"use identified ASIC value, not ambiguous package fallback");
+Check(Resolve(asicReport.Replace(".Value: 5",".Value: NaN"))==unknownPower,"invalid identified value remains unknown");
+Check(Resolve(asicReport.Replace(".Value: 5",".Value: 2001"))==unknownPower,"out of range identified value remains unknown");
+Check(Resolve(asicReport.Replace(".Value: 5",".Value: 0"))==new Reading(0,ReadingState.NumericReported,Meaning.GpuChip),"zero identified ASIC power remains numeric");
+Check(Resolve(asicReport+"Sensor[ADL_PMLOG_ASIC_POWER].Value: 7\n")==unknownPower,"ambiguous report value remains unknown");
 
 byte[] startup=new byte[128];
 BinaryPrimitives.WriteUInt32LittleEndian(startup,0x3142434D);

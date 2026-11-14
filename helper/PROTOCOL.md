@@ -46,6 +46,8 @@ Después siguen siete métricas de 16 bytes, en orden fijo. Cada métrica contie
 
 Los rangos acotan el transporte y no certifican la exactitud del sensor. Se rechazan NaN, infinitos, enteros fraccionarios, uso de VRAM mayor al total y campos desconocidos.
 
+Actualización 1C-0: no cambia la versión 1 ni ningún campo/tamaño. Se utiliza el Meaning GpuChip=5 ya existente para la potencia ASIC identificada en AMD PCI 1002:7340 con LHM 0.9.6.0, sensor GPU Package índice 3, backend Overdrive 8 y reporte con ASIC_POWER soportado y BOARD_POWER no soportado. Se toma el valor explícito y único ASIC_POWER del reporte público de LHM; no se reetiqueta el posible fallback de GPU Package. Se exigen cifras finitas entre 0 y 2.000 W. Otros dispositivos, versiones, informes ambiguos/incompletos y sensores sin identificar conservan UnknownPower=6, que la DLL devuelve UNSUPPORTED/0 con scope UNKNOWN. Evidencia y límites en RESULTADOS-1C.md.
+
 State tiene los valores NumericReported 1, WarmingUp 2, NoProvider 3, Unsupported 4 y ReadFailed 5. Si una lectura no es NumericReported, value y meaning son cero. NumericReported conserva también ceros como cifras crudas. No equivale a MACE_METRIC_VALID.
 
 Meaning tiene los valores None 0, CpuPackage 1, CpuControlTemperature 2, GpuCore 3, GpuBoard 4, GpuChip 5 y UnknownPower 6. Temperatura CPU acepta CpuPackage o CpuControlTemperature, GPU acepta GpuCore, potencia CPU exige CpuPackage y potencia GPU acepta GpuBoard, GpuChip o UnknownPower. Las demás métricas usan None.

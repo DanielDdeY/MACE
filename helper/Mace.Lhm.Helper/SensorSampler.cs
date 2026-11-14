@@ -46,6 +46,7 @@ public sealed class SensorSampler : IDisposable
             missing[1] = cpu
                 ? Select(sensors, SensorType.Power, Meaning.CpuPackage, "CPU Package", "Package")
                 : Select(sensors, SensorType.Power, Meaning.UnknownPower, "GPU Package", "GPU Power");
+            if (!cpu && pci is not null) missing[1]=AmdPowerPolicy.Apply(hardware,pci,missing[1]);
             if (!cpu)
             {
                 missing[2] = Select(sensors, SensorType.Load, Meaning.None, "GPU Core");

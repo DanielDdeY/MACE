@@ -20,7 +20,7 @@ public interface NativeApi {
     /**
      * Inicializa la telemetría una sola vez aunque varios adaptadores compartan la instancia.
      *
-     * @return código de {@code CP_InitializeTelemetry} (0 aunque falten proveedores opcionales)
+     * @return 0 si inició; BUSY es transitorio y permite reintento sin esperar al cierre en curso
      */
     int ensureTelemetryInitialized();
 

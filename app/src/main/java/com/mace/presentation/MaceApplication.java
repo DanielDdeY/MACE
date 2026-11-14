@@ -113,21 +113,19 @@ public final class MaceApplication extends Application {
 
     @Override
     public void stop() {
-        if (dashboardController != null) {
-            dashboardController.close();
+        RuntimeException failure=null;
+        for (AutoCloseable resource:new AutoCloseable[] {
+            dashboardController==null ? null : dashboardController::close,
+            monitoringService,dashboardViewModel,telemetryPublisher,adapters
+        }) {
+            if (resource==null) continue;
+            try { resource.close(); }
+            catch (Exception error) {
+                if (failure==null) failure=new IllegalStateException("No se completó un cierre de MACE",error);
+                else failure.addSuppressed(error);
+            }
         }
-        if (monitoringService != null) {
-            monitoringService.close();
-        }
-        if (dashboardViewModel != null) {
-            dashboardViewModel.close();
-        }
-        if (telemetryPublisher != null) {
-            telemetryPublisher.close();
-        }
-        if (adapters != null) {
-            adapters.close();
-        }
+        if (failure!=null) throw failure;
     }
 
     public static void main(String[] args) {

@@ -53,7 +53,7 @@ static void frame(unsigned char* b,uint64_t seq,bool warming) {
             put32(d+20,i*0x1111); put32(d+24,0x12345678); put32(d+28,1); }
         for (unsigned m=0;m<7;m++) put32(d+40+m*16,4);
         metric(d,0,i ? 44 : mode(L"zero-cpu") || mode(L"zero-unprivileged") ? 0 : 55,i ? 3 : 1);
-        metric(d,1,i ? mode(L"gpu-zero") ? 0 : 0.05 : mode(L"zero-cpu") || mode(L"zero-unprivileged") ? 0 : 15,i ? mode(L"unknown-power") ? 6 : 4 : 1);
+        metric(d,1,i ? mode(L"gpu-zero") ? 0 : 0.05 : mode(L"zero-cpu") || mode(L"zero-unprivileged") ? 0 : 15,i ? mode(L"unknown-power") ? 6 : mode(L"amd-chip") && i==1 ? 5 : 4 : 1);
         if (i) {
             metric(d,2,0,0); metric(d,3,0,0); metric(d,4,0,0);
             metric(d,5,1048576,0); metric(d,6,4294967296.0,0);

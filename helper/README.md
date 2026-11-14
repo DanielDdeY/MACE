@@ -1,5 +1,7 @@
 # Helper LHM de MACE — Subfases 1A y 1B
 
+La entrega de 1C y la corrección de potencia AMD están en [RESULTADOS-1C.md](RESULTADOS-1C.md). El protocolo conserva su versión y tamaños.
+
 Helper Windows x64 autocontenido, con .NET 10.0.12 y LibreHardwareMonitorLib 0.9.6. Se compila con SDK 10.0.401, dependencias exactas y archivos `packages.lock.json`. `global.json` rechaza otros SDK para conservar la configuración verificada.
 
 Desde PowerShell, en esta carpeta, ejecutar `powershell -NoProfile -ExecutionPolicy Bypass -File .\Build-Helper.ps1`. La restauración usa `--locked-mode`. Las pruebas automáticas se ejecutan antes de publicar. Cada publicación se crea en una carpeta nueva de `artifacts`. `artifacts/latest.txt` indica la última que pasó las comprobaciones.

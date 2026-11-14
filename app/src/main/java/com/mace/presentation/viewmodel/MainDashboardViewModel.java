@@ -87,6 +87,8 @@ public final class MainDashboardViewModel implements AutoCloseable {
     private volatile boolean closed;
     private long lastAppliedSequence;
     private long lastHardwareSequence;
+    private final TelemetryPresentation telemetryPresentation=new TelemetryPresentation(System::nanoTime);
+    private HardwareSnapshot displayedHardware;
 
     public MainDashboardViewModel(MonitoringService monitoringService,
                                   TerminateProcessService terminateProcessService,
@@ -142,7 +144,8 @@ public final class MainDashboardViewModel implements AutoCloseable {
             return;
         }
         if (snapshot.hardwareSequence() > lastHardwareSequence) {
-            applyHardware(snapshot.hardware(), snapshot.hardwareSequence());
+            displayedHardware=telemetryPresentation.apply(snapshot.hardware());
+            applyHardware(displayedHardware, snapshot.hardwareSequence());
             lastHardwareSequence = snapshot.hardwareSequence();
             hardwareSequence.set(lastHardwareSequence);
         }
@@ -157,7 +160,10 @@ public final class MainDashboardViewModel implements AutoCloseable {
         mutableAlerts.setAll(nextAlerts);
         blackboxStats.set(snapshot.blackbox());
         applyBlackbox(snapshot.blackbox());
-        latestSnapshot.set(snapshot);
+        // Both dashboard and HUD consume the same presentation copy. Domain data stays raw.
+        latestSnapshot.set(new MonitoringSnapshot(snapshot.sequence(),snapshot.hardwareSequence(),
+            displayedHardware,snapshot.thermalAlerts(),snapshot.processes(),snapshot.leakAlerts(),
+            snapshot.hangAlerts(),snapshot.responsiveness(),snapshot.blackbox()));
         lastAppliedSequence = snapshot.sequence();
         monitoringSequence.set(lastAppliedSequence);
     }

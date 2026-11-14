@@ -28,7 +28,7 @@ public final class NativeCodes {
         return state.ordinal();
     }
 
-    // MaceProviderId: 0..7 en el mismo orden que SensorProvider.
+    // MaceProviderId: 0..8 en el mismo orden que SensorProvider; LHM se añade al final.
     public static SensorProvider provider(int code) {
         SensorProvider[] providers = SensorProvider.values();
         return code >= 0 && code < providers.length ? providers[code] : SensorProvider.NONE;

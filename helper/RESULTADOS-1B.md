@@ -161,7 +161,7 @@ Evidencias regenerables, ignoradas por Git:
 |---|---|
 | CPU elevada a través de esta DLL C en hardware real | NO VERIFICADO en 1B; CPU elevada real sí constaba en 1A a través del receptor .NET. 1B verifica la promoción con simulación y la negativa real sin elevar |
 | Intel CPU, NVIDIA e Intel GPU físicos | NO VERIFICADO; preservar y probar dispatch simulado no prueba hardware |
-
+| HVCI activo y VM/instalación limpia | NO VERIFICADO; no se cambia Integridad de memoria ni se instala PawnIO en esta entrega |
 | Conexión desde otro usuario/SMB remoto | NO VERIFICADO físicamente; ACL nativa real inspeccionada y PIPE_REJECT_REMOTE_CLIENTS establecido |
 | UI Java con DLL nueva | NO VERIFICADO visualmente; mapeo provider 8 pendiente de 1C; paquete de aplicación no actualizado |
 | Suspensión/reanudación, hotplug, iGPU/dGPU inactivas, registro con dispositivos fantasma | NO VERIFICADO; se conserva N/D si no se puede probar identidad única reciente |
@@ -195,7 +195,7 @@ Desde PowerShell como administrador, para exigir también temperatura y potencia
 powershell -NoProfile -ExecutionPolicy Bypass -File .\native\scripts\test-lhm1b.ps1 -RealHelper -RequireCpu
 ```
 
-|--|
+El script no instala PawnIO ni modifica HVCI. Un fallo de -RequireCpu conserva el log para diagnóstico.
 
 Para repetir únicamente CTest en la carpeta verificada aquí:
 

@@ -12,7 +12,8 @@ public enum SensorProvider {
     AMD_UPROF("AMD uProf"),
     NVIDIA_NVML("NVIDIA NVML"),
     AMD_ADLX("AMD ADLX"),
-    INTEL_IGCL("Intel IGCL");
+    INTEL_IGCL("Intel IGCL"),
+    LHM("LibreHardwareMonitor");
 
     private final String label;
 

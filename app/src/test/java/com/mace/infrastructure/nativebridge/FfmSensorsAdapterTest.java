@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.foreign.MemorySegment;
 import java.util.List;
+import java.time.Clock;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static java.lang.foreign.ValueLayout.JAVA_FLOAT_UNALIGNED;
 import static java.lang.foreign.ValueLayout.JAVA_INT_UNALIGNED;
@@ -54,6 +56,37 @@ class FfmSensorsAdapterTest {
                 MetricReading.valid(71), MetricReading.valid(180), MetricReading.valid(97),
                 LongMetricReading.valid(2100), LongMetricReading.valid(58),
                 LongMetricReading.valid(10 * GIB), LongMetricReading.valid(12 * GIB), 3L));
+    }
+
+    @Test
+    void lhmSobreRegistrosV2MantieneProveedorYEstadosHastaLaPresentacion() {
+        api.cpuReadings=poll->new CpuReading(CpuVendor.AMD,SensorProvider.LHM,PowerScope.CPU_PACKAGE,
+            MetricReading.valid(60),MetricReading.valid(20),MetricReading.valid(10),1);
+        api.gpuReadings.put(DGPU.id(),poll->new GpuReading(DGPU,SensorProvider.LHM,PowerScope.UNKNOWN,
+            MetricReading.valid(44),MetricReading.unavailable(MetricState.UNSUPPORTED),MetricReading.valid(5),
+            LongMetricReading.valid(0),LongMetricReading.valid(0),LongMetricReading.valid(GIB),
+            LongMetricReading.valid(4*GIB),1));
+        var snapshot=new FfmSensorsAdapter(api).fetchHardwareSnapshot();
+        assertEquals(SensorProvider.LHM,snapshot.cpu().provider());
+        var gpu=snapshot.gpu(DGPU.id()).orElseThrow();
+        assertEquals("LibreHardwareMonitor",gpu.provider().label());
+        assertTrue(com.mace.presentation.viewmodel.MetricDisplay.decimal(gpu.powerWatts(),"W",1).text().startsWith("N/D"));
+        assertTrue(com.mace.presentation.viewmodel.MetricDisplay.decimal(gpu.temperatureCelsius(),"°C",1).isValid());
+        assertEquals("0 RPM",com.mace.presentation.viewmodel.MetricDisplay.whole(gpu.fanRpm(),"RPM").text());
+    }
+
+    @Test
+    void busyInicialDevuelveWarmingYElSiguienteSondeoPuedeRecuperarse() {
+        api.initResult=NativeStatus.BUSY;
+        AtomicLong time=new AtomicLong();
+        FfmSensorsAdapter adapter=new FfmSensorsAdapter(api,Clock.systemUTC(),time::get);
+        assertEquals(MetricState.WARMING_UP,adapter.fetchHardwareSnapshot().cpu().temperatureCelsius().state());
+        assertEquals(1,api.initCalls);
+        assertEquals(0,api.cpuPolls,"no se sondea telemetría sin inicialización confirmada");
+        api.initResult=0; time.set(TelemetryInitialization.RETRY_NANOS);
+        var snapshot=adapter.fetchHardwareSnapshot();
+        assertEquals(2,api.initCalls);
+        assertTrue(snapshot.cpu().temperatureCelsius().isValid());
     }
 
     @Test
