@@ -34,7 +34,7 @@ import static java.lang.foreign.ValueLayout.JAVA_LONG;
  * <p>Ciclo de vida (según {@code native/docs/PHASE5.md}): {@link #close()} espera a que
  * terminen las llamadas en curso, impide nuevas y llama una sola vez a
  * {@code CP_ShutdownTelemetry}. La DLL <strong>permanece cargada</strong> hasta que termina el
- * proceso (el proveedor ADLX conserva una sesión por proceso); por eso se enlaza con
+ * proceso para mantener la propiedad de los símbolos FFM; se enlaza con
  * {@link Arena#global()}. Los tokens de caja negra deben cerrarse antes que esta instancia.</p>
  *
  * <p>Los {@link MethodHandle} son inmutables y seguros para uso concurrente; la memoria fuera

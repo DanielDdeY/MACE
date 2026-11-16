@@ -11,7 +11,7 @@ public enum SensorProvider {
     AMD_RYZEN_SDK("AMD CPU (obsoleto)"), // Reservado ABI 3; sin implementación activa.
     AMD_UPROF("AMD uProf"),
     NVIDIA_NVML("NVIDIA NVML"),
-    AMD_ADLX("AMD ADLX"),
+    AMD_ADLX("AMD GPU (obsoleto)"), // Reservado ABI 6; sin implementación activa.
     INTEL_IGCL("Intel IGCL"),
     LHM("LibreHardwareMonitor");
 

@@ -43,6 +43,18 @@ Las opciones generales de los scripts se terminan de retirar en 1D-4.
 
 Pruebas del tramo: helper 63/63, CTest 40/40, Java 279 (una omitida), sin fallos ni errores. Logs: native/build/1d-2/{helper,native,java}.log.
 
+## 1D-3
+
+Se retira adlx_provider.c, su despacho y las opciones de compilación relacionadas
+con esa fuente. El test de despacho conserva NVML/IGCL y exige ausencia del
+proveedor AMD anterior; su original se archiva como texto. No se modifican las
+implementaciones NVML, IGCL ni windows_memory_capacity/DXGI.
+Mocks Radeon actuales pasan a LHM. El ID 6 queda reservado sin implementación.
+No se cambia AmdPowerPolicy: potencia AMD fuera de PCI 1002:7340 queda N/D;
+temperatura, uso, RPM y VRAM dependen de sus sensores LHM y de una identidad única.
+
+Pruebas del tramo: helper 63/63, CTest 40/40, Java 279 (una omitida), sin fallos ni errores. Logs: native/build/1d-3/{helper,native,java}.log.
+
 ## Límites
 
 NO VERIFICADO: CPU Intel, NVIDIA (NVML y respaldo), Intel GPU/IGCL, PawnIO ausente

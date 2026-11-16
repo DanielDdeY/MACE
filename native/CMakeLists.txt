@@ -49,17 +49,6 @@ target_include_directories(mace_native PRIVATE include
     src/process
     vendor_headers/intel_igcl
     "${CMAKE_CURRENT_BINARY_DIR}/generated")
-set(MACE_ADLX_SDK_DIR "" CACHE PATH "External AMD ADLX SDK root (contains SDK/Include/ADLX.h)")
-if (MACE_ADLX_SDK_DIR AND EXISTS "${MACE_ADLX_SDK_DIR}/SDK/Include/ADLX.h")
-    target_sources(mace_native PRIVATE src/telemetry/adlx_provider.c)
-    target_include_directories(mace_native PRIVATE "${MACE_ADLX_SDK_DIR}")
-    target_compile_definitions(mace_native PRIVATE MACE_HAS_ADLX=1)
-elseif (MACE_ADLX_SDK_DIR)
-    message(FATAL_ERROR "MACE_ADLX_SDK_DIR does not contain SDK/Include/ADLX.h")
-else()
-    message(STATUS "AMD ADLX provider disabled: set MACE_ADLX_SDK_DIR to the official SDK")
-endif()
-
 target_compile_definitions(mace_native PRIVATE MACE_EXPORTS
     _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE)
 target_compile_options(mace_native PRIVATE /W4 /WX /utf-8)
@@ -151,7 +140,6 @@ if (BUILD_TESTING)
     add_executable(test_gpu_provider_dispatch tests/test_gpu_provider_dispatch.c
         src/telemetry/gpu_providers.c)
     target_include_directories(test_gpu_provider_dispatch PRIVATE include src/telemetry)
-    target_compile_definitions(test_gpu_provider_dispatch PRIVATE MACE_HAS_ADLX=1)
     target_compile_options(test_gpu_provider_dispatch PRIVATE /W4 /WX /utf-8)
     target_link_libraries(test_gpu_provider_dispatch PRIVATE dxgi dxguid)
     set_target_properties(test_gpu_provider_dispatch PROPERTIES

@@ -44,7 +44,7 @@ enum {
     MACE_PROVIDER_AMD_RYZEN_SDK = 3, /* Reserved/obsolete ABI ID; no live provider. */
     MACE_PROVIDER_AMD_UPROF = 4,
     MACE_PROVIDER_NVIDIA_NVML = 5,
-    MACE_PROVIDER_AMD_ADLX = 6,
+    MACE_PROVIDER_AMD_ADLX = 6, /* Reserved/obsolete ABI ID; no live provider. */
     MACE_PROVIDER_INTEL_IGCL = 7,
     MACE_PROVIDER_LHM = 8
 };

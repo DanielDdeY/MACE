@@ -210,7 +210,7 @@ public final class MockSensorsAdapter implements HardwareSensorsPort {
         SimulatedGpu nvidia = new SimulatedGpu(adapter(0x0000_1A2B, 0x10DE, 0x2504, 0, "NVIDIA GeForce RTX 3060"),
                 GpuKind.DEDICATED_FULL, SensorProvider.NVIDIA_NVML, PowerScope.GPU_BOARD, 0f, 12L * GIB);
         SimulatedGpu radeon = new SimulatedGpu(adapter(0x0000_2C3D, 0x1002, 0x7340, 0, "AMD Radeon RX 5500 XT"),
-                GpuKind.DEDICATED_FULL, SensorProvider.AMD_ADLX, PowerScope.GPU_CHIP, 2f, 8L * GIB);
+                GpuKind.DEDICATED_FULL, SensorProvider.LHM, PowerScope.GPU_CHIP, 2f, 8L * GIB);
         SimulatedGpu intel = new SimulatedGpu(adapter(0x0000_0E4F, 0x8086, 0x9A49, 0, "Intel(R) Iris(R) Xe Graphics"),
                 GpuKind.INTEGRATED_NO_FAN, SensorProvider.INTEL_IGCL, PowerScope.GPU_CHIP, 4f, 2L * GIB);
         return switch (scenario) {

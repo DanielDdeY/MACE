@@ -15,7 +15,7 @@ import java.util.Locale;
 public enum MockScenario {
     NORMAL("Intel + NVIDIA, todas las métricas válidas"),
     CPU_NO_TEMPERATURE("CPU con uso válido y sin proveedor de temperatura ni potencia"),
-    AMD_NO_POWER("CPU AMD con temperatura LHM y potencia no disponible; Radeon por ADLX"),
+    AMD_NO_POWER("CPU AMD con temperatura LHM y potencia no disponible; Radeon por LHM"),
     ACCESS_DENIED("Ryzen sin elevación: temperatura de CPU con acceso denegado"),
     IGPU_NO_FAN("GPU integrada Intel con temperatura y sin ventilador propio"),
     DUAL_GPU("iGPU Intel + dGPU NVIDIA con datos distintos"),

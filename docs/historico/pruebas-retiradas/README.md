@@ -9,3 +9,4 @@ ni pruebas de producción; no se copian al instalador.
 | Archivo | Propósito anterior | Motivo |
 |---|---|---|
 | 1D-1-lhm_fixture_cpu.c.txt | Sustituía la inicialización hardware conservando GetSystemTimes | Ya no existe esa inicialización; el fixture vigente utiliza directamente el módulo Windows |
+| 1D-3-test_gpu_provider_dispatch.c.txt | Despacho con mock ADLX además de NVML/IGCL | Se conserva el original y se adapta el test vigente para conservar NVML/IGCL sin el proveedor retirado |

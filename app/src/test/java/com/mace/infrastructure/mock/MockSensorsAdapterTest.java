@@ -70,14 +70,14 @@ class MockSensorsAdapterTest {
     }
 
     @Test
-    void amdSinPotenciaYRadeonPorAdlx() {
+    void amdSinPotenciaYRadeonPorLhm() {
         HardwareSnapshot snapshot = adapter(MockScenario.AMD_NO_POWER).fetchHardwareSnapshot();
 
         assertEquals(CpuVendor.AMD, snapshot.cpu().vendor());
         assertEquals(SensorProvider.LHM, snapshot.cpu().provider());
         assertTrue(snapshot.cpu().temperatureCelsius().isValid());
         assertEquals(MetricState.NO_PROVIDER, snapshot.cpu().powerWatts().state());
-        assertEquals(SensorProvider.AMD_ADLX, snapshot.gpus().get(0).provider());
+        assertEquals(SensorProvider.LHM, snapshot.gpus().get(0).provider());
     }
 
     @Test
