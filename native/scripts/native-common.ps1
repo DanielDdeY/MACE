@@ -53,8 +53,12 @@ function Get-MaceToolchain {
 
         foreach ($candidate in $candidates) {
             if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) { continue }
-            $versionLine = (& $candidate --version | Select-Object -First 1)
-            if ($LASTEXITCODE -ne 0 -or $versionLine -notmatch 'cmake version (\d+\.\d+(?:\.\d+)?)') { continue }
+            # Drain stdout before selecting a line: Windows PowerShell 5.1 can
+            # otherwise stop the native process early and report exit code -1.
+            $versionOutput = @(& $candidate --version)
+            $versionExit = $LASTEXITCODE
+            $versionLine = $versionOutput | Select-Object -First 1
+            if ($versionExit -ne 0 -or $versionLine -notmatch 'cmake version (\d+\.\d+(?:\.\d+)?)') { continue }
             $cmakeVersion = [version]$Matches[1]
             if ($cmakeVersion -lt [version]'3.28') { continue }
             $ctest = Join-Path (Split-Path -Parent $candidate) 'ctest.exe'
