@@ -8,7 +8,7 @@ public enum SensorProvider {
     NONE("Ninguno"),
     WINDOWS("Windows"),
     INTEL_MSR("Intel MSR (obsoleto)"), // Reservado ABI 2; sin implementación activa.
-    AMD_RYZEN_SDK("AMD Ryzen Master SDK"),
+    AMD_RYZEN_SDK("AMD CPU (obsoleto)"), // Reservado ABI 3; sin implementación activa.
     AMD_UPROF("AMD uProf"),
     NVIDIA_NVML("NVIDIA NVML"),
     AMD_ADLX("AMD ADLX"),

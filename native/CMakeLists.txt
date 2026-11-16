@@ -60,32 +60,6 @@ else()
     message(STATUS "AMD ADLX provider disabled: set MACE_ADLX_SDK_DIR to the official SDK")
 endif()
 
-set(MACE_RYZEN_SDK_DIR "" CACHE PATH "External Ryzen Master Monitoring SDK root (contains include/ICPUEx.h)")
-if (MACE_RYZEN_SDK_DIR)
-    if (NOT EXISTS "${MACE_RYZEN_SDK_DIR}/include/ICPUEx.h" OR
-        NOT EXISTS "${MACE_RYZEN_SDK_DIR}/include/IPlatform.h")
-        message(FATAL_ERROR "MACE_RYZEN_SDK_DIR does not contain the Ryzen Master Monitoring SDK headers")
-    endif()
-    execute_process(COMMAND powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass
-        -File "${CMAKE_CURRENT_SOURCE_DIR}/scripts/check-ryzen-sdk-version.ps1"
-        "${MACE_RYZEN_SDK_DIR}"
-        RESULT_VARIABLE MACE_RYZEN_VERSION_RESULT
-        OUTPUT_VARIABLE MACE_RYZEN_VERSION_OUTPUT
-        ERROR_VARIABLE MACE_RYZEN_VERSION_ERROR)
-    if (NOT MACE_RYZEN_VERSION_RESULT EQUAL 0)
-        message(FATAL_ERROR "Unsupported Ryzen Master Monitoring SDK: ${MACE_RYZEN_VERSION_ERROR}")
-    endif()
-    enable_language(CXX)
-    set_target_properties(mace_native PROPERTIES
-        CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
-    target_sources(mace_native PRIVATE src/telemetry/amd_ryzen_provider.cpp)
-    target_include_directories(mace_native SYSTEM PRIVATE "${MACE_RYZEN_SDK_DIR}/include")
-    target_compile_definitions(mace_native PRIVATE MACE_HAS_RYZEN_SDK=1)
-    target_link_libraries(mace_native PRIVATE advapi32 version)
-    message(STATUS "AMD Ryzen CPU temperature provider enabled (external SDK headers)")
-else()
-    message(STATUS "AMD Ryzen CPU temperature disabled: set MACE_RYZEN_SDK_DIR to the official SDK")
-endif()
 target_compile_definitions(mace_native PRIVATE MACE_EXPORTS
     _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE)
 target_compile_options(mace_native PRIVATE /W4 /WX /utf-8)

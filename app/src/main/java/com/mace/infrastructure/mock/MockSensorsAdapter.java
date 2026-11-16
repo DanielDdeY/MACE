@@ -152,9 +152,9 @@ public final class MockSensorsAdapter implements HardwareSensorsPort {
             case CPU_NO_TEMPERATURE -> new CpuReading(CpuVendor.INTEL, SensorProvider.WINDOWS, PowerScope.UNKNOWN,
                     MetricReading.unavailable(MetricState.NO_PROVIDER), MetricReading.unavailable(MetricState.NO_PROVIDER),
                     usagePercent, nanos);
-            case AMD_NO_POWER -> new CpuReading(CpuVendor.AMD, SensorProvider.AMD_RYZEN_SDK, PowerScope.UNKNOWN,
+            case AMD_NO_POWER -> new CpuReading(CpuVendor.AMD, SensorProvider.LHM, PowerScope.UNKNOWN,
                     temperature, MetricReading.unavailable(MetricState.NO_PROVIDER), usagePercent, nanos);
-            case ACCESS_DENIED -> new CpuReading(CpuVendor.AMD, SensorProvider.AMD_RYZEN_SDK, PowerScope.UNKNOWN,
+            case ACCESS_DENIED -> new CpuReading(CpuVendor.AMD, SensorProvider.LHM, PowerScope.UNKNOWN,
                     MetricReading.unavailable(MetricState.ACCESS_DENIED), MetricReading.unavailable(MetricState.NO_PROVIDER),
                     usagePercent, nanos);
             default -> new CpuReading(CpuVendor.INTEL, SensorProvider.INTEL_MSR, PowerScope.CPU_PACKAGE,

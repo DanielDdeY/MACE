@@ -42,7 +42,7 @@ class FfmSensorsAdapterTest {
     @BeforeEach
     void setUp() {
         api = new FakeNativeApi();
-        api.cpuReadings = poll -> new CpuReading(CpuVendor.AMD, SensorProvider.AMD_RYZEN_SDK, PowerScope.UNKNOWN,
+        api.cpuReadings = poll -> new CpuReading(CpuVendor.AMD, SensorProvider.LHM, PowerScope.UNKNOWN,
                 MetricReading.valid(61.5), MetricReading.unavailable(MetricState.NO_PROVIDER),
                 poll == 1 ? MetricReading.unavailable(MetricState.WARMING_UP) : MetricReading.valid(23.0), 1_000L * poll);
         api.memoryReading = new SystemMemoryReading(LongMetricReading.valid(16 * GIB), LongMetricReading.valid(9 * GIB), 5L);
@@ -124,7 +124,7 @@ class FfmSensorsAdapterTest {
         CpuReading second = adapter.fetchHardwareSnapshot().cpu();
 
         assertEquals(CpuVendor.AMD, first.vendor());
-        assertEquals(SensorProvider.AMD_RYZEN_SDK, first.provider());
+        assertEquals(SensorProvider.LHM, first.provider());
         assertEquals(MetricState.NO_PROVIDER, first.powerWatts().state(), "AMD sin proveedor de potencia");
         assertEquals(MetricState.WARMING_UP, first.usagePercent().state());
         assertTrue(Double.isNaN(first.usagePercent().value()));

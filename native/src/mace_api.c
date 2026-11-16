@@ -14,9 +14,6 @@
 #include "internal/mace_runtime.h"
 #include "extensions/hang_detector.h"
 #include "extensions/shared_buffer.h"
-#ifdef MACE_HAS_RYZEN_SDK
-#include "telemetry/amd_ryzen_provider.h"
-#endif
 
 static uint64_t monotonic_ns(void) { return GetTickCount64() * UINT64_C(1000000); }
 
@@ -58,7 +55,6 @@ static MaceStatus poll_cpu_locked(MaceCpuTelemetryV2* out) {
     CpuSensors_Poll(&usage);
     sample.usage_percent.value = usage;
     sample.usage_percent.state = CpuSensors_UsageReady() ? MACE_METRIC_VALID : MACE_METRIC_WARMING_UP;
-    LegacyTelemetry_Cpu(&sample);
     LhmReceiver_ApplyCpu(&sample);
     memcpy(out, &sample, sizeof(sample));
     return MACE_OK;

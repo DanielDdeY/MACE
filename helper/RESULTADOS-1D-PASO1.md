@@ -32,6 +32,17 @@ omitida por falta de MACE_LEGACY_DLL), cero fallos/errores. Logs generados:
 native/build/1d-1/{helper,native,java}.log. Son cuatro casos nativos adicionales
 respecto de la línea base 36. Firma omitida con el aviso existente.
 
+## 1D-2
+
+Se retiran amd_ryzen_provider.cpp/h y su integración de compilación y del
+trabajador. Se archiva check-ryzen-sdk-version.ps1 como texto fuera de los builds.
+Se elimina LegacyTelemetry_Cpu y su caché; los sondeos CPU solo combinan uso
+Windows y temperatura/potencia LHM. El ID 3 queda reservado sin implementación.
+Los mocks CPU actuales y las expectativas Java pasan a LHM; no se suprimen tests.
+Las opciones generales de los scripts se terminan de retirar en 1D-4.
+
+Pruebas del tramo: helper 63/63, CTest 40/40, Java 279 (una omitida), sin fallos ni errores. Logs: native/build/1d-2/{helper,native,java}.log.
+
 ## Límites
 
 NO VERIFICADO: CPU Intel, NVIDIA (NVML y respaldo), Intel GPU/IGCL, PawnIO ausente

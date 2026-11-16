@@ -6,9 +6,6 @@
 #include "../telemetry/legacy_telemetry.h"
 #include "../telemetry/lhm_receiver.h"
 #include "../extensions/blackbox_buffer.h"
-#ifdef MACE_HAS_RYZEN_SDK
-#include "../telemetry/amd_ryzen_provider.h"
-#endif
 
 static SRWLOCK runtime_lock = SRWLOCK_INIT;
 static SRWLOCK lifecycle_lock = SRWLOCK_INIT;
