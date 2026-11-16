@@ -4,6 +4,14 @@ Se releyeron RESULTADOS-1B.md, PROTOCOL.md y prompt_mace_fase1.md. El usuario ap
 
 No se eliminaron proveedores antiguos ni se tocaron empaquetado/instalador. GetSystemTimes, NVML principal e IGCL principal siguen como en 1B. Firma y licencia siguen pendientes; se conservan los ganchos de firma opcional y hash. RESULTADOS-1B.md ya tenía modificaciones del usuario al comenzar y se conservaron.
 
+## Confirmación del usuario y cierre documental — 15 de noviembre de 2026
+
+**CONFIRMADO POR EL USUARIO EN LA UI:** en la confirmación recibida el 15/11/2026 (America/Lima), el usuario indica que la CPU ya muestra **temperatura y potencia en la interfaz de MACE**, ejecutada desde una consola de administrador. Es una observación del usuario, no una inspección ni una medición propia del agente. No se aportaron cifras, captura, hora exacta de la prueba, hashes de esa ejecución; no se deducen de esta confirmación.
+
+La ejecución elevada de test-lhm1b.ps1 -RealHelper -RequireCpu con éxito ya había sido confirmada por el usuario. Ambas confirmaciones satisfacen el caso local de CPU AMD elevada; no prueban CPU Intel, otras GPU, la Micro-HUD completa.
+
+Este cierre solo corrige documentación. El alcance real de potencia AMD, las condiciones exactas de AmdPowerPolicy y la tabla de requisitos previos a 1D están en [COBERTURA-AMD-POTENCIA.md](COBERTURA-AMD-POTENCIA.md). No se amplió la política ni se eliminó ningún proveedor.
+
 ## 1C-0: evidencia de potencia AMD
 
 El paquete NuGet local de LHM 0.9.6 identifica el commit 3d331e3370efb858411f19511373eff65a218701. En ese código, GPU Package es el sensor de potencia de índice 3 y puede recibir rutas distintas: no equivale universalmente a potencia de placa. La ruta PMLog distingue ASIC y board; el reporte público identifica su disponibilidad y sus valores. Véase [AmdGpu.cs fijado al commit del paquete](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/blob/3d331e3370efb858411f19511373eff65a218701/LibreHardwareMonitorLib/Hardware/Gpu/AmdGpu.cs#L432).
@@ -12,12 +20,14 @@ AMD define ASIC_POWER y BOARD_POWER como identificadores distintos, 23 y 73. Se 
 
 Política implementada en AmdPowerPolicy:
 
-- Solo AMD PCI vendor 1002/device 7340, LHM 0.9.6.0, GPU Package índice 3 y backend Overdrive 8.
-- Cada sondeo exige reporte con estado ADL_OK en las capacidades, ASIC_POWER soportado y BOARD_POWER no soportado.
+- Solo AMD PCI vendor 1002/device 7340, LHM 0.9.6.0 y un sensor Power llamado GPU Package, único e índice 3. Subsystem y revision no se restringen en AmdPowerPolicy; su identidad inequívoca se comprueba por separado.
+- Cada sondeo exige en la sección textual Overdrive Caps las líneas Status: ADL_OK y Version: 8, y en el reporte ASIC_POWER soportado y BOARD_POWER no soportado. Version: 8 es una comprobación literal de capacidades, no una prueba del éxito de cada consulta individual de potencia.
 - Se usa el número explícito y único Sensor[ADL_PMLOG_ASIC_POWER].Value del reporte público de LHM, finito y entre 0 y 2.000 W. No se reetiqueta el número ambiguo de GPU Package ni un fallback OD6.
 - Reporte incompleto, duplicado, fuera de rango, otro modelo/versión/sensor o disponibilidad ambigua: la cifra original permanece UnknownPower y la DLL entrega UNSUPPORTED/0, scope UNKNOWN.
 
 Esta elección evita reflexión, acceso a miembros privados de LHM y un proveedor ADL independiente. GetReport se ejecuta dentro del helper, nunca en CP_Poll ni en JavaFX. Su formato textual es una dependencia deliberada de la versión fijada; cambios inesperados dejan N/D.
+
+El filtro de device ID es una limitación explícita de cobertura: una Radeon con otro ID no pasa a GpuChip aunque publique un reporte equivalente. La presencia de BOARD_POWER también se rechaza por una decisión conservadora; no se ha demostrado que impida interpretar un valor ASIC identificado por separado. La tabla completa, las omisiones del parser y la diferencia entre casos permitidos por código y hardware probado están en el informe de cobertura.
 
 Se reutiliza Meaning.GpuChip=5 de LHM1 y MACE_POWER_SCOPE_GPU_CHIP=4 de V2. La DLL ya validaba y traducía ese significado; se añadió el test end-to-end amd-chip. No se agregó ningún campo ni valor nuevo al protocolo, ni cambió su versión.
 
@@ -81,7 +91,7 @@ El orden de MaceApplication.stop es vista/HUD, monitor, viewmodel, publisher y a
 
 No hay tarea de reintento independiente que pueda inicializar después del cierre. Las pruebas FFM con upcalls comprueban BUSY/OK, cierre único, ausencia de shutdown si no se adquirió el runtime y respuesta BUSY mientras un cierre mantiene el bloqueo.
 
-## Cambios por archivo
+## Cambios por archivo de la implementación 1C
 
 Rutas relativas a mace-native-dev:
 
@@ -125,8 +135,9 @@ El ZIP ajeno al cambio y las modificaciones previas de RESULTADOS-1B.md permanec
 - Java: batería completa con la DLL real, JDK 22 y helper configurado. 279 pruebas, cero fallos/errores; una omitida porque falta MACE_LEGACY_DLL para el caso de DLL antigua.
 - JavaFX: pruebas de controles del HUD y sus textos aprobadas. Hay infraestructura existente JUnit + Platform.startup; no se necesita añadir un framework UI.
 - Prueba nativa física definitiva: 5–6 W GPU_CHIP VALID, inicio 0,049 ms, primera disponibilidad a 937 ms, sondeo máximo observado 0,596 ms. Mediciones locales, sin garantía universal.
-- Se arrancó MACE nativo con las clases nuevas y la DLL exacta; el hilo JavaFX se observó en su bucle normal. La inspección visual fue NO VERIFICADO: la herramienta de captura devolvió FrameArrived timed out y, al reintentar, window capture timed out. No se afirma haber visto números o gráficos en la ventana.
-- NO VERIFICADO: UI elevada con esta entrega, Intel/NVIDIA físicos, otros modelos AMD, HVCI activo, suspensión/hotplug y calibración eléctrica externa. La aprobación elevada de 1B fue comunicada por el usuario.
+- Se arrancó MACE nativo con las clases nuevas y la DLL exacta; el hilo JavaFX se observó en su bucle normal. La inspección visual propia del agente fue NO VERIFICADO: la herramienta de captura devolvió FrameArrived timed out y, al reintentar, window capture timed out. Esto no invalida la confirmación posterior del usuario de temperatura y potencia CPU en la UI elevada, recibida el 15/11/2026.
+- CONFIRMADO POR EL USUARIO: temperatura y potencia CPU en la UI desde consola de administrador, además del éxito previamente comunicado de la prueba elevada de 1B.
+- NO VERIFICADO: inspección visual independiente del agente, todas las métricas GPU/HUD en UI elevada, Intel/NVIDIA físicos, otros modelos AMD, suspensión/hotplug y calibración eléctrica externa.
 - NO VERIFICADO: cierre normal de la ventana mediante UI automatizada, por el fallo de captura. El orden stop/shutdown sí está cubierto por pruebas automáticas.
 - Dependencia deliberada del reporte textual de LHM 0.9.6: si cambia su formato o no permite identificar el valor ASIC, se conserva UnknownPower/N/D.
 - Firma, licencia y distribución quedan pendientes. Se preservan los ganchos y no se modificó ningún instalador.
@@ -167,7 +178,7 @@ Los informes Java están en app/target/surefire-reports; la prueba física nativ
 ## Comprobar la UI manualmente
 
 1. Cierra las instancias anteriores de MACE para evitar confundir ventanas o versiones.
-2. En PowerShell como administrador, ejecuta la configuración de JDK/rutas/hashes anterior. PawnIO debe estar Running; no se instala ni se cambia HVCI en estos pasos.
+2. En PowerShell como administrador, ejecuta la configuración de JDK/rutas/hashes anterior. PawnIO debe estar Running;
 3. Desde la raíz ejecuta:
 
 ```powershell
@@ -183,4 +194,12 @@ mvn -f .\app\pom.xml javafx:run
 
 El empaquetado instalado anterior no se actualizó; esta comprobación usa las clases del proyecto y rutas explícitas.
 
-Subfase 1C terminada. Se detiene aquí hasta aprobación del usuario.
+## Lista de correcciones documentales aplicadas el 15/11/2026
+
+1. Registrada la confirmación del usuario de temperatura y potencia CPU en la interfaz elevada, con fecha de recepción y sin atribuirla al agente ni inventar cifras.
+2. Sustituido el pendiente genérico de UI elevada por una separación entre CPU confirmada por el usuario y aspectos visuales que siguen NO VERIFICADO.
+3. Precisados el filtro PCI, la comprobación literal de Overdrive Caps y el carácter conservador del rechazo de BOARD_POWER.
+4. Separada la lista histórica de cambios de implementación de este cierre documental.
+5. Añadido COBERTURA-AMD-POTENCIA.md con recorrido, condiciones, cobertura por grupos, opciones de ampliación, plan de pruebas, requisitos para 1D y lista de NO VERIFICADO.
+
+No se ejecutaron nuevas pruebas ni se cambió código de producción en este cierre. Las cifras y resultados anteriores son evidencia histórica de 1C, no una nueva ejecución del 15/11/2026. Subfase 1C cerrada documentalmente; no se avanza a 1D y se detiene aquí hasta aprobación del usuario.
