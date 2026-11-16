@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 class NativeCodesTest {
     @Test void lhmEsOchoYLosProveedoresAnterioresConservanSuCodigo() {
+        // Los códigos reservados se decodifican por compatibilidad; no cargan proveedores retirados.
         SensorProvider[] expected={SensorProvider.NONE,SensorProvider.WINDOWS,SensorProvider.INTEL_MSR,
             SensorProvider.AMD_RYZEN_SDK,SensorProvider.AMD_UPROF,SensorProvider.NVIDIA_NVML,
             SensorProvider.AMD_ADLX,SensorProvider.INTEL_IGCL,SensorProvider.LHM};

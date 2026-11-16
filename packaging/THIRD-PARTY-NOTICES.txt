@@ -1,0 +1,113 @@
+MACE — THIRD-PARTY NOTICES
+Inventory for the pinned development build, 2026-11-16.
+
+MACE license and production redistribution review: PENDING. This inventory is not legal clearance.
+The installer is copied intact, never extracted, patched, re-signed or executed by packaging.
+Runtime manifests identify the files actually copied; development documentation and tests are excluded.
+
+PawnIO Setup 2.2.0 and its driver/modules
+Source/distribution: https://github.com/namazso/PawnIO.Setup/tree/2.2.0
+Driver source: https://github.com/namazso/PawnIO
+Installer SHA-256: 1f519a22e47187f70a1379a48ca604981c4fcf694f4e65b734aaa74a9fba3032
+License/copyright and module redistribution obligations: PENDING review against the exact upstream release.
+The publisher Authenticode signature is preserved; signature validity does not grant redistribution rights.
+
+Microsoft.NETCore.App.Runtime.win-x64 10.0.12
+Authors: Microsoft
+Copyright: © Microsoft Corporation. All rights reserved.
+License: MIT
+Project: https://dot.net/
+Source: https://github.com/dotnet/dotnet
+Source revision: 95017c711e6afc1085133d440e42b4bd78155701
+Bundled license/notice: third-party/Microsoft.NETCore.App.Runtime.win-x64-LICENSE.TXT
+Bundled license/notice: third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT
+
+BlackSharp.Core 1.0.7
+Authors: BlackSharp.Core
+Copyright: Florian K.
+License: MPL-2.0
+Project: https://github.com/Blacktempel/BlackSharp
+Source: https://github.com/Blacktempel/BlackSharp
+Source revision: c70b735c6cec123ee8a046ac4a0bc6c606f52cf0
+
+DiskInfoToolkit 1.1.2
+Authors: DiskInfoToolkit
+Copyright: Florian K.
+License: MPL-2.0
+Project: https://github.com/Blacktempel/DiskInfoToolkit
+Source: https://github.com/Blacktempel/DiskInfoToolkit
+Source revision: 25319eae5781e75bcf141e844ceab2afe94d40ea
+
+HidSharp 2.6.4
+Authors: James F. Bellinger
+Copyright: Copyright 2010-2025 James Bellinger
+License: LICENSE.txt
+Project: https://software.seekye.com/hidsharp
+Source: Not declared
+Source revision: Not declared
+Bundled license/notice: third-party/HidSharp-LICENSE.txt
+
+LibreHardwareMonitorLib 0.9.6
+Authors: LibreHardwareMonitorLib
+Copyright: LibreHardwareMonitor
+License: MPL-2.0
+Project: https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
+Source: https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
+Source revision: 3d331e3370efb858411f19511373eff65a218701
+
+Mono.Posix.NETStandard 1.0.0
+Authors: Microsoft
+Copyright: © Microsoft Corporation. All rights reserved.
+License: Not declared in package metadata
+Project: https://go.microsoft.com/fwlink/?linkid=869051
+Source: Not declared
+Source revision: Not declared
+
+RAMSPDToolkit-NDD 1.4.2
+Authors: RAMSPDToolkit-NDD
+Copyright: Florian K.
+License: MPL-2.0
+Project: https://github.com/Blacktempel/RAMSPDToolkit
+Source: https://github.com/Blacktempel/RAMSPDToolkit
+Source revision: 3b47b960e0830fef344624ad5e389675d5f0a1ce
+
+System.CodeDom 10.0.2
+Authors: Microsoft
+Copyright: © Microsoft Corporation. All rights reserved.
+License: MIT
+Project: https://dot.net/
+Source: https://github.com/dotnet/dotnet
+Source revision: 44525024595742ebe09023abe709df51de65009b
+Bundled license/notice: third-party/System.CodeDom-THIRD-PARTY-NOTICES.TXT
+
+System.IO.Ports 10.0.3
+Authors: Microsoft
+Copyright: © Microsoft Corporation. All rights reserved.
+License: MIT
+Project: https://dot.net/
+Source: https://github.com/dotnet/dotnet
+Source revision: c2435c3e0f46de784341ac3ed62863ce77e117b4
+Bundled license/notice: third-party/System.IO.Ports-THIRD-PARTY-NOTICES.TXT
+
+System.Management 10.0.2
+Authors: Microsoft
+Copyright: © Microsoft Corporation. All rights reserved.
+License: MIT
+Project: https://dot.net/
+Source: https://github.com/dotnet/dotnet
+Source revision: 44525024595742ebe09023abe709df51de65009b
+Bundled license/notice: third-party/System.Management-THIRD-PARTY-NOTICES.TXT
+
+Intel IGCL vendored header
+License: see third-party/Intel-IGCL-LICENSE.txt (preserved verbatim).
+Source: https://github.com/intel/drivers.gpu.control-library
+NVML and IGCL runtime libraries are supplied by the user graphics driver; they are not copied by MACE.
+
+Java runtime and JavaFX
+JDK 22+ selected by JAVA_HOME; implementation and legal terms must be recorded for each release.
+The local test JDK reports Oracle Corporation 22.0.2; redistribution review is PENDING.
+Do not assume the test JDK license permits public redistribution. jlink retains its module legal files.
+OpenJFX 22.0.2: https://github.com/openjdk/jfx/tree/22.0.2 — GPL-2.0 with Classpath Exception; review bundled legal notices.
+AtlantaFX 2.0.1: https://github.com/mkpaz/atlantafx/tree/2.0.1 — MIT; verify upstream release notice before publication.
+Java dependency licenses and final release runtime distribution approval: PENDING.
+The prototype image is for local verification; no publication is performed by these scripts.

@@ -17,8 +17,7 @@ REM      --skip-native   Aceptada por compatibilidad: este script ya no compila 
 REM      --help          Muestra esta ayuda
 REM
 REM  DLL nativa (obligatoria):
-REM      Este script NO compila native\. Una recompilacion accidental sin los SDK de ADLX o
-REM      Ryzen Master produciria una DLL con menos sensores que la probada. Se empaqueta
+REM      Este script NO compila native\. Se empaqueta la DLL verificada de la revision actual.
 REM      exclusivamente bin\mace_native.dll del paquete verificado por Dev 1
 REM      (native\scripts\package-native.ps1), comprobando antes su SHA-256 y su ABI.
 REM
@@ -27,6 +26,9 @@ REM      MACE_NATIVE_LIB     Ruta a bin\mace_native.dll del paquete de Dev 1. Si
 REM                          se usa el paquete mas reciente de native\dist\mace-native-*.
 REM      MACE_NATIVE_SHA256  Hash esperado; si no se define se toma de build-info.json o
 REM                          SHA256SUMS.txt del mismo paquete.
+REM      MACE_HELPER_PUBLISH Directorio publicado del helper; por defecto helper/artifacts/latest.txt
+REM      MACE_PAWNIO_INSTALLER Ruta al instalador oficial intacto 2.2.0 (obligatoria)
+REM      MACE_SIGNING_SCRIPT Hook opcional de firma de archivos propios (-FilePath)
 REM      JAVA_HOME           JDK 22+ a usar (si no, se toma el java del PATH)
 REM      JAVAFX_JMODS        Carpeta con los .jmod de JavaFX 22 para que jlink genere un
 REM                          runtime minimo con JavaFX modular. Si no se define, JavaFX se
@@ -43,7 +45,7 @@ REM         MACE-Preview.exe (datos simulados, sin DLL ni administrador).
 REM      6. Incrusta packaging\app.manifest (requireAdministrator) SOLO en MACE.exe con mt.exe.
 REM      7. Opcional: jpackage --type msi|exe a partir de la app-image ya firmada con el manifiesto.
 REM
-REM  No incluye ni descarga AMD Ryzen Master SDK, ADLX SDK, WinRing0 ni controladores de terceros.
+REM  Incluye helper publicado, PawnIO oficial intacto y avisos; no ejecuta el instalador de PawnIO.
 REM ============================================================================
 setlocal EnableExtensions EnableDelayedExpansion
 
@@ -170,8 +172,8 @@ REM 2. Build Java + dependencias
 REM ---------------------------------------------------------------------------
 echo.
 echo [2/7] Compilando la aplicacion Java con Maven...
-if exist "%STAGE_DIR%" rmdir /s /q "%STAGE_DIR%"
-mkdir "%STAGE_DIR%"
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%PACKAGING_DIR%\prepare-directory.ps1" -Directory "%STAGE_DIR%" -Create
+if errorlevel 1 exit /b 1
 
 set "MVN_TEST_FLAG="
 if "%SKIP_TESTS%"=="1" set "MVN_TEST_FLAG=-DskipTests"
@@ -251,12 +253,14 @@ REM 4. jlink
 REM ---------------------------------------------------------------------------
 echo.
 echo [4/7] Generando runtime con jlink...
-if exist "%RUNTIME_DIR%" rmdir /s /q "%RUNTIME_DIR%"
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%PACKAGING_DIR%\prepare-directory.ps1" -Directory "%RUNTIME_DIR%"
+if errorlevel 1 exit /b 1
 
 set "RUNTIME_OPT="
 if not exist "%JDK_HOME%\jmods" (
     echo [WARN] El JDK no incluye la carpeta jmods; jpackage usara el runtime por defecto.
     goto :jlink_done
+
 )
 
 set "JLINK_MODULE_PATH=%JDK_HOME%\jmods"
@@ -278,13 +282,21 @@ set "RUNTIME_OPT=--runtime-image "%RUNTIME_DIR%""
 echo [OK] Runtime en %RUNTIME_DIR%
 
 :jlink_done
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%PACKAGING_DIR%\stage-runtime.ps1" ^
+    -StageDirectory "%STAGE_DIR%" -AppJar "%APP_DIR%\target\%MAIN_JAR%" ^
+    -NativeDll "%NATIVE_DLL_PATH%" -NativeSha256 "%NATIVE_SHA256%"
+if errorlevel 1 (
+    echo [ERROR] Faltan componentes o fallo la verificacion del payload.
+    exit /b 1
+)
 
 REM ---------------------------------------------------------------------------
 REM 5. jpackage app-image (launcher real + launcher de vista previa)
 REM ---------------------------------------------------------------------------
 echo.
 echo [5/7] Creando app-image con jpackage...
-if exist "%DIST_DIR%\%APP_NAME%" rmdir /s /q "%DIST_DIR%\%APP_NAME%"
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%PACKAGING_DIR%\prepare-directory.ps1" -Directory "%DIST_DIR%\%APP_NAME%"
+if errorlevel 1 exit /b 1
 
 set "ICON_OPT="
 if exist "%PACKAGING_DIR%\icon.ico" set "ICON_OPT=--icon "%PACKAGING_DIR%\icon.ico""
@@ -312,6 +324,8 @@ if errorlevel 1 (
     echo [ERROR] jpackage fallo al crear la app-image.
     exit /b 1
 )
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%PACKAGING_DIR%\verify-runtime.ps1" -RuntimeDirectory "%DIST_DIR%\%APP_NAME%\app" -AppImage
+if errorlevel 1 exit /b 1
 set "APP_IMAGE_DIR=%DIST_DIR%\%APP_NAME%"
 set "LAUNCHER_EXE=%APP_IMAGE_DIR%\%APP_NAME%.exe"
 echo [OK] App-image en %APP_IMAGE_DIR%

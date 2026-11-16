@@ -1,3 +1,5 @@
+> Documento histórico conservado. La opción C y la retirada de 1D fueron aprobadas después de esta evidencia; el estado vigente está en [RESULTADOS-1D-PASO1.md](RESULTADOS-1D-PASO1.md).
+
 # Cobertura de potencia GPU AMD y requisitos previos a 1D
 
 Fecha del informe: **15/11/2026, America/Lima**. Revisión de implementación: commit 79c713c, sin cambios de producción en este cierre. Se revisaron RESULTADOS-1C.md, PROTOCOL.md, AmdPowerPolicy.cs y sus consumidores. Este documento propone pruebas y alternativas; no las implementa ni autoriza retirar proveedores.

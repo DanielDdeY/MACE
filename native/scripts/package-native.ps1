@@ -1,8 +1,7 @@
-param(
+﻿param(
     [ValidateSet('Auto', 'VS2022', 'VS2026')][string]$VisualStudio = 'Auto',
     [string]$BuildDirectory,
-    [string]$AdlxSdkDirectory = $env:MACE_ADLX_SDK_DIR,
-    [string]$RyzenSdkDirectory = $env:MACE_RYZEN_SDK_DIR
+    [string]$SigningScript = $env:MACE_SIGNING_SCRIPT
 )
 
 . (Join-Path $PSScriptRoot 'native-common.ps1')
@@ -20,8 +19,7 @@ $sourceRevision = (& git -C $repositoryRoot rev-parse HEAD).Trim()
 Assert-MaceCommandSucceeded 'Consulta de revisión Git'
 
 & (Join-Path $PSScriptRoot 'build-native.ps1') -Configuration Release `
-    -VisualStudio $VisualStudio -BuildDirectory $build -AdlxSdkDirectory $AdlxSdkDirectory `
-    -RyzenSdkDirectory $RyzenSdkDirectory
+    -VisualStudio $VisualStudio -BuildDirectory $build
 
 $sourceDll = Join-Path $build 'Release\mace_native.dll'
 $sourceLib = Join-Path $build 'Release\mace_native.lib'
@@ -37,6 +35,12 @@ if ($cmakeText -notmatch 'project\(mace_native VERSION (\d+\.\d+\.\d+)') {
     throw 'No se pudo leer la versión de native/CMakeLists.txt.'
 }
 $nativeVersion = $Matches[1]
+if ($SigningScript) {
+    & $SigningScript -FilePath $sourceDll
+    if (-not $? -or (Get-AuthenticodeSignature -LiteralPath $sourceDll).Status -ne 'Valid') {
+        throw 'Firma de la DLL nativa no válida.'
+    }
+} else { Write-Warning 'Firma MACE omitida: certificado pendiente.' }
 $sourceDllHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $sourceDll).Hash
 $sourceLibHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $sourceLib).Hash
 $sourceDiagnosticHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $sourceDiagnostic).Hash
@@ -79,6 +83,9 @@ Assert-MaceCommandSucceeded 'Arranque de test_mace.exe distribuido'
     -BuildDirectory $build -Configuration Release -SkipCTest `
     -FfmSourcePath (Join-Path $package 'examples\ffm\NativeContractProbe.java')
 
+$testListingText = (& $toolchain.CTest --test-dir $build -C Release --show-only=json-v1) -join "`n"
+Assert-MaceCommandSucceeded 'Inventario CTest'
+$testListing = $testListingText | ConvertFrom-Json
 $metadata = [ordered]@{
     schemaVersion = 1
     project = 'MACE native'
@@ -95,10 +102,9 @@ $metadata = [ordered]@{
     dllSha256 = $sourceDllHash
     importLibrarySha256 = $sourceLibHash
     diagnosticExeSha256 = $sourceDiagnosticHash
-    amdAdlxCompiled = -not [string]::IsNullOrWhiteSpace($AdlxSdkDirectory)
-    amdAdlxProcessLifetime = -not [string]::IsNullOrWhiteSpace($AdlxSdkDirectory)
-    amdRyzenSdkCompiled = -not [string]::IsNullOrWhiteSpace($RyzenSdkDirectory)
-    tests = @('CTest abi_layouts', 'CTest abi_exports', 'CTest telemetry_v2', 'CTest gpu_provider_dispatch', 'CTest process_security', 'CTest process_api', 'CTest process_extensions', 'CTest blackbox_buffer', 'CTest lifecycle', 'CTest concurrency', 'CTest buffer_concurrency', 'Packaged test_mace.exe startup', 'C exports on distributed DLL', 'JDK 22 FFM on distributed DLL')
+    telemetryArchitecture = 'LHM1'
+    retiredProvidersRemoved = $true
+    tests = @($testListing.tests | ForEach-Object { 'CTest ' + $_.name }) + @('Packaged test_mace.exe startup', 'C exports on distributed DLL', 'JDK 22 FFM on distributed DLL')
 }
 $metadata | ConvertTo-Json -Depth 5 |
     Set-Content -LiteralPath (Join-Path $package 'build-info.json') -Encoding utf8

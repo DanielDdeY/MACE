@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 #  MACE - Verificacion de la DLL nativa antes de jpackage
 # ----------------------------------------------------------------------------
 #  Comprueba que la DLL a empaquetar es exactamente la del paquete verificado
@@ -63,8 +63,6 @@ try {
         throw "La DLL no supera la verificacion de ABI:`n$($verifier -join "`n")"
     }
 
-    $adlx = if ($buildInfo) { $buildInfo.amdAdlxCompiled } else { 'desconocido' }
-    $ryzen = if ($buildInfo) { $buildInfo.amdRyzenSdkCompiled } else { 'desconocido' }
     $report = @(
         'MACE - DLL nativa empaquetada',
         "Fecha (UTC)        : $([DateTime]::UtcNow.ToString('o'))",
@@ -72,15 +70,10 @@ try {
         "DLL                : $dll",
         "SHA-256            : $actual",
         "Hash de referencia : $source",
-        "ADLX compilado     : $adlx",
-        "Ryzen SDK compilado: $ryzen",
         'Verificacion FFM   :'
     ) + ($verifier | ForEach-Object { "  $_" })
     $report | Set-Content -LiteralPath $ReportPath -Encoding utf8
 
-    if ($buildInfo -and (-not $buildInfo.amdAdlxCompiled -or -not $buildInfo.amdRyzenSdkCompiled)) {
-        Write-Warning 'La DLL se compilo sin ADLX y/o sin Ryzen Master SDK: tendra menos sensores AMD que la version de referencia.'
-    }
     Write-Output $actual
 } catch {
     # Salida explicita con 1: el .bat la detecta aunque PowerShell devuelva otro codigo.

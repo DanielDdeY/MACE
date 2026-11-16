@@ -1,6 +1,8 @@
+> Documento actualizado en Subfase 1D. [Original íntegro](../../docs/historico/native/pre1D-native__docs__ABI.md). Los comandos actuales no requieren SDK externos de sensores retirados.
+
 # Contrato de integración native/FFM
 
-Estado: fase 5. La DLL exporta los siete símbolos heredados, `CP_GetAbiInfo`, cuatro funciones V2 de telemetría, seis de procesos, cinco del anillo y el cierre del mapeo heredado: **24 símbolos**. `CP_GetAbiInfo` devuelve ABI **1.4** en un registro de estructura versión **2**. El Java actual solo consume la interfaz heredada.
+Estado: Subfase 1D. La DLL exporta los siete símbolos heredados, `CP_GetAbiInfo`, cuatro funciones V2 de telemetría, seis de procesos, cinco del anillo y el cierre del mapeo heredado: **24 símbolos**. `CP_GetAbiInfo` devuelve ABI **1.4** en un registro de estructura versión **2**. Java consume las interfaces V2 con verificación ABI y SHA-256.
 
 ## Plataforma y tipos
 
@@ -17,9 +19,9 @@ La nueva consulta de identificación es `MaceStatus CP_GetAbiInfo(MaceAbiInfoV2*
 `abi_major=1, abi_minor=4` significa que la interfaz heredada está intacta y se añadieron telemetría, procesos y extensiones V2. `build_major/minor/patch=1.4.2` identifica esta DLL. `implemented_capabilities` anuncia además `MACE_CAP_PROCESS_SAMPLES`, `MACE_CAP_WINDOW_RESPONSIVENESS` y `MACE_CAP_BLACKBOX_BUFFER`; un bit indica código disponible, no acceso a todos los procesos ni sensores del equipo. Los 24 símbolos exportados se comprueban al cargar exactamente la DLL distribuida.
 
 | Símbolo | Firma C | Resultado actual |
-|---|---|
-| `CP_InitializeTelemetry` | `int (void)` | Devuelve `0` aunque falten proveedores opcionales. Carga CPU, NVML, IGCL, ADLX y Ryzen Master Monitoring SDK si se compilaron los adaptadores respectivos. |
-| `CP_ShutdownTelemetry` | `void (void)` | Espera las lecturas activas, reinicia las referencias de muestreo y cierra todos los mapeos de ambas generaciones. Descarga proveedores salvo la sesión ADLX, que permanece hasta el fin del proceso por una limitación comprobada del controlador AMD. |
+|---|---|---|
+| `CP_InitializeTelemetry` | `int (void)` | Inicia trabajadores sin esperar sensores; BUSY durante cierre. |
+| `CP_ShutdownTelemetry` | `void (void)` | Impide nuevos sondeos, une trabajadores y reinicia referencias. |
 | `CP_PollTelemetry` | `int (TelemetryData*)` | `-1` si el puntero es nulo; `0` en otro caso, aun si faltan sensores. |
 | `CP_EnumerateUserlandProcesses` | `int (ProcessData*, uint32_t max_count, uint32_t* out_count)` | `-1` si los argumentos son inválidos; `0` si la enumeración termina; código Win32 positivo si falla el snapshot. Puede truncar al llegar a `max_count` sin indicarlo; comparte el filtro de seguridad con V2. |
 | `CP_TerminateProcess` | `int (uint32_t pid)` | `-1` para PID 0/4; `0` si termina; `ERROR_ACCESS_DENIED` para objetivo protegido/propio y código Win32 positivo en otros errores. Revalida el objetivo en el mismo handle, pero no puede detectar que un PID cambió desde una enumeración previa. Solo se invoca por petición manual. |

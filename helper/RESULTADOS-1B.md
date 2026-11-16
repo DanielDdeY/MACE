@@ -1,3 +1,5 @@
+> Documento histórico conservado. La opción C y la retirada de 1D fueron aprobadas después de esta evidencia; el estado vigente está en [RESULTADOS-1D-PASO1.md](RESULTADOS-1D-PASO1.md).
+
 # Entrega Subfase 1B — receptor nativo C
 
 Se releyeron PROTOCOL.md y RESULTADOS-1A.md antes de implementar. El alcance termina en 1B. No se implementan el puente Java de 1C, la limpieza de 1D ni el instalador. Los cambios previos de Java, HUD, CSS y el ZIP del proyecto se conservaron.

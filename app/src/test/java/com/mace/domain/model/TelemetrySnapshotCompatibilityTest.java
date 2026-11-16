@@ -45,7 +45,7 @@ class TelemetrySnapshotCompatibilityTest {
 
     @Test
     void elUsoCalentandoSeTraduceACeroEnLaVistaHeredada() {
-        CpuReading cpu = new CpuReading(CpuVendor.INTEL, SensorProvider.INTEL_MSR, PowerScope.CPU_PACKAGE,
+        CpuReading cpu = new CpuReading(CpuVendor.INTEL, SensorProvider.LHM, PowerScope.CPU_PACKAGE,
                 MetricReading.valid(40), missing(MetricState.WARMING_UP), missing(MetricState.WARMING_UP), 1L);
 
         TelemetrySnapshot legacy = TelemetrySnapshot.fromHardwareSnapshot(DomainFixtures.snapshot(cpu));
