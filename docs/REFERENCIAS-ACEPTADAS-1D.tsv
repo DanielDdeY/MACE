@@ -152,6 +152,9 @@ helper/RESULTADOS-1D-PASO1.md	13	43	Rdmsr	Informe fechado y conservado de migrac
 helper/RESULTADOS-1D-PASO1.md	37	12	amd_ryzen_provider	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
 helper/RESULTADOS-1D-PASO1.md	38	30	ryzen-sdk	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
 helper/RESULTADOS-1D-PASO1.md	48	11	adlx	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-PASO2.md	91	65	WinRing0	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-PASO2.md	92	45	WinRing0	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-PASO2.md	98	74	WinRing0	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
 native/include/mace_status.h	43	19	INTEL_MSR	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
 native/include/mace_status.h	44	19	AMD_RYZEN_SDK	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
 native/include/mace_status.h	47	23	ADLX	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
@@ -159,3 +162,6 @@ native/test_main.c	31	28	INTEL_MSR	Etiqueta diagnostica de ID ABI reservado; no 
 native/test_main.c	32	28	AMD_RYZEN_SDK	Etiqueta diagnostica de ID ABI reservado; no invoca proveedores retirados
 native/test_main.c	35	32	ADLX	Etiqueta diagnostica de ID ABI reservado; no invoca proveedores retirados
 native/test_main.c	35	63	ADLX	Etiqueta diagnostica de ID ABI reservado; no invoca proveedores retirados
+packaging/compatibility-references.json	8	14	WinRing0	Excepcion de metadatos NDD aprobada por usuario en Paso 2; enum/interfaz sin driver, SHA-256 fijado
+packaging/compatibility-references.json	11	16	WinRing0	Excepcion de metadatos NDD aprobada por usuario en Paso 2; enum/interfaz sin driver, SHA-256 fijado
+packaging/compatibility-references.json	12	17	WinRing0	Excepcion de metadatos NDD aprobada por usuario en Paso 2; enum/interfaz sin driver, SHA-256 fijado

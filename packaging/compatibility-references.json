@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "approvedDate": "2026-11-16",
+  "approvedBy": "User, Step 2 clarification",
+  "file": "app/lhm/RAMSPDToolkit-NDD.dll",
+  "version": "1.4.2",
+  "sha256": "42C1CCAF90592542EC64E801AE599ED803BB98F4039B2ABB7119CB8EA2087CBA",
+  "needle": "WinRing0",
+  "expectedMatches": 2,
+  "metadata": [
+    { "name": "WinRing0", "offset": 105819, "kind": "reserved compatibility enum field", "owner": "DriverImplementation" },
+    { "name": "IWinRing0Driver", "offset": 127562, "kind": "empty compatibility interface" }
+  ],
+  "reason": "Pinned NDD package: no concrete implementation, method bodies or embedded driver resources. Compatibility names only; not a MACE provider."
+}

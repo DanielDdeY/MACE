@@ -273,7 +273,7 @@ if defined JAVAFX_JMODS if exist "%JAVAFX_JMODS%\javafx.base.jmod" (
     echo [INFO] JavaFX modular desde %JAVAFX_JMODS%
 )
 
-"%JDK_BIN%\jlink.exe" --module-path "!JLINK_MODULE_PATH!" --add-modules !JLINK_ADD_MODULES! --strip-debug --no-header-files --no-man-pages --compress zip-6 --output "%RUNTIME_DIR%"
+"%JDK_BIN%\jlink.exe" --module-path "!JLINK_MODULE_PATH!" --add-modules !JLINK_ADD_MODULES! --strip-debug --no-header-files --no-man-pages --exclude-files "**.lib" --compress zip-6 --output "%RUNTIME_DIR%"
 if errorlevel 1 (
     echo [ERROR] jlink fallo.
     exit /b 1
@@ -372,6 +372,8 @@ if defined MT_EXE (
 REM ---------------------------------------------------------------------------
 REM 7. Instalador opcional (msi / exe) a partir de la app-image
 REM ---------------------------------------------------------------------------
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%PACKAGING_DIR%\verify-image.ps1" -ImageDirectory "%APP_IMAGE_DIR%"
+if errorlevel 1 exit /b 1
 echo.
 if /I "%PKG_TYPE%"=="app-image" (
     echo [7/7] Instalador omitido ^(tipo app-image^).

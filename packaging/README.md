@@ -67,4 +67,13 @@ opcionalmente -HelperDirectory y -JavaExe (JDK 22+, o JAVA_HOME/PATH). Comprueba
 el verificador FFM/ABI real con el JAR de clases, copia completa/intacta y rechazos de
 instalador incorrecto, DLL con cargador retirado, archivo interno añadido y helper
 alterado. Usa carpetas únicas bajo native/build/1d-4 y nunca ejecuta PawnIO.
-La creación de la imagen final mediante jpackage queda para el Paso 2 aprobado.
+La imagen final mediante jpackage se verificó en el Paso 2; los resultados están
+en ../helper/RESULTADOS-1D-PASO2.md. MSI/EXE e instalación limpia siguen pendientes.
+
+verify-image.ps1 revisa además el runtime completo y el contenido de los JAR.
+jlink excluye las bibliotecas .lib de desarrollo. La excepción de compatibilidad
+aprobada para la dependencia NDD está fijada por ruta, SHA-256 y dos offsets en
+compatibility-references.json; no autoriza otros archivos ni implementaciones.
+packaging/tests/test-image.ps1 prueba el rechazo de una .lib añadida y de los
+mismos bytes de la dependencia fuera de la ruta aprobada; elimina sus archivos
+temporales y verifica otra vez la imagen final.

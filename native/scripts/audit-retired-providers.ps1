@@ -27,6 +27,7 @@ foreach ($relative in $files) {
     elseif ($relative -eq 'native/test_main.c') { $reason='Etiqueta diagnostica de ID ABI reservado; no invoca proveedores retirados' }
     elseif ($relative -match '^app/src/test/java/com/mace/infrastructure/nativebridge/(NativeCodesTest|V2RecordsTest)\.java$') { $reason='Compatibilidad numerica/decodificacion ABI historica, sin acceso hardware' }
     elseif ($relative.StartsWith('packaging/third-party/')) { $reason='Texto de licencia de terceros conservado literalmente; no es codigo activo' }
+    elseif ($relative -eq 'packaging/compatibility-references.json') { $reason='Excepcion de metadatos NDD aprobada por usuario en Paso 2; enum/interfaz sin driver, SHA-256 fijado' }
     $lines=[IO.File]::ReadAllLines($path)
     for ($i=0;$i -lt $lines.Length;$i++) {
         foreach ($match in $regex.Matches($lines[$i])) {
