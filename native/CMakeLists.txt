@@ -140,7 +140,8 @@ if (BUILD_TESTING)
     endforeach()
     foreach(scenario slow valid stale stale-arrival bad-pid wrong-client malformed disconnect
         no-elevation driver-missing zero-cpu zero-unprivileged unknown-power unknown-gpu duplicate-pci replay nan fragmented fallback
-        gpu-zero bad-server-pid hash-mismatch init-race amd-chip)
+        gpu-zero bad-server-pid hash-mismatch init-race amd-chip
+        missing-helper-default missing-helper-explicit missing-helper-duplicate driver-stopped)
         add_test(NAME lhm_${scenario} COMMAND test_lhm_receiver "$<TARGET_FILE:lhm_fake_helper>" ${scenario})
         set_tests_properties(lhm_${scenario} PROPERTIES TIMEOUT 25)
     endforeach()

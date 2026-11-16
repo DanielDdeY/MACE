@@ -35,6 +35,8 @@ void GpuProviders_Poll(const MaceGpuAdapterInfoV2* a,MaceGpuTelemetryV2* s) {
     s->temperature_c.state=s->power_w.state=s->usage_percent.state=MACE_METRIC_NO_PROVIDER;
     s->fan_rpm.state=s->fan_percent.state=MACE_METRIC_NO_PROVIDER;
     s->video_memory_used_bytes.state=s->video_memory_total_bytes.state=MACE_METRIC_NO_PROVIDER;
+    s->provider_id=MACE_PROVIDER_WINDOWS;
+    s->video_memory_total_bytes=(MaceMetricU64V2){4294967296ULL,MACE_METRIC_VALID,0};
     wchar_t fallback[2];
     if (GetEnvironmentVariableW(L"MACE_SIM_FORCE_FALLBACK",fallback,2)) return;
     if (a->vendor_id==0x10DE || a->vendor_id==0x8086) {

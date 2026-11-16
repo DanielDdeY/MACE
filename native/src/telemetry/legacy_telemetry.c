@@ -31,7 +31,6 @@ void LegacyTelemetry_GpuState(MaceGpuTelemetryV2* s, MaceMetricState state) {
 
 static DWORD WINAPI sample_worker(void* unused) {
     (void)unused;
-    CpuSensors_Init();
 #ifdef MACE_HAS_RYZEN_SDK
     if (cpu_vendor==MACE_CPU_VENDOR_AMD) AmdRyzenProvider_Init();
 #endif
@@ -40,15 +39,6 @@ static DWORD WINAPI sample_worker(void* unused) {
         MaceCpuTelemetryV2 cpu={0};
         cpu.provider_id=MACE_PROVIDER_WINDOWS;
         cpu.temperature_c.state=cpu.power_w.state=MACE_METRIC_NO_PROVIDER;
-        float temp=0,power=0;
-        CpuSensors_Poll(&temp,&power,NULL); /* usage baseline belongs only to CP_Poll. */
-        if (cpu_vendor==MACE_CPU_VENDOR_INTEL && CpuSensors_HardwareAvailable()) {
-            cpu.provider_id=MACE_PROVIDER_INTEL_MSR;
-            cpu.temperature_c=(MaceMetricF32V2){temp,temp>0 ? MACE_METRIC_VALID : MACE_METRIC_READ_FAILED};
-            cpu.power_w=(MaceMetricF32V2){power,CpuSensors_PowerReady() ? MACE_METRIC_VALID :
-                (CpuSensors_PowerSupported() ? MACE_METRIC_WARMING_UP : MACE_METRIC_READ_FAILED)};
-            if (cpu.power_w.state==MACE_METRIC_VALID) cpu.power_scope=MACE_POWER_SCOPE_CPU_PACKAGE;
-        }
 #ifdef MACE_HAS_RYZEN_SDK
         if (cpu_vendor==MACE_CPU_VENDOR_AMD) AmdRyzenProvider_Poll(&cpu);
 #endif

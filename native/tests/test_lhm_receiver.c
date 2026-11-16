@@ -28,7 +28,17 @@ int wmain(int argc,wchar_t** argv) {
     CHECK(SetEnvironmentVariableW(L"MACE_SIM_SCENARIO",argv[2]));
     CHECK(SetEnvironmentVariableW(L"MACE_LHM_HELPER_SHA256",wcscmp(argv[2],L"hash-mismatch")==0 ?
         L"0000000000000000000000000000000000000000000000000000000000000000" : NULL));
-    bool duplicate=wcscmp(argv[2],L"duplicate-pci")==0;
+    bool missing_default=wcscmp(argv[2],L"missing-helper-default")==0;
+    bool missing=missing_default || wcscmp(argv[2],L"missing-helper-explicit")==0 ||
+        wcscmp(argv[2],L"missing-helper-duplicate")==0;
+    if (missing_default) CHECK(SetEnvironmentVariableW(L"MACE_LHM_HELPER",NULL));
+    else if (missing) {
+        wchar_t nonexistent[32768];
+        CHECK(swprintf_s(nonexistent,32768,L"%ls.missing",argv[1])>0);
+        CHECK(GetFileAttributesW(nonexistent)==INVALID_FILE_ATTRIBUTES);
+        CHECK(SetEnvironmentVariableW(L"MACE_LHM_HELPER",nonexistent));
+    }
+    bool duplicate=wcscmp(argv[2],L"duplicate-pci")==0 || wcscmp(argv[2],L"missing-helper-duplicate")==0;
     bool fallback=wcscmp(argv[2],L"fallback")==0;
     SetEnvironmentVariableW(L"MACE_SIM_DUPLICATE_PCI",duplicate ? L"1" : NULL);
     SetEnvironmentVariableW(L"MACE_SIM_FORCE_FALLBACK",fallback ? L"1" : NULL);
@@ -43,13 +53,30 @@ int wmain(int argc,wchar_t** argv) {
     bool failed=wcscmp(argv[2],L"bad-pid")==0 || wcscmp(argv[2],L"malformed")==0 ||
         wcscmp(argv[2],L"wrong-client")==0 || wcscmp(argv[2],L"stale-arrival")==0 || wcscmp(argv[2],L"nan")==0 ||
         wcscmp(argv[2],L"bad-server-pid")==0 || wcscmp(argv[2],L"hash-mismatch")==0;
-    bool unprivileged=wcscmp(argv[2],L"no-elevation")==0 || wcscmp(argv[2],L"driver-missing")==0 || wcscmp(argv[2],L"zero-unprivileged")==0;
+    bool unprivileged=wcscmp(argv[2],L"no-elevation")==0 || wcscmp(argv[2],L"driver-missing")==0 || wcscmp(argv[2],L"driver-stopped")==0 || wcscmp(argv[2],L"zero-unprivileged")==0;
     MaceMetricState expected=failed || wcscmp(argv[2],L"zero-cpu")==0 ? MACE_METRIC_READ_FAILED :
-        unprivileged ? MACE_METRIC_NO_PROVIDER : MACE_METRIC_VALID;
+        unprivileged || missing ? MACE_METRIC_NO_PROVIDER : MACE_METRIC_VALID;
     CHECK(wait_cpu(expected,7000,&cpu,&gpu));
     CHECK(cpu.power_w.state==expected);
     if (expected!=MACE_METRIC_VALID) CHECK(cpu.temperature_c.value==0 && cpu.power_w.value==0);
-    if (failed) { CHECK(gpu.temperature_c.state==MACE_METRIC_READ_FAILED); }
+    if (missing) {
+        ULONGLONG until=GetTickCount64()+3000;
+        do { CHECK(poll(&cpu,&gpu));
+            if (gpu.temperature_c.state==MACE_METRIC_NO_PROVIDER &&
+                gpu.video_memory_total_bytes.state==(MaceMetricState)(duplicate ? MACE_METRIC_NO_PROVIDER : MACE_METRIC_VALID)) break;
+            Sleep(10); }
+        while (GetTickCount64()<until);
+        CHECK(cpu.provider_id==MACE_PROVIDER_LHM);
+        CHECK(gpu.temperature_c.state==MACE_METRIC_NO_PROVIDER && gpu.temperature_c.value==0);
+        CHECK(gpu.power_w.state==MACE_METRIC_NO_PROVIDER && gpu.power_w.value==0 && gpu.power_scope==MACE_POWER_SCOPE_UNKNOWN);
+        CHECK(gpu.usage_percent.state==MACE_METRIC_NO_PROVIDER && gpu.usage_percent.value==0);
+        CHECK(gpu.fan_rpm.state==MACE_METRIC_NO_PROVIDER && gpu.fan_rpm.value==0);
+        CHECK(gpu.fan_percent.state==MACE_METRIC_NO_PROVIDER && gpu.fan_percent.value==0);
+        CHECK(gpu.video_memory_used_bytes.state==MACE_METRIC_NO_PROVIDER && gpu.video_memory_used_bytes.value==0);
+        CHECK(duplicate ? gpu.video_memory_total_bytes.state!=MACE_METRIC_VALID && gpu.video_memory_total_bytes.value==0 :
+            gpu.provider_id==MACE_PROVIDER_WINDOWS && gpu.video_memory_total_bytes.state==MACE_METRIC_VALID && gpu.video_memory_total_bytes.value==4294967296ULL);
+    }
+    else if (failed) { CHECK(gpu.temperature_c.state==MACE_METRIC_READ_FAILED); }
     else {
         MaceMetricState gpu_expected=duplicate || wcscmp(argv[2],L"unknown-gpu")==0 ? MACE_METRIC_UNSUPPORTED : MACE_METRIC_VALID;
         CHECK(wait_gpu(gpu_expected,4000,&cpu,&gpu));

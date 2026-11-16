@@ -10,7 +10,7 @@ extern IMAGE_DOS_HEADER __ImageBase;
 static SRWLOCK cache_lock=SRWLOCK_INIT;
 static HANDLE stop_event, worker;
 static LhmFrame cache;
-static bool have_frame, enabled=true;
+static bool have_frame;
 static MaceMetricState cache_state=MACE_METRIC_WARMING_UP;
 
 static void invalidate(MaceMetricState state) {
@@ -18,9 +18,8 @@ static void invalidate(MaceMetricState state) {
     have_frame=false; memset(&cache,0,sizeof(cache)); cache_state=state;
     ReleaseSRWLockExclusive(&cache_lock);
 }
-static bool helper_path(wchar_t* path, DWORD capacity, bool* explicit_path) {
+static bool helper_path(wchar_t* path, DWORD capacity) {
     DWORD size=GetEnvironmentVariableW(L"MACE_LHM_HELPER",path,capacity);
-    *explicit_path=size!=0;
     if (size>=capacity) return false;
     if (size) return size>3 && path[1]==L':' && (path[2]==L'\\' || path[2]==L'/');
     size=GetModuleFileNameW((HMODULE)&__ImageBase,path,capacity);
@@ -32,12 +31,10 @@ static bool helper_path(wchar_t* path, DWORD capacity, bool* explicit_path) {
 }
 static DWORD WINAPI receive_worker(void* unused) {
     (void)unused;
-    wchar_t path[32768], expected[65]={0}; bool explicit_path=false;
-    if (!helper_path(path,32768,&explicit_path)) { invalidate(MACE_METRIC_NO_PROVIDER); return 0; }
+    wchar_t path[32768], expected[65]={0};
+    if (!helper_path(path,32768)) { invalidate(MACE_METRIC_NO_PROVIDER); return 0; }
     if (GetFileAttributesW(path)==INVALID_FILE_ATTRIBUTES) {
-        AcquireSRWLockExclusive(&cache_lock);
-        enabled=explicit_path; cache_state=MACE_METRIC_NO_PROVIDER;
-        ReleaseSRWLockExclusive(&cache_lock);
+        invalidate(MACE_METRIC_NO_PROVIDER);
         return 0;
     }
     DWORD hash_size=GetEnvironmentVariableW(L"MACE_LHM_HELPER_SHA256",expected,65);
@@ -71,7 +68,7 @@ static DWORD WINAPI receive_worker(void* unused) {
     return 0;
 }
 bool LhmReceiver_Start(void) {
-    enabled=true; invalidate(MACE_METRIC_WARMING_UP);
+    invalidate(MACE_METRIC_WARMING_UP);
     stop_event=CreateEventW(NULL,TRUE,FALSE,NULL);
     if (!stop_event) { invalidate(MACE_METRIC_READ_FAILED); return false; }
     worker=CreateThread(NULL,0,receive_worker,NULL,0,NULL);
@@ -84,11 +81,10 @@ void LhmReceiver_Stop(void) {
     if (stop_event) { CloseHandle(stop_event); stop_event=NULL; }
     invalidate(MACE_METRIC_NOT_INITIALIZED);
 }
-static bool snapshot(LhmFrame* f, MaceMetricState* state) {
+static void snapshot(LhmFrame* f, MaceMetricState* state) {
     *state=MACE_METRIC_WARMING_UP;
     memset(f,0,sizeof(*f));
-    if (!TryAcquireSRWLockShared(&cache_lock)) return true;
-    bool active=enabled;
+    if (!TryAcquireSRWLockShared(&cache_lock)) return;
     *state=cache_state;
     if (have_frame) {
         *f=cache;
@@ -98,11 +94,10 @@ static bool snapshot(LhmFrame* f, MaceMetricState* state) {
         else if (f->helper!=2) *state=MACE_METRIC_READ_FAILED;
     }
     ReleaseSRWLockShared(&cache_lock);
-    return active;
 }
 bool LhmReceiver_ApplyCpu(MaceCpuTelemetryV2* s) {
     LhmFrame f; MaceMetricState state;
-    if (!snapshot(&f,&state)) return false;
+    snapshot(&f,&state);
     s->provider_id=MACE_PROVIDER_LHM; s->power_scope=MACE_POWER_SCOPE_UNKNOWN;
     s->temperature_c=(MaceMetricF32V2){0,state}; s->power_w=s->temperature_c;
     if (state!=MACE_METRIC_VALID) return true;
@@ -119,10 +114,21 @@ bool LhmReceiver_ApplyCpu(MaceCpuTelemetryV2* s) {
 }
 bool LhmReceiver_ApplyGpu(const MaceGpuAdapterInfoV2* a, MaceGpuTelemetryV2* s) {
     LhmFrame f; MaceMetricState state;
-    if (!snapshot(&f,&state)) return false;
+    snapshot(&f,&state);
+    /* A missing helper does not invalidate independently known Windows capacity.
+     * Never restore capacity for ambiguous PCI, malformed data or stale samples. */
+    MaceMetricU64V2 capacity=s->video_memory_total_bytes;
+    bool windows_capacity=s->provider_id==MACE_PROVIDER_WINDOWS;
     s->provider_id=MACE_PROVIDER_LHM;
     LegacyTelemetry_GpuState(s,state);
-    if (state!=MACE_METRIC_VALID) return true;
+    if (state!=MACE_METRIC_VALID) {
+        if (state==MACE_METRIC_NO_PROVIDER && windows_capacity &&
+            capacity.state==MACE_METRIC_VALID && LegacyTelemetry_PciMatches(a)==1) {
+            s->video_memory_total_bytes=capacity;
+            s->provider_id=MACE_PROVIDER_WINDOWS;
+        }
+        return true;
+    }
     uint32_t matches=LegacyTelemetry_PciMatches(a);
     if (matches==UINT32_MAX) { LegacyTelemetry_GpuState(s,MACE_METRIC_WARMING_UP); return true; }
     if (matches!=1) { LegacyTelemetry_GpuState(s,MACE_METRIC_UNSUPPORTED); return true; }

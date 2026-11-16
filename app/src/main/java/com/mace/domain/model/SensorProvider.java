@@ -7,7 +7,7 @@ package com.mace.domain.model;
 public enum SensorProvider {
     NONE("Ninguno"),
     WINDOWS("Windows"),
-    INTEL_MSR("Intel MSR (WinRing0)"),
+    INTEL_MSR("Intel MSR (obsoleto)"), // Reservado ABI 2; sin implementación activa.
     AMD_RYZEN_SDK("AMD Ryzen Master SDK"),
     AMD_UPROF("AMD uProf"),
     NVIDIA_NVML("NVIDIA NVML"),

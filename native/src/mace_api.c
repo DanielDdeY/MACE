@@ -55,7 +55,7 @@ static MaceStatus poll_cpu_locked(MaceCpuTelemetryV2* out) {
     sample.temperature_c.state = MACE_METRIC_NO_PROVIDER;
     sample.power_w.state = MACE_METRIC_NO_PROVIDER;
     float usage = 0;
-    CpuSensors_Poll(NULL, NULL, &usage);
+    CpuSensors_Poll(&usage);
     sample.usage_percent.value = usage;
     sample.usage_percent.state = CpuSensors_UsageReady() ? MACE_METRIC_VALID : MACE_METRIC_WARMING_UP;
     LegacyTelemetry_Cpu(&sample);

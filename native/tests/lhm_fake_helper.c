@@ -43,7 +43,7 @@ static void frame(unsigned char* b,uint64_t seq,bool warming) {
     put32(b+12,mode(L"no-elevation") || mode(L"zero-unprivileged") ? 0 : 1);
     put64(b+16,seq); put64(b+24,GetTickCount64()-(mode(L"stale-arrival") ? 3001 : 0));
     put32(b+32,GetCurrentProcessId()+(mode(L"bad-pid") ? 1 : 0));
-    put32(b+36,mode(L"driver-missing") || mode(L"zero-unprivileged") ? 1 : 3);
+    put32(b+36,mode(L"driver-missing") || mode(L"zero-unprivileged") ? 1 : mode(L"driver-stopped") ? 2 : 3);
     put32(b+40,warming ? 1 : 2); put32(b+44,warming ? 0 : 4);
     if (warming) return;
     for (unsigned i=0;i<4;i++) {
