@@ -25,8 +25,10 @@ Assert-MaceCommandSucceeded 'Verificación de exportaciones de la DLL selecciona
 
 $java = Get-Command java.exe -ErrorAction SilentlyContinue
 if ($null -eq $java) { throw 'La prueba FFM requiere JDK 22 o superior.' }
-$javaVersionLine = (& $java.Source --version | Select-Object -First 1)
-if ($LASTEXITCODE -ne 0 -or $javaVersionLine -notmatch '(\d+)(?:\.\d+)?') {
+$javaVersionOutput = @(& $java.Source --version)
+$javaVersionExit = $LASTEXITCODE
+$javaVersionLine = $javaVersionOutput | Select-Object -First 1
+if ($javaVersionExit -ne 0 -or $javaVersionLine -notmatch '(\d+)(?:\.\d+)?') {
     throw 'No se pudo identificar la versión de Java.'
 }
 if ([int]$Matches[1] -lt 22) { throw 'La prueba FFM requiere JDK 22 o superior.' }
