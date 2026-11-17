@@ -5,6 +5,15 @@
 #include <stdio.h>
 #include <string.h>
 
+static SRWLOCK active_lock=SRWLOCK_INIT;
+static HANDLE active_job;
+
+void LhmTransport_AbortActive(void) {
+    AcquireSRWLockShared(&active_lock);
+    if (active_job) TerminateJobObject(active_job,1);
+    ReleaseSRWLockShared(&active_lock);
+}
+
 static bool wait_io(HANDLE pipe, HANDLE stop, OVERLAPPED* operation, DWORD timeout, DWORD* transferred) {
     HANDLE waits[2]={stop,operation->hEvent};
     if (WaitForMultipleObjects(2,waits,FALSE,timeout)!=WAIT_OBJECT_0+1) {
@@ -54,11 +63,20 @@ static PSECURITY_DESCRIPTOR private_descriptor(void) {
 void LhmTransport_Close(LhmSession* s) {
     if (s->pipe && s->pipe!=INVALID_HANDLE_VALUE) CloseHandle(s->pipe);
     if (s->process) {
-        if (WaitForSingleObject(s->process,250)!=WAIT_OBJECT_0) TerminateProcess(s->process,1);
+        /* 1A still uses EOF as the cooperative signal. Explicit control is 1B. */
+        if (WaitForSingleObject(s->process,2000)!=WAIT_OBJECT_0) {
+            if (s->job) TerminateJobObject(s->job,1);
+            else TerminateProcess(s->process,1);
+        }
         WaitForSingleObject(s->process,1000);
         CloseHandle(s->process);
     }
-    if (s->job) CloseHandle(s->job);
+    if (s->job) {
+        AcquireSRWLockExclusive(&active_lock);
+        if (active_job==s->job) active_job=NULL;
+        CloseHandle(s->job);
+        ReleaseSRWLockExclusive(&active_lock);
+    }
     memset(s,0,sizeof(*s));
 }
 
@@ -91,10 +109,10 @@ bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* s) {
     start.StartupInfo.dwFlags=STARTF_USESTDHANDLES;
     start.StartupInfo.hStdInput=input; start.StartupInfo.hStdOutput=null_output; start.StartupInfo.hStdError=null_output;
     SIZE_T attribute_size=0;
-    InitializeProcThreadAttributeList(NULL,1,0,&attribute_size);
+    InitializeProcThreadAttributeList(NULL,2,0,&attribute_size);
     start.lpAttributeList=HeapAlloc(GetProcessHeap(),0,attribute_size);
     if (!start.lpAttributeList) { ok=false; goto cleanup; }
-    bool attributes_ready=InitializeProcThreadAttributeList(start.lpAttributeList,1,0,&attribute_size)!=0;
+    bool attributes_ready=InitializeProcThreadAttributeList(start.lpAttributeList,2,0,&attribute_size)!=0;
     HANDLE inherited[2]={input,null_output};
     PROCESS_INFORMATION child={0};
     if (attributes_ready && UpdateProcThreadAttribute(start.lpAttributeList,0,PROC_THREAD_ATTRIBUTE_HANDLE_LIST,
@@ -103,10 +121,23 @@ bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* s) {
         JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits={0};
         limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
         if (s->job && SetInformationJobObject(s->job,JobObjectExtendedLimitInformation,&limits,sizeof(limits)) &&
-            CreateProcessW(executable,command,NULL,NULL,TRUE,CREATE_SUSPENDED|CREATE_NO_WINDOW|EXTENDED_STARTUPINFO_PRESENT,
-                NULL,NULL,&start.StartupInfo,&child)) {
+            UpdateProcThreadAttribute(start.lpAttributeList,0,PROC_THREAD_ATTRIBUTE_JOB_LIST,
+                &s->job,sizeof(s->job),NULL,NULL)) {
+            AcquireSRWLockExclusive(&active_lock);
+            active_job=s->job;
+            ReleaseSRWLockExclusive(&active_lock);
+            /* Creation-time assignment closes the create/assign crash window.
+             * No breakaway flags; restrictive enclosing jobs fail closed. */
+            ok=WaitForSingleObject(stop,0)==WAIT_TIMEOUT &&
+                CreateProcessW(executable,command,NULL,NULL,TRUE,
+                    CREATE_SUSPENDED|CREATE_NO_WINDOW|EXTENDED_STARTUPINFO_PRESENT,
+                    NULL,NULL,&start.StartupInfo,&child)!=0;
+        } else ok=false;
+        if (ok) {
             s->process=child.hProcess; s->pid=child.dwProcessId;
-            if (AssignProcessToJobObject(s->job,s->process) && ResumeThread(child.hThread)!=(DWORD)-1) {
+            BOOL assigned=FALSE;
+            if (IsProcessInJob(s->process,s->job,&assigned) && assigned &&
+                WaitForSingleObject(stop,0)==WAIT_TIMEOUT && ResumeThread(child.hThread)!=(DWORD)-1) {
                 uint32_t magic=0x3142434Du, version=1, pid=GetCurrentProcessId(), length=73;
                 memcpy(bootstrap,&magic,4); memcpy(bootstrap+4,&version,4);
                 memcpy(bootstrap+8,&pid,4); memcpy(bootstrap+12,&length,4);
@@ -115,7 +146,7 @@ bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* s) {
                 ok=WriteFile(writer,bootstrap,sizeof(bootstrap),&written,NULL) && written==sizeof(bootstrap);
             } else ok=false;
             CloseHandle(child.hThread);
-        } else ok=false;
+        } else OutputDebugStringW(L"MACE LHM: contained helper creation failed; telemetry degraded.\n");
     } else ok=false;
     if (attributes_ready) DeleteProcThreadAttributeList(start.lpAttributeList);
     HeapFree(GetProcessHeap(),0,start.lpAttributeList);

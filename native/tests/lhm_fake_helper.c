@@ -72,6 +72,7 @@ static bool pipe_security(const wchar_t* path) {
     return GetLastError()==ERROR_ACCESS_DENIED;
 }
 int wmain(int argc,wchar_t** argv) {
+    if (argc==2 && wcscmp(argv[1],L"--job-descendant")==0) { Sleep(60000); return 0; }
     GetEnvironmentVariableW(L"MACE_SIM_SCENARIO",scenario,64);
     if (mode(L"wrong-client") && !(argc==2 && wcscmp(argv[1],L"--fake-child")==0)) {
         wchar_t exe[32768],cmd[32768];
@@ -99,9 +100,17 @@ int wmain(int argc,wchar_t** argv) {
     if (!restricted_acl(pipe)) { CloseHandle(pipe); return 9; }
     ULONG pid=0;
     if (!GetNamedPipeServerProcessId(pipe,&pid) || pid!=LhmWire_U32(bootstrap+8)+(mode(L"bad-server-pid") ? 1 : 0)) { CloseHandle(pipe); return 6; }
+    if (mode(L"job-descendant")) {
+        wchar_t exe[32768],cmd[32768];
+        GetModuleFileNameW(NULL,exe,32768); swprintf_s(cmd,32768,L"\"%s\" --job-descendant",exe);
+        STARTUPINFOW si={0}; si.cb=sizeof(si); PROCESS_INFORMATION pi={0};
+        if (!CreateProcessW(exe,cmd,NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,NULL,&si,&pi)) return 11;
+        CloseHandle(pi.hThread); CloseHandle(pi.hProcess);
+    }
     unsigned char bytes[LHM_MAX_FRAME]; DWORD written=0;
     frame(bytes,1,true);
     if (!WriteFile(pipe,bytes,48,&written,NULL)) { CloseHandle(pipe); return 7; }
+    if (mode(L"hang-close")) { Sleep(60000); CloseHandle(pipe); return 0; }
     if (mode(L"slow")) Sleep(1200);
     for (uint64_t sequence=2;;sequence++) {
         frame(bytes,mode(L"replay") ? 2 : sequence,false);

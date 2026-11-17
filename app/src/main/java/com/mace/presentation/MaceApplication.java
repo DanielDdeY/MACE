@@ -17,12 +17,15 @@ import com.mace.infrastructure.telemetry.SubmissionTelemetryPublisher;
 import com.mace.presentation.view.MainDashboardController;
 import com.mace.presentation.viewmodel.MainDashboardViewModel;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.time.Clock;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Punto de composición de MACE. */
 public final class MaceApplication extends Application {
@@ -32,6 +35,7 @@ public final class MaceApplication extends Application {
     private MonitoringService monitoringService;
     private MainDashboardViewModel dashboardViewModel;
     private MainDashboardController dashboardController;
+    private final ShutdownCoordinator shutdown = new ShutdownCoordinator();
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -108,24 +112,40 @@ public final class MaceApplication extends Application {
         primaryStage.setScene(scene);
         primaryStage.setMinWidth(900);
         primaryStage.setMinHeight(600);
+        Platform.setImplicitExit(false);
+        primaryStage.setOnCloseRequest(event -> {
+            event.consume();
+            beginShutdown(true);
+            primaryStage.hide();
+        });
         primaryStage.show();
     }
 
     @Override
     public void stop() {
-        RuntimeException failure=null;
-        for (AutoCloseable resource:new AutoCloseable[] {
-            dashboardController==null ? null : dashboardController::close,
-            monitoringService,dashboardViewModel,telemetryPublisher,adapters
-        }) {
-            if (resource==null) continue;
-            try { resource.close(); }
-            catch (Exception error) {
-                if (failure==null) failure=new IllegalStateException("No se completó un cierre de MACE",error);
-                else failure.addSuppressed(error);
+        // Also covers Platform.exit() and partial startup; never joins on JavaFX.
+        beginShutdown(false);
+    }
+
+    private void beginShutdown(boolean exitWhenComplete) {
+        if (shutdown.isStarted()) return;
+        // UI bindings/stages belong to JavaFX. Only detach them here; all waits,
+        // persistence and native teardown belong to the dedicated cleanup owner.
+        try { if (dashboardController != null) dashboardController.close(); }
+        catch (RuntimeException error) { System.err.println("MACE: view detach failed during shutdown."); }
+        try { if (dashboardViewModel != null) dashboardViewModel.close(); }
+        catch (RuntimeException error) { System.err.println("MACE: subscription detach failed during shutdown."); }
+        List<AutoCloseable> resources = new ArrayList<>();
+        if (monitoringService != null) resources.add(monitoringService);
+        if (telemetryPublisher != null) resources.add(telemetryPublisher);
+        if (adapters != null) resources.add(adapters);
+        shutdown.start(resources, failure -> {
+            if (failure != null) System.err.println("MACE: cleanup completed with errors.");
+            if (exitWhenComplete) {
+                try { Platform.runLater(Platform::exit); }
+                catch (IllegalStateException toolkitStopped) { /* stop() already ran. */ }
             }
-        }
-        if (failure!=null) throw failure;
+        });
     }
 
     public static void main(String[] args) {

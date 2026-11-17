@@ -7,5 +7,7 @@ bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* sessi
 bool LhmTransport_Read(LhmSession* session, HANDLE stop, unsigned char* data,
                        DWORD size, ULONGLONG deadline);
 void LhmTransport_Close(LhmSession* session);
+/* Emergency containment only; never terminates an unrelated process. */
+void LhmTransport_AbortActive(void);
 bool LhmTransport_VerifyHash(const wchar_t* executable, const wchar_t* expected);
 #endif

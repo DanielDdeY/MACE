@@ -1,6 +1,7 @@
 /* Only linked into mace_native_lhm_test.dll: no vendor SDK or sensor hardware. */
 #include <windows.h>
 #include <string.h>
+#include <stdlib.h>
 #include "../src/telemetry/gpu_providers.h"
 #include "../src/hardware/gpu_inventory.h"
 static void adapter(uint32_t i,MaceGpuAdapterInfoV2* a) {
@@ -28,8 +29,11 @@ bool GpuInventory_GetPciAddress(const MaceAdapterLuidV2* luid,uint32_t* bus,uint
 }
 void GpuProviders_Init(void) {}
 void GpuProviders_Shutdown(void) {
-    wchar_t flag[2];
-    if (GetEnvironmentVariableW(L"MACE_SIM_SLOW_STOP",flag,2)) Sleep(1000);
+    wchar_t flag[16];
+    if (GetEnvironmentVariableW(L"MACE_SIM_SLOW_STOP",flag,16)) {
+        DWORD delay=wcstoul(flag,NULL,10);
+        Sleep(delay>1 && delay<=15000 ? delay : 1000);
+    }
 }
 void GpuProviders_Poll(const MaceGpuAdapterInfoV2* a,MaceGpuTelemetryV2* s) {
     s->temperature_c.state=s->power_w.state=s->usage_percent.state=MACE_METRIC_NO_PROVIDER;

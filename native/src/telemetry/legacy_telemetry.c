@@ -54,10 +54,19 @@ bool LegacyTelemetry_Start(uint32_t vendor) {
     if (!worker) { CloseHandle(stop_event); stop_event=NULL; return false; }
     return true;
 }
-void LegacyTelemetry_Stop(void) {
+void LegacyTelemetry_RequestStop(void) {
     if (stop_event) SetEvent(stop_event);
-    if (worker) { WaitForSingleObject(worker,INFINITE); CloseHandle(worker); worker=NULL; }
+}
+bool LegacyTelemetry_StopUntil(uint64_t deadline_ms) {
+    LegacyTelemetry_RequestStop();
+    if (worker) {
+        uint64_t now=GetTickCount64();
+        DWORD remaining=now<deadline_ms ? (DWORD)(deadline_ms-now) : 0;
+        if (WaitForSingleObject(worker,remaining)!=WAIT_OBJECT_0) return false;
+        CloseHandle(worker); worker=NULL;
+    }
     if (stop_event) { CloseHandle(stop_event); stop_event=NULL; }
+    return true;
 }
 void LegacyTelemetry_Gpu(const MaceGpuAdapterInfoV2* a, MaceGpuTelemetryV2* s) {
     LegacyTelemetry_GpuState(s,MACE_METRIC_WARMING_UP);

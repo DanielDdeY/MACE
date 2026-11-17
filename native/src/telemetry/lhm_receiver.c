@@ -75,11 +75,24 @@ bool LhmReceiver_Start(void) {
     if (!worker) { CloseHandle(stop_event); stop_event=NULL; invalidate(MACE_METRIC_READ_FAILED); return false; }
     return true;
 }
-void LhmReceiver_Stop(void) {
+void LhmReceiver_RequestStop(void) {
     if (stop_event) SetEvent(stop_event);
-    if (worker) { WaitForSingleObject(worker,INFINITE); CloseHandle(worker); worker=NULL; }
+}
+bool LhmReceiver_StopUntil(uint64_t deadline_ms) {
+    LhmReceiver_RequestStop();
+    if (worker) {
+        uint64_t now=GetTickCount64();
+        DWORD remaining=now<deadline_ms ? (DWORD)(deadline_ms-now) : 0;
+        if (WaitForSingleObject(worker,remaining)!=WAIT_OBJECT_0) {
+            LhmTransport_AbortActive();
+            /* Retain event/worker/cache until it really exits; never kill a thread. */
+            return false;
+        }
+        CloseHandle(worker); worker=NULL;
+    }
     if (stop_event) { CloseHandle(stop_event); stop_event=NULL; }
     invalidate(MACE_METRIC_NOT_INITIALIZED);
+    return true;
 }
 static void snapshot(LhmFrame* f, MaceMetricState* state) {
     *state=MACE_METRIC_WARMING_UP;
