@@ -29,7 +29,7 @@ No son proveedores ni estados del wire; el protocolo privado permanece en 2.
 | Helper declara proceso sin elevación | NOT_ELEVATED=9 | Temperatura/potencia CPU; uso Windows y GPU independientes |
 | PawnIO Missing | PAWNIO_MISSING=10 | Temperatura/potencia CPU |
 | PawnIO Stopped | PAWNIO_STOPPED=11 | Temperatura/potencia CPU; nunca implica 3010 |
-| Reinicio requerido por 3010 | REBOOT_REQUIRED=12 | Reservado funcionalmente al mapeo/simulación de Fase 2, sin origen instalado implementado |
+| Reinicio requerido por 3010 | REBOOT_REQUIRED=12 | Encoder/decodificación y simulación de Fase 2; origen del instalador pendiente |
 | Helper ausente o lanzamiento bloqueado | HELPER_UNAVAILABLE=13 | Métricas LHM afectadas; conserva capacidad Windows solo en el caso de ausencia ya permitido |
 | Presupuesto agotado/modo lento | HELPER_RETRYING=14 | Métricas LHM afectadas; sigue reintentando según 4A |
 | Runtime no verificable/inaccesible | HELPER_UNTRUSTED=15 | Métricas LHM afectadas; mensaje genérico, sin detalle de comprobación |

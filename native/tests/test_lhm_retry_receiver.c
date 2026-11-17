@@ -32,6 +32,7 @@ int wmain(int argc,wchar_t** argv) {
     CHECK(SetEnvironmentVariableW(L"MACE_LHM_HELPER_SHA256",NULL));
     CHECK(SetEnvironmentVariableW(L"MACE_SIM_SCENARIO",mode));
     bool missing=!wcscmp(mode,L"permanent-missing"),trust=!wcscmp(mode,L"permanent-trust"),job=!wcscmp(mode,L"permanent-job");
+    bool containment=!wcscmp(mode,L"permanent-containment");
     HANDLE restricting_job=NULL;
     if (missing) {
         wchar_t absent[32768]; swprintf_s(absent,32768,L"%s.missing",argv[1]);
@@ -48,8 +49,9 @@ int wmain(int argc,wchar_t** argv) {
     }
     ULONGLONG start=GetTickCount64(); CHECK(CP_InitializeTelemetry()==0); CHECK(GetTickCount64()-start<200);
     LhmRetryEvidence e={0};
-    if (missing || trust || job) {
-        CHECK(cpu_state(trust ? MACE_METRIC_HELPER_UNTRUSTED : MACE_METRIC_HELPER_UNAVAILABLE,4000));
+    if (missing || trust || job || containment) {
+        CHECK(cpu_state(containment ? MACE_METRIC_HELPER_CONTAINMENT_FAILED :
+            trust ? MACE_METRIC_HELPER_UNTRUSTED : MACE_METRIC_HELPER_UNAVAILABLE,4000));
         Sleep(1200); LhmReceiver_TestEvidence(&e);
         CHECK(e.policy.blocked && e.policy.attempts==(uint32_t)(missing ? 0 : 1));
         CHECK(shared->launches==0);
@@ -93,16 +95,16 @@ int wmain(int argc,wchar_t** argv) {
         ULONGLONG until=GetTickCount64()+2000;
         while (!shared->pid && GetTickCount64()<until) Sleep(5);
         HANDLE owned=OpenProcess(SYNCHRONIZE,FALSE,(DWORD)shared->pid); CHECK(owned);
-        CHECK(cpu_state(MACE_METRIC_HELPER_UNAVAILABLE,4500));
+        CHECK(cpu_state(MACE_METRIC_READ_FAILED,4500));
         CHECK(WaitForSingleObject(owned,4000)==WAIT_OBJECT_0); CloseHandle(owned);
         CHECK(cpu_state(MACE_METRIC_VALID,4000));
         LhmReceiver_TestEvidence(&e); CHECK(e.policy.attempts==2 && e.policy.count==1);
     } else if (!wcscmp(mode,L"retry-broken")) {
-        CHECK(cpu_state(MACE_METRIC_VALID,3000)); CHECK(cpu_state(MACE_METRIC_HELPER_UNAVAILABLE,3000));
+        CHECK(cpu_state(MACE_METRIC_VALID,3000)); CHECK(cpu_state(MACE_METRIC_READ_FAILED,3000));
         CHECK(attempts(2,4000,&e)); CHECK(cpu_state(MACE_METRIC_VALID,3000));
         LhmReceiver_TestEvidence(&e); CHECK(e.policy.count==1);
     } else if (!wcscmp(mode,L"retry-invalid")) {
-        CHECK(cpu_state(MACE_METRIC_HELPER_UNAVAILABLE,3000));
+        CHECK(cpu_state(MACE_METRIC_READ_FAILED,3000));
         CHECK(attempts(2,4000,&e)); CHECK(cpu_state(MACE_METRIC_VALID,3000));
         LhmReceiver_TestEvidence(&e); CHECK(e.policy.count==1);
     } else if (!wcscmp(mode,L"retry-pawn")) {

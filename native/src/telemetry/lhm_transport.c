@@ -155,7 +155,12 @@ bool LhmTransport_OpenEx(const wchar_t* executable,HANDLE stop,LhmSession* s,Lhm
     PROCESS_INFORMATION child={0};
     if (attributes_ready && UpdateProcThreadAttribute(start.lpAttributeList,0,PROC_THREAD_ATTRIBUTE_HANDLE_LIST,
         inherited,sizeof(inherited),NULL,NULL) && swprintf_s(command,32768,L"\"%s\" --bootstrap-stdin",executable)>0) {
+#ifdef MACE_LHM_TEST_HOOKS
+        wchar_t test_mode[64]={0}; GetEnvironmentVariableW(L"MACE_SIM_SCENARIO",test_mode,64);
+        s->job=wcscmp(test_mode,L"permanent-containment")==0 ? NULL : CreateJobObjectW(NULL,NULL);
+#else
         s->job=CreateJobObjectW(NULL,NULL);
+#endif
         JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits={0};
         limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
         if (s->job && SetInformationJobObject(s->job,JobObjectExtendedLimitInformation,&limits,sizeof(limits)) &&
