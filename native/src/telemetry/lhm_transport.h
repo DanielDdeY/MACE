@@ -9,6 +9,7 @@ typedef struct { HANDLE pipe, process, job; DWORD pid; bool authenticated; uint6
 typedef enum { LHM_OPEN_TRANSIENT, LHM_OPEN_TRUST, LHM_OPEN_CONTAINMENT, LHM_OPEN_LAUNCH_BLOCKED } LhmOpenFailure;
 static inline MaceMetricState LhmTransport_FailureState(LhmOpenFailure failure) {
     switch (failure) {
+        case LHM_OPEN_TRANSIENT: return MACE_METRIC_READ_FAILED;
         case LHM_OPEN_TRUST: return MACE_METRIC_HELPER_UNTRUSTED;
         case LHM_OPEN_CONTAINMENT: return MACE_METRIC_HELPER_CONTAINMENT_FAILED;
         default: return MACE_METRIC_HELPER_UNAVAILABLE;

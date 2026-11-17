@@ -54,7 +54,7 @@ int wmain(int argc,wchar_t** argv) {
         wcscmp(argv[2],L"wrong-client")==0 || wcscmp(argv[2],L"stale-arrival")==0 || wcscmp(argv[2],L"nan")==0 ||
         wcscmp(argv[2],L"bad-server-pid")==0 || wcscmp(argv[2],L"hash-mismatch")==0;
     bool unprivileged=wcscmp(argv[2],L"no-elevation")==0 || wcscmp(argv[2],L"driver-missing")==0 || wcscmp(argv[2],L"driver-stopped")==0 || wcscmp(argv[2],L"zero-unprivileged")==0;
-    MaceMetricState expected=failed ? (wcscmp(argv[2],L"hash-mismatch")==0 ? MACE_METRIC_HELPER_UNTRUSTED : MACE_METRIC_HELPER_UNAVAILABLE) :
+    MaceMetricState expected=failed ? (wcscmp(argv[2],L"hash-mismatch")==0 ? MACE_METRIC_HELPER_UNTRUSTED : MACE_METRIC_READ_FAILED) :
         wcscmp(argv[2],L"zero-cpu")==0 ? MACE_METRIC_READ_FAILED :
         missing ? MACE_METRIC_HELPER_UNAVAILABLE :
         wcscmp(argv[2],L"driver-missing")==0 ? MACE_METRIC_PAWNIO_MISSING :
@@ -101,12 +101,12 @@ int wmain(int argc,wchar_t** argv) {
             gpu.power_scope==MACE_POWER_SCOPE_UNKNOWN);
         if (wcscmp(argv[2],L"stale")==0) {
             Sleep(2100); CHECK(poll(&cpu,&gpu)); CHECK(cpu.temperature_c.state==MACE_METRIC_VALID);
-            CHECK(wait_cpu(MACE_METRIC_HELPER_UNAVAILABLE,2000,&cpu,&gpu));
-            CHECK(cpu.temperature_c.value==0 && gpu.temperature_c.state==MACE_METRIC_HELPER_UNAVAILABLE && gpu.temperature_c.value==0);
+            CHECK(wait_cpu(MACE_METRIC_READ_FAILED,2000,&cpu,&gpu));
+            CHECK(cpu.temperature_c.value==0 && gpu.temperature_c.state==MACE_METRIC_READ_FAILED && gpu.temperature_c.value==0);
         }
         if (wcscmp(argv[2],L"disconnect")==0 || wcscmp(argv[2],L"replay")==0) {
-            CHECK(wait_cpu(MACE_METRIC_HELPER_UNAVAILABLE,2500,&cpu,&gpu));
-            CHECK(cpu.temperature_c.value==0 && gpu.temperature_c.state==MACE_METRIC_HELPER_UNAVAILABLE);
+            CHECK(wait_cpu(MACE_METRIC_READ_FAILED,2500,&cpu,&gpu));
+            CHECK(cpu.temperature_c.value==0 && gpu.temperature_c.state==MACE_METRIC_READ_FAILED);
             if (wcscmp(argv[2],L"disconnect")==0) CHECK(wait_cpu(MACE_METRIC_VALID,4000,&cpu,&gpu));
         }
         /* Primaries must survive the secondary helper's data. */

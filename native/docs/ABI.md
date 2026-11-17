@@ -30,7 +30,7 @@ No son proveedores ni estados del wire; el protocolo privado permanece en 2.
 | PawnIO Missing | PAWNIO_MISSING=10 | Temperatura/potencia CPU |
 | PawnIO Stopped | PAWNIO_STOPPED=11 | Temperatura/potencia CPU; nunca implica 3010 |
 | Reinicio requerido por 3010 | REBOOT_REQUIRED=12 | Reservado funcionalmente al mapeo/simulación de Fase 2, sin origen instalado implementado |
-| Helper ausente, lanzamiento bloqueado o transporte no disponible | HELPER_UNAVAILABLE=13 | Métricas LHM afectadas; conserva capacidad Windows solo en el caso de ausencia ya permitido |
+| Helper ausente o lanzamiento bloqueado | HELPER_UNAVAILABLE=13 | Métricas LHM afectadas; conserva capacidad Windows solo en el caso de ausencia ya permitido |
 | Presupuesto agotado/modo lento | HELPER_RETRYING=14 | Métricas LHM afectadas; sigue reintentando según 4A |
 | Runtime no verificable/inaccesible | HELPER_UNTRUSTED=15 | Métricas LHM afectadas; mensaje genérico, sin detalle de comprobación |
 | Fallo conocido al crear/verificar contención | HELPER_CONTAINMENT_FAILED=16 | Métricas LHM afectadas; falla cerrado |
@@ -40,9 +40,10 @@ sospechoso y caché caducada. Unknown de PawnIO no se inventa como Missing,
 Stopped o reinicio pendiente: conserva NO_PROVIDER=2. GPU ambigua/UnknownPower
 conserva UNSUPPORTED=3. Ninguna de estas causas cambia la promoción a VALID.
 
-Se agrupan ausencia/fallo de arranque/EOF y transporte roto en 13 porque no
-requieren acciones UI distintas: componente no disponible, mientras la política
-interna sigue distinguiendo reparación manual de fallos transitorios. CreateProcess
+Se agrupan ausencia/fallo de arranque bloqueado en 13: necesitan revisar la
+distribución o restricciones. EOF, transporte roto y mensajes inválidos conservan
+READ_FAILED=6 mientras 4A reintenta automáticamente; al pasar a modo lento usan
+14. Así un corte transitorio no muestra instrucciones de reparar. CreateProcess
 fallido no demuestra un fallo de job: usa 13; solo fallo conocido de configuración
 o verificación de job usa 16. Se agrupan los rechazos de confianza en 15 para no
 revelar si falló ruta, hash, manifiesto, acceso o firma. En modo lento prevalece

@@ -130,7 +130,7 @@ static DWORD WINAPI receive_worker(void* unused) {
             cache=frame; have_frame=true; cache_state=MACE_METRIC_VALID; missing_helper_capacity=false;
             ReleaseSRWLockExclusive(&cache_lock);
         }
-        invalidate(opened ? MACE_METRIC_HELPER_UNAVAILABLE : LhmTransport_FailureState(failure));
+        invalidate(opened ? MACE_METRIC_READ_FAILED : LhmTransport_FailureState(failure));
         LhmTransport_Close(&session);
         if (WaitForSingleObject(stop_event,0)!=WAIT_TIMEOUT) break;
         if (!awake_ms(&now)) { retry.blocked=true; evidence(&retry,5); break; }

@@ -70,7 +70,7 @@ int wmain(int argc,wchar_t** argv) {
     }
     if (!wcscmp(mode,L"relaunch")) {
         HANDLE child=own_helper(); CHECK(child); CHECK(TerminateProcess(child,1)); CHECK(WaitForSingleObject(child,2000)==WAIT_OBJECT_0); CloseHandle(child);
-        CHECK(wait_state(MACE_METRIC_HELPER_UNAVAILABLE,2000)); ResetEvent(started);
+        CHECK(wait_state(MACE_METRIC_READ_FAILED,2000)); ResetEvent(started);
         swprintf_s(destination,32768,L"%s\\dependency.dll",root);
         HANDLE file=INVALID_HANDLE_VALUE; ULONGLONG until=GetTickCount64()+500;
         do { file=CreateFileW(destination,FILE_APPEND_DATA,0,NULL,OPEN_EXISTING,0,NULL); if (file!=INVALID_HANDLE_VALUE) break; Sleep(1); } while (GetTickCount64()<until);
