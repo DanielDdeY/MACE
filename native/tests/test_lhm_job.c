@@ -90,10 +90,46 @@ static int parent_case(const wchar_t* helper,bool restricted) {
     return 0;
 }
 
+/* An unrelated process with the exact same image, contained in a TEST-owned job.
+ * Transport must never touch it. The harness cleans up by retained handles only. */
+static int foreign_homonym(const wchar_t* helper) {
+    HANDLE foreign_job=CreateJobObjectW(NULL,NULL); CHECK(foreign_job);
+    JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits={0};
+    limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+    CHECK(SetInformationJobObject(foreign_job,JobObjectExtendedLimitInformation,&limits,sizeof(limits)));
+    SIZE_T size=0; InitializeProcThreadAttributeList(NULL,1,0,&size);
+    STARTUPINFOEXW startup={0}; startup.StartupInfo.cb=sizeof(startup);
+    startup.lpAttributeList=HeapAlloc(GetProcessHeap(),0,size); CHECK(startup.lpAttributeList);
+    CHECK(InitializeProcThreadAttributeList(startup.lpAttributeList,1,0,&size));
+    CHECK(UpdateProcThreadAttribute(startup.lpAttributeList,0,PROC_THREAD_ATTRIBUTE_JOB_LIST,&foreign_job,sizeof(foreign_job),NULL,NULL));
+    wchar_t command[32768]; swprintf_s(command,32768,L"\"%s\" --job-descendant",helper);
+    PROCESS_INFORMATION foreign={0};
+    CHECK(CreateProcessW(helper,command,NULL,NULL,FALSE,CREATE_NO_WINDOW|EXTENDED_STARTUPINFO_PRESENT,
+        NULL,NULL,&startup.StartupInfo,&foreign));
+    DeleteProcThreadAttributeList(startup.lpAttributeList); HeapFree(GetProcessHeap(),0,startup.lpAttributeList);
+    CloseHandle(foreign.hThread);
+    CHECK(WaitForSingleObject(foreign.hProcess,100)==WAIT_TIMEOUT);
+    SetEnvironmentVariableW(L"MACE_SIM_SCENARIO",L"valid");
+    LhmSession session={0}; HANDLE stop=CreateEventW(NULL,TRUE,FALSE,NULL); CHECK(stop);
+    CHECK(LhmTransport_Open(helper,stop,&session));
+    CHECK(session.pid!=foreign.dwProcessId);
+    HANDLE owned=NULL; CHECK(DuplicateHandle(GetCurrentProcess(),session.process,GetCurrentProcess(),&owned,SYNCHRONIZE,FALSE,0));
+    unsigned char frame[48]; CHECK(LhmTransport_Read(&session,stop,frame,48,GetTickCount64()+5000));
+    LhmTransport_Close(&session);
+    CHECK(WaitForSingleObject(owned,1000)==WAIT_OBJECT_0);
+    CHECK(WaitForSingleObject(foreign.hProcess,200)==WAIT_TIMEOUT);
+    puts("owned helper exited; unrelated live process with identical executable untouched: OK");
+    CloseHandle(owned); CloseHandle(stop);
+    // Test cleanup only, AFTER proving survival; production has no access to this job.
+    CloseHandle(foreign_job); CHECK(WaitForSingleObject(foreign.hProcess,2000)==WAIT_OBJECT_0);
+    CloseHandle(foreign.hProcess); return 0;
+}
+
 int wmain(int argc,wchar_t** argv) {
     if (argc==6 && wcscmp(argv[1],L"--parent")==0)
         return parent(argv[2],argv[3],argv[4],wcscmp(argv[5],L"1")==0);
     CHECK(argc==3);
+    if (wcscmp(argv[2],L"foreign-homonym")==0) return foreign_homonym(argv[1]);
     if (wcscmp(argv[2],L"abrupt-parent")==0) return parent_case(argv[1],false);
     if (wcscmp(argv[2],L"restrictive-job")==0) return parent_case(argv[1],true);
     bool forced=wcscmp(argv[2],L"forced-close")==0;

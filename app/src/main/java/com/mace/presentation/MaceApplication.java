@@ -36,12 +36,32 @@ public final class MaceApplication extends Application {
     private MainDashboardViewModel dashboardViewModel;
     private MainDashboardController dashboardController;
     private final ShutdownCoordinator shutdown;
+    private WindowsSingleInstance.Result instanceReservation;
 
     public MaceApplication() { this(new ShutdownCoordinator()); }
     MaceApplication(ShutdownCoordinator shutdown) { this.shutdown = shutdown; }
 
     @Override
+    public void init() {
+        // JavaFX calls init before creating the primary Stage. No telemetry/helper yet.
+        instanceReservation = WindowsSingleInstance.acquire();
+    }
+
+    @Override
     public void start(Stage primaryStage) throws Exception {
+        if (instanceReservation == null || instanceReservation.status() != WindowsSingleInstance.Status.ACQUIRED) {
+            boolean busy = instanceReservation != null && instanceReservation.status() == WindowsSingleInstance.Status.BUSY;
+            Alert notice = new Alert(busy ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR);
+            notice.setTitle("MACE");
+            notice.setHeaderText(busy ? "MACE ya está abierto o se está cerrando" : "No se pudo reservar la instancia de MACE");
+            notice.setContentText(busy
+                    ? "Solo se permite una instancia de MACE o Preview por usuario y sesión. Espera unos segundos y vuelve a intentarlo."
+                    : "No se inició la telemetría. Revisa los permisos de Windows y vuelve a intentarlo. Código: "
+                        + (instanceReservation == null ? -1 : instanceReservation.error()));
+            notice.showAndWait();
+            Platform.exit();
+            return;
+        }
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
 
         /*
