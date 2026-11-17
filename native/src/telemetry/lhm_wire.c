@@ -12,7 +12,7 @@ bool LhmWire_Decode(const unsigned char* b, uint32_t size, uint32_t pid,
                     uint64_t previous, uint64_t now, LhmFrame* out) {
     if (size < LHM_HEADER_SIZE || size > LHM_MAX_FRAME ||
         (size-LHM_HEADER_SIZE)%LHM_DEVICE_SIZE || LhmWire_U32(b)!=0x314D484Cu ||
-        LhmWire_U32(b+4)!=0x00300001u || LhmWire_U32(b+8)!=size) return false;
+        LhmWire_U32(b+4)!=((LHM_HEADER_SIZE<<16)|LHM_PROTOCOL_VERSION) || LhmWire_U32(b+8)!=size) return false;
     LhmFrame f = {0};
     f.flags=LhmWire_U32(b+12); f.sequence=u64(b+16); f.timestamp=u64(b+24);
     f.pid=LhmWire_U32(b+32); f.driver=LhmWire_U32(b+36);

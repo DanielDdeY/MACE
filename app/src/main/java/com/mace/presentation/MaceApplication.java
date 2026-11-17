@@ -35,7 +35,10 @@ public final class MaceApplication extends Application {
     private MonitoringService monitoringService;
     private MainDashboardViewModel dashboardViewModel;
     private MainDashboardController dashboardController;
-    private final ShutdownCoordinator shutdown = new ShutdownCoordinator();
+    private final ShutdownCoordinator shutdown;
+
+    public MaceApplication() { this(new ShutdownCoordinator()); }
+    MaceApplication(ShutdownCoordinator shutdown) { this.shutdown = shutdown; }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -128,6 +131,7 @@ public final class MaceApplication extends Application {
     }
 
     private void beginShutdown(boolean exitWhenComplete) {
+        shutdown.armWatchdog(); // Covers view detach as well as monitor/persistence/native cleanup.
         if (shutdown.isStarted()) return;
         // UI bindings/stages belong to JavaFX. Only detach them here; all waits,
         // persistence and native teardown belong to the dedicated cleanup owner.

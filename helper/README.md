@@ -1,6 +1,6 @@
-# Helper LHM de MACE — Subfases 1A y 1B
+# Helper LHM de MACE — protocolo privado 2
 
-La entrega de 1C y la corrección de potencia AMD están en [RESULTADOS-1C.md](RESULTADOS-1C.md). El protocolo conserva su versión y tamaños.
+La entrega de 1C y la corrección de potencia AMD están en [RESULTADOS-1C.md](RESULTADOS-1C.md). Desde la Fase 2 Paso 1B se usa protocolo privado 2: helper de aplicación 1.1.0 y DLL compatible se distribuyen juntos. Los tamaños/offsets de las muestras y el ABI público V2 permanecen intactos; no se mezclan componentes privados 1 y 2. Véanse [PROTOCOL.md](PROTOCOL.md) y [FASE2-PASO1B.md](FASE2-PASO1B.md).
 
 Helper Windows x64 autocontenido, con .NET 10.0.12 y LibreHardwareMonitorLib 0.9.6. Se compila con SDK 10.0.401, dependencias exactas y archivos `packages.lock.json`. `global.json` rechaza otros SDK para conservar la configuración verificada.
 
@@ -12,7 +12,7 @@ Desde PowerShell, en esta carpeta, ejecutar `powershell -NoProfile -ExecutionPol
 
 La DLL crea la tubería y lanza `Mace.Lhm.Helper.exe --bootstrap-stdin`. El nombre aleatorio y el PID del receptor viajan en un bloque privado de 128 bytes por stdin heredado, con una lista explícita de handles. El nombre no figura en argumentos ni variables de entorno. El helper verifica el PID real del servidor antes de abrir LHM. Escribe WARMING_UP, abre los sensores y emite muestras a 1 Hz. Usa un plazo de conexión de 5 s y uno de escritura de 2 s. Al perder la conexión termina y libera sus recursos. Los argumentos `--pipe ... --parent-pid ...` se conservan para compatibilidad con el receptor de referencia de 1A; la DLL no los usa.
 
-La DLL implementa el servidor en C con SID del usuario, SYSTEM, DACL protegida, primera instancia exclusiva y rechazo de clientes remotos. Comprueba `GetNamedPipeClientProcessId` frente al hijo creado, y el helper comprueba `GetNamedPipeServerProcessId`. `PrivatePipe.cs` sigue siendo el servidor de referencia de las pruebas 1A. El Job Object del transporte contiene exclusivamente el hijo de esta DLL; no se buscan ni terminan instancias de LHM ajenas. Otros procesos con control del mismo usuario, acceso a depuración o privilegios de administrador siguen dentro del límite de confianza de Windows.
+La DLL implementa el servidor en C con SID del usuario, SYSTEM, DACL protegida, primera instancia exclusiva y rechazo de clientes remotos. Comprueba `GetNamedPipeClientProcessId` frente al hijo creado, y el helper comprueba `GetNamedPipeServerProcessId`. `PrivatePipe.cs` sigue siendo el servidor de referencia de las pruebas 1A. El Job Object del transporte contiene el helper propio y sus descendientes, incluidos auxiliares de Windows; no se buscan ni terminan instancias de LHM ajenas. Otros procesos con control del mismo usuario, acceso a depuración o privilegios de administrador siguen dentro del límite de confianza de Windows.
 
 Para la prueba física, desde PowerShell como administrador, ejecutar `powershell -NoProfile -ExecutionPolicy Bypass -File .\Smoke-Test.ps1`. El receptor de prueba inicia el artefacto publicado, comprueba PID y protocolo, lee cinco mensajes y cierra la tubería. El resultado y el tiempo de la primera muestra operativa se guardan en `artifacts/smoke-*.txt`.
 

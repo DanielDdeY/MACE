@@ -60,17 +60,45 @@ static PSECURITY_DESCRIPTOR private_descriptor(void) {
     return descriptor;
 }
 
+bool LhmTransport_SendShutdown(LhmSession* s) {
+    if (!s->authenticated || !s->pipe || s->pipe==INVALID_HANDLE_VALUE || s->control_sequence) return false;
+    unsigned char message[LHM_CONTROL_SIZE]={0};
+    uint32_t magic=0x3143434Du, header=(LHM_CONTROL_SIZE<<16)|LHM_PROTOCOL_VERSION;
+    uint32_t size=LHM_CONTROL_SIZE, type=1, pid=GetCurrentProcessId(); uint64_t sequence=1;
+    memcpy(message,&magic,4); memcpy(message+4,&header,4); memcpy(message+8,&size,4);
+    memcpy(message+12,&type,4); memcpy(message+16,&sequence,8); memcpy(message+24,&pid,4);
+    OVERLAPPED op={0}; op.hEvent=CreateEventW(NULL,TRUE,FALSE,NULL);
+    if (!op.hEvent) return false;
+    DWORD written=0; BOOL done=WriteFile(s->pipe,message,sizeof(message),&written,&op);
+    bool ok=done!=0;
+    if (!done && GetLastError()==ERROR_IO_PENDING) {
+        if (WaitForSingleObject(op.hEvent,100)!=WAIT_OBJECT_0) {
+            CancelIoEx(s->pipe,&op);
+            GetOverlappedResult(s->pipe,&op,&written,TRUE); // Keep stack storage alive until cancellation completes.
+        } else ok=GetOverlappedResult(s->pipe,&op,&written,FALSE)!=0;
+    }
+    CloseHandle(op.hEvent);
+    if (ok && written==sizeof(message)) { s->control_sequence=1; return true; }
+    return false;
+}
+
 void LhmTransport_Close(LhmSession* s) {
-    if (s->pipe && s->pipe!=INVALID_HANDLE_VALUE) CloseHandle(s->pipe);
+    ULONGLONG deadline=GetTickCount64()+2000;
+    bool sent=s->control_sequence==1 || LhmTransport_SendShutdown(s);
+    if (!sent && s->pipe && s->pipe!=INVALID_HANDLE_VALUE) {
+        CloseHandle(s->pipe); s->pipe=NULL; // Failure to send never disables EOF fallback.
+    }
     if (s->process) {
-        /* 1A still uses EOF as the cooperative signal. Explicit control is 1B. */
-        if (WaitForSingleObject(s->process,2000)!=WAIT_OBJECT_0) {
+        ULONGLONG now=GetTickCount64();
+        if (WaitForSingleObject(s->process,now<deadline ? (DWORD)(deadline-now) : 0)!=WAIT_OBJECT_0) {
+            if (s->pipe && s->pipe!=INVALID_HANDLE_VALUE) { CloseHandle(s->pipe); s->pipe=NULL; }
             if (s->job) TerminateJobObject(s->job,1);
             else TerminateProcess(s->process,1);
         }
         WaitForSingleObject(s->process,1000);
         CloseHandle(s->process);
     }
+    if (s->pipe && s->pipe!=INVALID_HANDLE_VALUE) CloseHandle(s->pipe);
     if (s->job) {
         AcquireSRWLockExclusive(&active_lock);
         if (active_job==s->job) active_job=NULL;
@@ -81,6 +109,7 @@ void LhmTransport_Close(LhmSession* s) {
 }
 
 bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* s) {
+    OutputDebugStringA(LHM_PROTOCOL_MARKER);
     memset(s,0,sizeof(*s));
     unsigned char random[32], bootstrap[128]={0};
     wchar_t name[74]=L"mace-lhm-", path[96], command[32768];
@@ -91,7 +120,7 @@ bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* s) {
     PSECURITY_DESCRIPTOR descriptor=private_descriptor();
     if (!descriptor) return false;
     SECURITY_ATTRIBUTES sa={sizeof(sa),descriptor,FALSE};
-    s->pipe=CreateNamedPipeW(path,PIPE_ACCESS_INBOUND|FILE_FLAG_OVERLAPPED|FILE_FLAG_FIRST_PIPE_INSTANCE,
+    s->pipe=CreateNamedPipeW(path,PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED|FILE_FLAG_FIRST_PIPE_INSTANCE,
         PIPE_TYPE_BYTE|PIPE_READMODE_BYTE|PIPE_REJECT_REMOTE_CLIENTS,1,LHM_MAX_FRAME,LHM_MAX_FRAME,0,&sa);
     if (s->pipe==INVALID_HANDLE_VALUE) { LocalFree(descriptor); s->pipe=NULL; return false; }
     HANDLE input=NULL, writer=NULL, null_output=INVALID_HANDLE_VALUE;
@@ -138,7 +167,7 @@ bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* s) {
             BOOL assigned=FALSE;
             if (IsProcessInJob(s->process,s->job,&assigned) && assigned &&
                 WaitForSingleObject(stop,0)==WAIT_TIMEOUT && ResumeThread(child.hThread)!=(DWORD)-1) {
-                uint32_t magic=0x3142434Du, version=1, pid=GetCurrentProcessId(), length=73;
+                uint32_t magic=0x3142434Du, version=LHM_PROTOCOL_VERSION, pid=GetCurrentProcessId(), length=73;
                 memcpy(bootstrap,&magic,4); memcpy(bootstrap+4,&version,4);
                 memcpy(bootstrap+8,&pid,4); memcpy(bootstrap+12,&length,4);
                 for (unsigned i=0;i<73;i++) bootstrap[16+i]=(unsigned char)name[i];
@@ -161,6 +190,7 @@ bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* s) {
     CloseHandle(connect.hEvent);
     ULONG peer=0;
     if (ok) ok=GetNamedPipeClientProcessId(s->pipe,&peer) && peer==s->pid && WaitForSingleObject(s->process,0)==WAIT_TIMEOUT;
+    s->authenticated=ok;
 cleanup:
     ok=ok && s->process!=NULL;
     if (input) CloseHandle(input);

@@ -24,6 +24,9 @@ $binaryText=[Text.Encoding]::ASCII.GetString($binary)+[Text.Encoding]::Unicode.G
 foreach ($needle in @(('Win'+'Ring0x64.dll'),('amdad'+'lx64.dll'),('RyzenMaster'+'MonitoringSDK'))) {
     if ($binaryText.IndexOf($needle,[StringComparison]::OrdinalIgnoreCase) -ge 0) { throw 'La DLL contiene un cargador de proveedor retirado.' }
 }
+if ([Text.Encoding]::ASCII.GetString($binary).IndexOf('MACE_LHM_PROTOCOL=2',[StringComparison]::Ordinal) -lt 0) {
+    throw 'La DLL no declara el protocolo privado 2 requerido por el helper; recompila ambos componentes.'
+}
 if (-not $HelperDirectory) {
     $latest=Join-Path $repoRoot 'helper\artifacts\latest.txt'
     if (-not (Test-Path -LiteralPath $latest)) { throw 'Publica el helper con helper\Build-Helper.ps1 o define MACE_HELPER_PUBLISH.' }
@@ -72,7 +75,7 @@ if ($SigningScript) {
 $files=@(Get-ChildItem -LiteralPath $stage -Recurse -File | Sort-Object FullName | ForEach-Object {
     [ordered]@{file=$_.FullName.Substring($stage.Length+1).Replace('\','/');sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}
 })
-[ordered]@{schema=1;helperProtocol=1;helperVersion=$sourceManifest.lhm;pawnIoVersion=$pawnPolicy.version;files=$files} |
+[ordered]@{schema=1;helperProtocol=2;helperVersion=$sourceManifest.lhm;pawnIoVersion=$pawnPolicy.version;files=$files} |
     ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $stage 'runtime-manifest.json') -Encoding UTF8
 & (Join-Path $PSScriptRoot 'verify-runtime.ps1') -RuntimeDirectory $stage
 Write-Host 'Staging completo: aplicación, DLL, helper, PawnIO intacto y avisos. No se ejecutó el instalador.'

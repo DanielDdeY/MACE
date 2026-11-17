@@ -13,7 +13,7 @@ import static org.mockito.Mockito.*;
 
 class MaceApplicationStopTest {
     @Test void unErrorEnLaVistaNoImpideCerrarMonitorYTelemetriaNativa() throws Exception {
-        var app=new MaceApplication();
+        var app=new MaceApplication(new ShutdownCoordinator(java.time.Duration.ofSeconds(10), code -> {}));
         var controller=mock(MainDashboardController.class);
         var monitoring=mock(MonitoringService.class);
         var viewModel=mock(MainDashboardViewModel.class);

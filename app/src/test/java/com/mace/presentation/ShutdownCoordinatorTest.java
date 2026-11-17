@@ -14,6 +14,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ShutdownCoordinatorTest {
+    private static ShutdownCoordinator coordinator() {
+        return new ShutdownCoordinator(java.time.Duration.ofSeconds(10), code -> {});
+    }
     @BeforeAll static void startFx() throws Exception {
         try { Platform.startup(() -> {}); }
         catch (IllegalStateException alreadyStarted) { /* Shared toolkit. */ }
@@ -23,7 +26,7 @@ class ShutdownCoordinatorTest {
     }
 
     @Test void nativeWaitDoesNotBlockFxAndStopCannotCloseTwice() throws Exception {
-        var coordinator = new ShutdownCoordinator();
+        var coordinator = coordinator();
         var entered = new CountDownLatch(1);
         var release = new CountDownLatch(1);
         var calls = new AtomicInteger();
@@ -48,7 +51,7 @@ class ShutdownCoordinatorTest {
     }
 
     @Test void failureStillClosesRemainingResourcesInOrderOffFx() throws Exception {
-        var coordinator = new ShutdownCoordinator();
+        var coordinator = coordinator();
         var order = new java.util.concurrent.CopyOnWriteArrayList<String>();
         var done = new CompletableFuture<Throwable>();
         var failure = new IllegalStateException("test failure");
@@ -61,7 +64,7 @@ class ShutdownCoordinatorTest {
     }
 
     @Test void concurrentExitRequestsHaveOneCleanupOwner() throws Exception {
-        var coordinator = new ShutdownCoordinator();
+        var coordinator = coordinator();
         var calls = new AtomicInteger();
         var done = new CompletableFuture<Throwable>();
         var unexpected = new AtomicReference<Throwable>();
@@ -77,5 +80,39 @@ class ShutdownCoordinatorTest {
         assertNull(done.get(3, TimeUnit.SECONDS));
         assertNull(unexpected.get());
         assertEquals(1, calls.get());
+    }
+
+    @Test void watchdogFiresOnceWhileCleanupIsBlocked() throws Exception {
+        var forced = new CountDownLatch(1);
+        var release = new CountDownLatch(1);
+        var count = new AtomicInteger();
+        var done = new CompletableFuture<Throwable>();
+        var coordinator = new ShutdownCoordinator(java.time.Duration.ofMillis(150), code -> {
+            assertEquals(70, code); assertFalse(Platform.isFxApplicationThread());
+            count.incrementAndGet(); forced.countDown();
+        });
+        try {
+            coordinator.start(List.of(() -> release.await(3, TimeUnit.SECONDS)), done::complete);
+            assertFalse(coordinator.start(List.of(), done::complete));
+            assertTrue(forced.await(2, TimeUnit.SECONDS));
+            assertFalse(done.isDone()); assertEquals(1, count.get());
+        } finally { release.countDown(); }
+        done.get(2, TimeUnit.SECONDS);
+    }
+
+    @Test void watchdogAlsoCoversBlockedCompletionAfterCleanup() throws Exception {
+        var forced = new CountDownLatch(1);
+        var release = new CountDownLatch(1);
+        var completed = new CountDownLatch(1);
+        var coordinator = new ShutdownCoordinator(java.time.Duration.ofMillis(150), code -> forced.countDown());
+        try {
+            coordinator.start(List.of(), failure -> {
+                completed.countDown();
+                try { release.await(3, TimeUnit.SECONDS); }
+                catch (InterruptedException error) { Thread.currentThread().interrupt(); }
+            });
+            assertTrue(completed.await(2, TimeUnit.SECONDS));
+            assertTrue(forced.await(2, TimeUnit.SECONDS));
+        } finally { release.countDown(); }
     }
 }

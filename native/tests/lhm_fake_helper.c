@@ -39,7 +39,7 @@ static bool restricted_acl(HANDLE pipe) {
 }
 static void frame(unsigned char* b,uint64_t seq,bool warming) {
     memset(b,0,LHM_MAX_FRAME);
-    put32(b,0x314D484C); put32(b+4,0x00300001); put32(b+8,warming ? 48 : 624);
+    put32(b,0x314D484C); put32(b+4,(LHM_HEADER_SIZE<<16)|(mode(L"old-version") ? 1 : LHM_PROTOCOL_VERSION)); put32(b+8,warming ? 48 : 624);
     put32(b+12,mode(L"no-elevation") || mode(L"zero-unprivileged") ? 0 : 1);
     put64(b+16,seq); put64(b+24,GetTickCount64()-(mode(L"stale-arrival") ? 3001 : 0));
     put32(b+32,GetCurrentProcessId()+(mode(L"bad-pid") ? 1 : 0));
@@ -71,6 +71,20 @@ static bool pipe_security(const wchar_t* path) {
     if (duplicate!=INVALID_HANDLE_VALUE) { CloseHandle(duplicate); return false; }
     return GetLastError()==ERROR_ACCESS_DENIED;
 }
+/* The fake uses the production frame shape; no sensor hardware is involved. */
+static int read_control(HANDLE pipe,DWORD parent) {
+    DWORD available=0;
+    if (!PeekNamedPipe(pipe,NULL,0,NULL,&available,NULL)) return 1; // EOF fallback.
+    if (available<LHM_CONTROL_SIZE) return 0;
+    unsigned char message[LHM_CONTROL_SIZE]; DWORD read=0;
+    if (!ReadFile(pipe,message,sizeof(message),&read,NULL) || read!=sizeof(message)) return 12;
+    uint64_t sequence=0; memcpy(&sequence,message+16,8);
+    if (LhmWire_U32(message)!=0x3143434Du ||
+        LhmWire_U32(message+4)!=((LHM_CONTROL_SIZE<<16)|LHM_PROTOCOL_VERSION) ||
+        LhmWire_U32(message+8)!=LHM_CONTROL_SIZE || LhmWire_U32(message+12)!=1 ||
+        sequence!=1 || LhmWire_U32(message+24)!=parent || LhmWire_U32(message+28)) return 12;
+    return 1;
+}
 int wmain(int argc,wchar_t** argv) {
     if (argc==2 && wcscmp(argv[1],L"--job-descendant")==0) { Sleep(60000); return 0; }
     GetEnvironmentVariableW(L"MACE_SIM_SCENARIO",scenario,64);
@@ -88,14 +102,14 @@ int wmain(int argc,wchar_t** argv) {
         if (!ReadFile(GetStdHandle(STD_INPUT_HANDLE),bootstrap+offset,128-offset,&read,NULL) || !read) return 2;
         offset+=read;
     }
-    if (LhmWire_U32(bootstrap)!=0x3142434D || LhmWire_U32(bootstrap+4)!=1 || LhmWire_U32(bootstrap+12)!=73) return 3;
+    if (LhmWire_U32(bootstrap)!=0x3142434D || LhmWire_U32(bootstrap+4)!=LHM_PROTOCOL_VERSION || LhmWire_U32(bootstrap+12)!=73) return 3;
     wchar_t path[96]=L"\\\\.\\pipe\\";
     for (unsigned i=0;i<73;i++) path[9+i]=(wchar_t)bootstrap[16+i];
     path[82]=0;
     if (wcsstr(GetCommandLineW(),path+9)) return 8;
     if (mode(L"slow")) Sleep(1200);
     if (!pipe_security(path)) return 4;
-    HANDLE pipe=CreateFileW(path,GENERIC_WRITE|READ_CONTROL,0,NULL,OPEN_EXISTING,SECURITY_SQOS_PRESENT|SECURITY_IDENTIFICATION,NULL);
+    HANDLE pipe=CreateFileW(path,GENERIC_READ|GENERIC_WRITE|READ_CONTROL,0,NULL,OPEN_EXISTING,SECURITY_SQOS_PRESENT|SECURITY_IDENTIFICATION,NULL);
     if (pipe==INVALID_HANDLE_VALUE) return 5;
     if (!restricted_acl(pipe)) { CloseHandle(pipe); return 9; }
     ULONG pid=0;
@@ -113,6 +127,8 @@ int wmain(int argc,wchar_t** argv) {
     if (mode(L"hang-close")) { Sleep(60000); CloseHandle(pipe); return 0; }
     if (mode(L"slow")) Sleep(1200);
     for (uint64_t sequence=2;;sequence++) {
+        int control=read_control(pipe,LhmWire_U32(bootstrap+8));
+        if (control) { CloseHandle(pipe); return control==1 ? 0 : control; }
         frame(bytes,mode(L"replay") ? 2 : sequence,false);
         DWORD size=624;
         if (mode(L"fragmented")) {

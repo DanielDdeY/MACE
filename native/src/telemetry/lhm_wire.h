@@ -4,6 +4,9 @@
 #include <stdbool.h>
 #include "mace_types_v2.h"
 #define LHM_HEADER_SIZE 48u
+#define LHM_PROTOCOL_VERSION 2u
+#define LHM_PROTOCOL_MARKER "MACE_LHM_PROTOCOL=2"
+#define LHM_CONTROL_SIZE 32u
 #define LHM_DEVICE_SIZE 144u
 #define LHM_MAX_DEVICES 17u
 #define LHM_MAX_FRAME 2496u

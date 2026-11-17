@@ -98,6 +98,8 @@ int wmain(int argc,wchar_t** argv) {
     if (wcscmp(argv[2],L"restrictive-job")==0) return parent_case(argv[1],true);
     bool forced=wcscmp(argv[2],L"forced-close")==0;
     bool descendants=wcscmp(argv[2],L"descendants")==0;
+    bool control_close=wcscmp(argv[2],L"control-close")==0;
+    bool eof_close=wcscmp(argv[2],L"eof-close")==0;
     SetEnvironmentVariableW(L"MACE_SIM_SCENARIO",forced ? L"hang-close" : descendants ? L"job-descendant" : L"valid");
     LhmSession session={0}; HANDLE stop=CreateEventW(NULL,TRUE,FALSE,NULL); CHECK(stop);
     CHECK(LhmTransport_Open(argv[1],stop,&session));
@@ -133,11 +135,21 @@ int wmain(int argc,wchar_t** argv) {
         }
         CHECK(fake_count==2);
     } else {
-        CHECK(DuplicateHandle(GetCurrentProcess(),session.process,GetCurrentProcess(),&processes[0],SYNCHRONIZE,FALSE,0)); count=1;
+        CHECK(DuplicateHandle(GetCurrentProcess(),session.process,GetCurrentProcess(),&processes[0],SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,0)); count=1;
     }
+    if (control_close) {
+        CHECK(LhmTransport_SendShutdown(&session));
+        CHECK(!LhmTransport_SendShutdown(&session)); // DLL never emits a duplicate.
+        CHECK(WaitForSingleObject(processes[0],2000)==WAIT_OBJECT_0); // Pipe still open; control alone suffices.
+    }
+    if (eof_close) { CloseHandle(session.pipe); session.pipe=NULL; }
     ULONGLONG before=GetTickCount64(); LhmTransport_Close(&session); ULONGLONG elapsed=GetTickCount64()-before;
     CHECK(elapsed<3500); if (forced) CHECK(elapsed>=1800);
-    for (DWORD i=0;i<count;i++) { CHECK(WaitForSingleObject(processes[i],1000)==WAIT_OBJECT_0); CloseHandle(processes[i]); }
+    for (DWORD i=0;i<count;i++) {
+        CHECK(WaitForSingleObject(processes[i],1000)==WAIT_OBJECT_0);
+        if (control_close || eof_close) { DWORD code=1; CHECK(GetExitCodeProcess(processes[i],&code) && code==0); }
+        CloseHandle(processes[i]);
+    }
     CHECK(!session.job && !session.process && !session.pipe); CloseHandle(stop);
     printf("job containment, handle ownership, descendant cleanup; close %llu ms: OK\n",elapsed);
     return 0;

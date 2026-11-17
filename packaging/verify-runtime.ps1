@@ -3,7 +3,7 @@ $ErrorActionPreference='Stop'
 $root=(Resolve-Path -LiteralPath $RuntimeDirectory).Path
 $manifestPath=Join-Path $root 'runtime-manifest.json'
 $manifest=Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-if ($manifest.schema -ne 1 -or $manifest.helperProtocol -ne 1 -or $manifest.helperVersion -ne '0.9.6' -or $manifest.pawnIoVersion -ne '2.2.0') {
+if ($manifest.schema -ne 1 -or $manifest.helperProtocol -ne 2 -or $manifest.helperVersion -ne '0.9.6' -or $manifest.pawnIoVersion -ne '2.2.0') {
     throw 'Contrato del paquete inesperado.'
 }
 $names=@($manifest.files | ForEach-Object { $_.file })
@@ -13,6 +13,9 @@ foreach ($required in @('mace_native.dll','lhm/Mace.Lhm.Helper.exe','lhm/Mace.Lh
     'lhm/Mace.Lhm.Helper.deps.json','lhm/Mace.Lhm.Helper.runtimeconfig.json',
     'prerequisites/PawnIO_setup.exe','THIRD-PARTY-NOTICES.txt')) {
     if ($names -notcontains $required) { throw "Falta componente obligatorio: $required" }
+}
+if ([Text.Encoding]::ASCII.GetString([IO.File]::ReadAllBytes((Join-Path $root 'mace_native.dll'))).IndexOf('MACE_LHM_PROTOCOL=2',[StringComparison]::Ordinal) -lt 0) {
+    throw 'DLL incompatible con helperProtocol 2.'
 }
 if (@($names | Where-Object { $_ -match '^mace-app-[^/]+\.jar$' }).Count -ne 1) { throw 'Falta el JAR de la aplicación.' }
 foreach ($entry in $manifest.files) {

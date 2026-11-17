@@ -23,10 +23,12 @@ try
     bool elevated = new WindowsPrincipal(identity).IsInRole(WindowsBuiltInRole.Administrator);
     using var shutdown = new CancellationTokenSource();
     Console.CancelKeyPress += (_, e) => { e.Cancel = true; shutdown.Cancel(); };
-    using var pipe = new NamedPipeClientStream(".", pipeName, PipeDirection.Out, PipeOptions.Asynchronous,
+    using var pipe = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous,
         TokenImpersonationLevel.Identification);
     await pipe.ConnectAsync(5000, shutdown.Token);
     PrivatePipe.VerifyServer(pipe, parentPid);
+    using var controlLifetime = new CancellationTokenSource();
+    Task controls = ControlProtocol.ListenAsync(pipe, parentPid, shutdown.Cancel, controlLifetime.Token);
     ulong sequence = 0;
     async Task Send(HelperState state, DriverState driver, DeviceSample[] devices)
     {
@@ -37,29 +39,47 @@ try
         await pipe.WriteAsync(bytes, deadline.Token);
         await pipe.FlushAsync(deadline.Token);
     }
-    await Send(HelperState.WarmingUp, PawnIoStatus.Read(), []);
-    using var sampler = new SensorSampler();
-    sampler.Open();
-    using var interval = new PeriodicTimer(TimeSpan.FromSeconds(1));
-    do
+    try
     {
-        DriverState driver = PawnIoStatus.Read();
-        DeviceSample[] devices;
-        try { devices = sampler.Poll(driver); }
-        catch (Exception error) when (error is not OutOfMemoryException)
+        shutdown.Token.ThrowIfCancellationRequested();
+        await Send(HelperState.WarmingUp, PawnIoStatus.Read(), []);
+        using var sampler = new SensorSampler();
+        sampler.Open();
+        shutdown.Token.ThrowIfCancellationRequested();
+        using var interval = new PeriodicTimer(TimeSpan.FromSeconds(1));
+        do
         {
-            await Send(HelperState.ReadFailed, driver, []);
-            continue;
+            shutdown.Token.ThrowIfCancellationRequested();
+            DriverState driver = PawnIoStatus.Read();
+            DeviceSample[] devices;
+            try { devices = sampler.Poll(driver); }
+            catch (Exception error) when (error is not OutOfMemoryException)
+            {
+                await Send(HelperState.ReadFailed, driver, []);
+                continue;
+            }
+            try { await Send(HelperState.Ready, driver, devices); }
+            catch (InvalidDataException) { await Send(HelperState.ReadFailed, driver, []); }
+        } while (await interval.WaitForNextTickAsync(shutdown.Token));
+    }
+    catch (OperationCanceledException) when (shutdown.IsCancellationRequested) { }
+    finally
+    {
+        // Let the bounded drain reject an already queued duplicate before exit.
+        if (shutdown.IsCancellationRequested && !controls.IsCompleted)
+        {
+            try { await controls.WaitAsync(TimeSpan.FromMilliseconds(700)); }
+            catch (TimeoutException) { }
         }
-        try { await Send(HelperState.Ready, driver, devices); }
-        catch (InvalidDataException) { await Send(HelperState.ReadFailed, driver, []); }
-    } while (await interval.WaitForNextTickAsync(shutdown.Token));
+        controlLifetime.Cancel();
+        await controls;
+    }
     return 0;
 }
 catch (OperationCanceledException) { return 0; }
 catch (IOException error) when ((error.HResult & 0xFFFF) is 109 or 232 or 233) { return 0; }
 catch (Exception error)
 {
-    Console.Error.WriteLine(error.GetType().Name + ": " + error.Message);
+    Console.Error.WriteLine("MACE helper: " + error.GetType().Name);
     return 1;
 }

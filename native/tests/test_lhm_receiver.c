@@ -50,7 +50,7 @@ int wmain(int argc,wchar_t** argv) {
     MaceCpuTelemetryV2 cpu={0}; MaceGpuTelemetryV2 gpu={0};
     CHECK(poll(&cpu,&gpu));
     if (wcscmp(argv[2],L"slow")==0) CHECK(cpu.temperature_c.state==MACE_METRIC_WARMING_UP);
-    bool failed=wcscmp(argv[2],L"bad-pid")==0 || wcscmp(argv[2],L"malformed")==0 ||
+    bool failed=wcscmp(argv[2],L"old-version")==0 || wcscmp(argv[2],L"bad-pid")==0 || wcscmp(argv[2],L"malformed")==0 ||
         wcscmp(argv[2],L"wrong-client")==0 || wcscmp(argv[2],L"stale-arrival")==0 || wcscmp(argv[2],L"nan")==0 ||
         wcscmp(argv[2],L"bad-server-pid")==0 || wcscmp(argv[2],L"hash-mismatch")==0;
     bool unprivileged=wcscmp(argv[2],L"no-elevation")==0 || wcscmp(argv[2],L"driver-missing")==0 || wcscmp(argv[2],L"driver-stopped")==0 || wcscmp(argv[2],L"zero-unprivileged")==0;

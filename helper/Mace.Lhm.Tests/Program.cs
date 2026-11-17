@@ -7,6 +7,12 @@ using System.Text.Json;
 using Mace.Lhm.Helper;
 using Mace.Lhm.Protocol;
 
+if (args is ["--control-process-tests", var helperExecutable])
+{
+    Console.WriteLine($"PASS: {await ControlProcessTests.RunAsync(helperExecutable)} real helper control cases");
+    return;
+}
+
 if (args is ["--amd-power-report"])
 {
     var computer=new LibreHardwareMonitor.Hardware.Computer { IsGpuEnabled=true };
@@ -67,7 +73,7 @@ Check(Resolve(asicReport+"Sensor[ADL_PMLOG_ASIC_POWER].Value: 7\n")==unknownPowe
 
 byte[] startup=new byte[128];
 BinaryPrimitives.WriteUInt32LittleEndian(startup,0x3142434D);
-BinaryPrimitives.WriteUInt32LittleEndian(startup.AsSpan(4),1);
+BinaryPrimitives.WriteUInt32LittleEndian(startup.AsSpan(4),WireProtocol.Version);
 BinaryPrimitives.WriteUInt32LittleEndian(startup.AsSpan(8),123);
 BinaryPrimitives.WriteUInt32LittleEndian(startup.AsSpan(12),73);
 System.Text.Encoding.ASCII.GetBytes("mace-lhm-"+new string('a',64)).CopyTo(startup,16);
@@ -89,7 +95,7 @@ foreach ((int offset, uint value) in new[] {(0,0u),(8,4096u),(12,2u),(32,124u),(
     Reject(() => Decode(bad), "invalid wire field " + offset);
 }
 byte[] oldVersion = frame.ToArray();
-oldVersion[4] = 2;
+oldVersion[4] = 1;
 Reject(() => Decode(oldVersion), "version");
 Reject(() => WireProtocol.Decode(frame,123,1,10000), "replay");
 Reject(() => WireProtocol.Decode(frame,123,0,14000), "stale sample");
@@ -153,6 +159,7 @@ using (var server = PrivatePipe.CreateServer(name))
     foreach (byte value in frame) await client.WriteAsync(new byte[] {value},deadline.Token);
     Check((await read).SequenceEqual(frame), "fragmented pipe frame");
 }
+passed += await ControlTests.RunAsync();
 if (args.Length > 0)
 {
     string executable = Path.GetFullPath(args[0]);

@@ -5,7 +5,7 @@ namespace Mace.Lhm.Protocol;
 public static class WireProtocol
 {
     public const uint Magic = 0x314D484C; // LHM1
-    public const ushort Version = 1;
+    public const ushort Version = 2;
     public const int HeaderSize = 48;
     public const int DeviceSize = 144;
     public const int MaxDevices = 17;

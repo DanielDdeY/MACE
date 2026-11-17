@@ -62,11 +62,19 @@ marcadores y retirar procesos/propiedades innecesarios. No se anonimizaron origi
 
 ## Comprobación del payload sin instalar
 
+Desde Fase 2 Paso 1B, el staging exige protocolo privado 2 tanto en el manifiesto
+del helper como en la declaración compilada de la DLL. Ambos se reconstruyen y
+distribuyen juntos; no se sustituye uno solo en una imagen de protocolo 1. El ABI
+público sigue en 1.4. La versión privada y la tabla de compatibilidad están en
+../helper/PROTOCOL.md. La declaración no autentica al publicador; la confianza
+fijada y la firma siguen pendientes del Paso 2.
+
 packaging/tests/test-runtime-payload.ps1 recibe -NativeDll y -PawnIoInstaller;
 opcionalmente -HelperDirectory y -JavaExe (JDK 22+, o JAVA_HOME/PATH). Comprueba
 el verificador FFM/ABI real con el JAR de clases, copia completa/intacta y rechazos de
-instalador incorrecto, DLL con cargador retirado, archivo interno añadido y helper
-alterado. Usa carpetas únicas bajo native/build/1d-4 y nunca ejecuta PawnIO.
+instalador incorrecto, DLL con cargador retirado, DLL/helper de protocolo 1,
+archivo interno añadido y helper alterado. Son ocho comprobaciones. Usa carpetas
+únicas bajo native/build/1d-4 y nunca ejecuta PawnIO.
 La imagen final mediante jpackage se verificó en el Paso 2; los resultados están
 en ../helper/RESULTADOS-1D-PASO2.md. MSI/EXE e instalación limpia siguen pendientes.
 

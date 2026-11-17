@@ -32,8 +32,8 @@ public static partial class PrivatePipe
         {
             Marshal.Copy(bytes, 0, memory, bytes.Length);
             var attributes = new SecurityAttributes { Length = Marshal.SizeOf<SecurityAttributes>(), Descriptor = memory };
-            // INBOUND | FIRST_PIPE_INSTANCE | OVERLAPPED; BYTE | REJECT_REMOTE_CLIENTS.
-            var handle = CreateNamedPipeW(@"\\.\pipe\" + name, 0x40080001, 0x8, 1,
+            // DUPLEX | FIRST_PIPE_INSTANCE | OVERLAPPED; BYTE | REJECT_REMOTE_CLIENTS.
+            var handle = CreateNamedPipeW(@"\\.\pipe\" + name, 0x40080003, 0x8, 1,
                 WireProtocol.MaxFrameSize, WireProtocol.MaxFrameSize, 0, ref attributes);
             if (handle.IsInvalid)
             {
@@ -41,7 +41,7 @@ public static partial class PrivatePipe
                 handle.Dispose();
                 throw new Win32Exception(error);
             }
-            try { return new NamedPipeServerStream(PipeDirection.In, true, false, handle); }
+            try { return new NamedPipeServerStream(PipeDirection.InOut, true, false, handle); }
             catch { handle.Dispose(); throw; }
         }
         finally { Marshal.FreeHGlobal(memory); }

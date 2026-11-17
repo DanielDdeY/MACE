@@ -112,7 +112,7 @@ if (BUILD_TESTING)
         target_compile_definitions(${target} PRIVATE UNICODE _UNICODE)
         set_target_properties(${target} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     endforeach()
-    foreach(scenario contained forced-close descendants abrupt-parent restrictive-job)
+    foreach(scenario contained forced-close descendants abrupt-parent restrictive-job control-close eof-close)
         add_test(NAME lhm_job_${scenario} COMMAND test_lhm_job "$<TARGET_FILE:lhm_fake_helper>" ${scenario})
         set_tests_properties(lhm_job_${scenario} PROPERTIES TIMEOUT 20)
     endforeach()
@@ -121,7 +121,7 @@ if (BUILD_TESTING)
     foreach(scenario slow valid stale stale-arrival bad-pid wrong-client malformed disconnect
         no-elevation driver-missing zero-cpu zero-unprivileged unknown-power unknown-gpu duplicate-pci replay nan fragmented fallback
         gpu-zero bad-server-pid hash-mismatch init-race amd-chip
-        missing-helper-default missing-helper-explicit missing-helper-duplicate driver-stopped)
+        missing-helper-default missing-helper-explicit missing-helper-duplicate driver-stopped old-version)
         add_test(NAME lhm_${scenario} COMMAND test_lhm_receiver "$<TARGET_FILE:lhm_fake_helper>" ${scenario})
         set_tests_properties(lhm_${scenario} PROPERTIES TIMEOUT 25)
     endforeach()

@@ -2,7 +2,7 @@ param([Parameter(Mandatory=$true)][string]$Directory)
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path -LiteralPath $Directory).Path
 $manifest = Get-Content -LiteralPath (Join-Path $root 'artifact-manifest.json') -Raw | ConvertFrom-Json
-if ($manifest.protocol -ne 1 -or $manifest.sdk -ne '10.0.401' -or $manifest.runtime -ne '10.0.12' -or $manifest.lhm -ne '0.9.6') {
+if ($manifest.protocol -ne 2 -or $manifest.sdk -ne '10.0.401' -or $manifest.runtime -ne '10.0.12' -or $manifest.lhm -ne '0.9.6') {
     throw 'Versiones del artefacto inesperadas.'
 }
 foreach ($required in @('Mace.Lhm.Helper.exe','Mace.Lhm.Helper.dll','Mace.Lhm.Protocol.dll','coreclr.dll','LibreHardwareMonitorLib.dll')) {

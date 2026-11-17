@@ -11,7 +11,7 @@ public static class Bootstrap
         byte[] data=new byte[128];
         input.ReadExactly(data);
         if (BinaryPrimitives.ReadUInt32LittleEndian(data)!=0x3142434D
-            || BinaryPrimitives.ReadUInt32LittleEndian(data.AsSpan(4))!=1
+            || BinaryPrimitives.ReadUInt32LittleEndian(data.AsSpan(4))!=WireProtocol.Version
             || BinaryPrimitives.ReadUInt32LittleEndian(data.AsSpan(12))!=73
             || data.AsSpan(89).ContainsAnyExcept((byte)0))
             throw new InvalidDataException("Invalid bootstrap.");

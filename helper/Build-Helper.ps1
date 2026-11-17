@@ -28,7 +28,7 @@ try {
     $files = @(Get-ChildItem -LiteralPath $output -File | Sort-Object Name | ForEach-Object {
         [pscustomobject]@{file=$_.Name;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}
     })
-    [pscustomobject]@{protocol=1;sdk='10.0.401';runtime='10.0.12';lhm='0.9.6';signed=$signed;files=$files} |
+    [pscustomobject]@{protocol=2;sdk='10.0.401';runtime='10.0.12';lhm='0.9.6';signed=$signed;files=$files} |
         ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $output 'artifact-manifest.json') -Encoding UTF8
     & (Join-Path $PSScriptRoot 'Verify-Artifacts.ps1') -Directory $output
     $output | Set-Content -LiteralPath (Join-Path $PSScriptRoot 'artifacts\latest.txt') -Encoding UTF8

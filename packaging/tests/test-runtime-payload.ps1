@@ -56,6 +56,14 @@ $fake=Join-Path $testRoot 'obsolete.dll'
 [IO.File]::WriteAllBytes($fake,[Text.Encoding]::ASCII.GetBytes(('Win'+'Ring0x64.dll')))
 $fakeSha=(Get-FileHash -LiteralPath $fake -Algorithm SHA256).Hash
 Expect-Rejection { & (Join-Path $packaging 'stage-runtime.ps1') -StageDirectory $bad -AppJar $jar -NativeDll $fake -NativeSha256 $fakeSha -HelperDirectory $HelperDirectory -PawnIoInstaller $PawnIoInstaller } 'proveedor retirado'
+$oldProtocol=Join-Path $testRoot 'protocol1.dll'
+[IO.File]::WriteAllBytes($oldProtocol,[Text.Encoding]::ASCII.GetBytes('MACE_LHM_PROTOCOL=1'))
+$oldSha=(Get-FileHash -LiteralPath $oldProtocol -Algorithm SHA256).Hash
+Expect-Rejection { & (Join-Path $packaging 'stage-runtime.ps1') -StageDirectory $bad -AppJar $jar -NativeDll $oldProtocol -NativeSha256 $oldSha -HelperDirectory $HelperDirectory -PawnIoInstaller $PawnIoInstaller } 'protocolo privado 2'
+$oldHelper=Join-Path $testRoot 'helper-protocol1'
+New-Item -ItemType Directory -Path $oldHelper | Out-Null
+'{"protocol":1}' | Set-Content -LiteralPath (Join-Path $oldHelper 'artifact-manifest.json') -Encoding UTF8
+Expect-Rejection { & (Join-Path $repoRoot 'helper\Verify-Artifacts.ps1') -Directory $oldHelper } 'Versiones del artefacto'
 $extra=Join-Path $good 'internal.log'
 [IO.File]::WriteAllText($extra,'development-only')
 Expect-Rejection { & (Join-Path $packaging 'verify-runtime.ps1') -RuntimeDirectory $good } 'Archivos no declarados'
@@ -63,5 +71,5 @@ Remove-Item -LiteralPath $extra # A single file created by this test; never recu
 $module=Join-Path $good 'lhm\Mace.Lhm.Helper.dll'
 [IO.File]::AppendAllText($module,'tampered')
 Expect-Rejection { & (Join-Path $packaging 'verify-runtime.ps1') -RuntimeDirectory $good } 'Hash incorrecto'
-Write-Host 'PASS: 6 payload checks (complete runtime with intact installer, real Java FFM/ABI verifier, wrong installer, obsolete loader, extra file, tampered helper).'
+Write-Host 'PASS: 8 payload checks (complete runtime, Java FFM/ABI, wrong installer, obsolete loader, protocol-1 DLL/helper rejected, extra file, tampered helper).'
 Write-Host 'No se ejecutó PawnIO ni jpackage. La imagen final y el instalador MSI/EXE siguen NO VERIFICADO hasta Paso 2.'

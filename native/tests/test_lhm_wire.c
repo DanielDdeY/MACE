@@ -9,12 +9,14 @@ static bool decode(const unsigned char* b,uint32_t size,LhmFrame* f) { return Lh
 int main(void) {
     unsigned checks=0;
     unsigned char valid[192]={0},bad[LHM_MAX_FRAME]={0}; LhmFrame f;
-    put32(valid,0x314D484C); put32(valid+4,0x00300001); put32(valid+8,192);
+    put32(valid,0x314D484C); put32(valid+4,(LHM_HEADER_SIZE<<16)|LHM_PROTOCOL_VERSION); put32(valid+8,192);
     put32(valid+12,1); put64(valid+16,1); put64(valid+24,10000); put32(valid+32,123);
     put32(valid+36,3); put32(valid+40,2); put32(valid+44,1);
     put32(valid+48,1); put32(valid+52,1);
     for (unsigned i=0;i<7;i++) put32(valid+88+i*16,4);
     CHECK(decode(valid,192,&f));
+    memcpy(bad,valid,192); put32(bad+4,(LHM_HEADER_SIZE<<16)|1u); CHECK(!decode(bad,192,&f));
+    memcpy(bad,valid,192); put32(bad+4,(LHM_HEADER_SIZE<<16)|3u); CHECK(!decode(bad,192,&f));
     CHECK(!decode(valid,47,&f)); CHECK(!decode(bad,LHM_MAX_FRAME+1,&f));
     CHECK(!decode(valid,191,&f));
     const uint32_t offsets[]={0,4,8,12,32,36,40,44,48,52,56,88,92};
