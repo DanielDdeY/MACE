@@ -38,7 +38,7 @@ public final class MetricCard extends VBox implements AutoCloseable {
         value.setWrapText(true);
         value.setMinHeight(56); // Stable value region for one/two-line absence labels.
         value.textProperty().bind(Bindings.createStringBinding(
-                () -> reading.getValue() == null ? "N/D" : reading.getValue().text(), reading));
+                () -> reading.getValue() == null || !reading.getValue().isValid() ? "N/D" : reading.getValue().text(), reading));
         if (captionText != null) {
             caption.getStyleClass().add("metric-card-caption");
             caption.setWrapText(true);
