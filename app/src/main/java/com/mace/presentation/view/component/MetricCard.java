@@ -5,6 +5,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
 
 import java.util.Objects;
@@ -14,6 +15,8 @@ public final class MetricCard extends VBox implements AutoCloseable {
 
     private final Label value = new Label();
     private final Label caption = new Label();
+    private final Label explanation = new Label();
+    private final Tooltip detail = new Tooltip();
 
     public MetricCard(String title, ObservableValue<MetricDisplay> reading) {
         this(title, reading, null);
@@ -33,6 +36,7 @@ public final class MetricCard extends VBox implements AutoCloseable {
         name.getStyleClass().add("metric-card-title");
         value.getStyleClass().add("metric-card-value");
         value.setWrapText(true);
+        value.setMinHeight(56); // Stable value region for one/two-line absence labels.
         value.textProperty().bind(Bindings.createStringBinding(
                 () -> reading.getValue() == null ? "N/D" : reading.getValue().text(), reading));
         if (captionText != null) {
@@ -43,11 +47,21 @@ public final class MetricCard extends VBox implements AutoCloseable {
         } else {
             getChildren().addAll(name, value);
         }
+        explanation.getStyleClass().add("metric-card-caption");
+        explanation.setWrapText(true);
+        // Reserve space even when empty: changing state never adds/removes layout nodes.
+        explanation.setMinHeight(92); explanation.setPrefHeight(92); explanation.setMaxHeight(92);
+        explanation.textProperty().bind(Bindings.createStringBinding(
+                () -> reading.getValue() == null ? "" : reading.getValue().message(), reading));
+        detail.textProperty().bind(explanation.textProperty());
+        Tooltip.install(this, detail);
+        getChildren().add(explanation);
     }
 
     @Override
     public void close() {
         value.textProperty().unbind();
         caption.textProperty().unbind();
+        explanation.textProperty().unbind(); detail.textProperty().unbind(); Tooltip.uninstall(this, detail);
     }
 }

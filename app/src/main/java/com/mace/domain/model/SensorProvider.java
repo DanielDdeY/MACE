@@ -13,6 +13,7 @@ public enum SensorProvider {
     NVIDIA_NVML("NVIDIA NVML"),
     AMD_ADLX("AMD GPU (obsoleto)"), // Reservado ABI 6; sin implementación activa.
     INTEL_IGCL("Intel IGCL"),
+    // Los motivos de indisponibilidad ABI 1.5 pertenecen a MetricState, no a este ID.
     LHM("LibreHardwareMonitor");
 
     private final String label;
