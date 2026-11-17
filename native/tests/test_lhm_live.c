@@ -24,7 +24,9 @@ int wmain(int argc,wchar_t** argv) {
         double elapsed=(double)(end.QuadPart-start.QuadPart)*1000/frequency.QuadPart;
         if (elapsed>max_ms) max_ms=elapsed;
         if (cpu.provider_id==MACE_PROVIDER_LHM && (cpu.temperature_c.state==MACE_METRIC_VALID ||
-            cpu.temperature_c.state==MACE_METRIC_NO_PROVIDER || cpu.temperature_c.state==MACE_METRIC_UNSUPPORTED)) {
+            cpu.temperature_c.state==MACE_METRIC_NO_PROVIDER || cpu.temperature_c.state==MACE_METRIC_UNSUPPORTED ||
+            cpu.temperature_c.state==MACE_METRIC_NOT_ELEVATED || cpu.temperature_c.state==MACE_METRIC_PAWNIO_MISSING ||
+            cpu.temperature_c.state==MACE_METRIC_PAWNIO_STOPPED)) {
             ready=true; if (first_ready_ms<0) first_ready_ms=(double)(GetTickCount64()-begin);
         }
         saw_cpu |= cpu.temperature_c.state==MACE_METRIC_VALID && cpu.power_w.state==MACE_METRIC_VALID;

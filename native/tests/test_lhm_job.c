@@ -19,10 +19,10 @@ static int parent(const wchar_t* helper,const wchar_t* mapping,const wchar_t* re
         MaceCpuTelemetryV2 cpu={0}; ULONGLONG deadline=GetTickCount64()+5000;
         do {
             CHECK(CP_PollCpuTelemetryV2(&cpu,sizeof(cpu))==MACE_OK);
-            if (cpu.temperature_c.state==MACE_METRIC_READ_FAILED && cpu.usage_percent.state==MACE_METRIC_VALID) break;
+            if (cpu.temperature_c.state==MACE_METRIC_HELPER_UNAVAILABLE && cpu.usage_percent.state==MACE_METRIC_VALID) break;
             Sleep(20);
         } while (GetTickCount64()<deadline);
-        evidence->result=cpu.temperature_c.state==MACE_METRIC_READ_FAILED &&
+        evidence->result=cpu.temperature_c.state==MACE_METRIC_HELPER_UNAVAILABLE &&
             cpu.temperature_c.value==0 && cpu.usage_percent.state==MACE_METRIC_VALID ? 0 : 1;
         CP_ShutdownTelemetry(); SetEvent(event);
         UnmapViewOfFile(evidence); CloseHandle(memory); CloseHandle(event); return 0;

@@ -26,8 +26,8 @@ static int check_version_resource(const wchar_t* dll_path) {
     int failed = !ok || fixed == NULL || fixed_size < sizeof(*fixed) ||
                  fixed->dwSignature != 0xFEEF04BD ||
                  HIWORD(fixed->dwFileVersionMS) != 1 ||
-                 LOWORD(fixed->dwFileVersionMS) != 4 ||
-                 HIWORD(fixed->dwFileVersionLS) != 2 ||
+                 LOWORD(fixed->dwFileVersionMS) != 5 ||
+                 HIWORD(fixed->dwFileVersionLS) != 0 ||
                  LOWORD(fixed->dwFileVersionLS) != 0;
     if (failed) fprintf(stderr, "Incorrect Windows version resource\n");
     free(data);
@@ -124,13 +124,13 @@ int wmain(int argc, wchar_t** argv) {
         required != sizeof(MaceAbiInfoV2) ||
         buffer.info.struct_size != sizeof(MaceAbiInfoV2) ||
         buffer.info.version != MACE_V2_CONTRACT_VERSION ||
-        buffer.info.abi_major != 1 || buffer.info.abi_minor != 4 ||
+        buffer.info.abi_major != 1 || buffer.info.abi_minor != 5 ||
         buffer.info.process_data_size != sizeof(ProcessData) ||
         buffer.info.telemetry_data_size != sizeof(TelemetryData) ||
         buffer.info.blackbox_header_size != sizeof(BlackboxSharedHeader) ||
         buffer.info.wchar_size != 2 || buffer.info.pointer_size != 8 ||
-        buffer.info.build_major != 1 || buffer.info.build_minor != 4 ||
-        buffer.info.build_patch != 2 ||
+        buffer.info.build_major != 1 || buffer.info.build_minor != 5 ||
+        buffer.info.build_patch != 0 ||
         (buffer.info.implemented_capabilities &
           (MACE_CAP_CPU_USAGE | MACE_CAP_GPU_INVENTORY |
            MACE_CAP_GPU_MEMORY | MACE_CAP_SYSTEM_MEMORY |
@@ -159,6 +159,6 @@ int wmain(int argc, wchar_t** argv) {
     FreeLibrary(library);
     if (failed) return 1;
 
-    puts("24 exports, ABI 1.4, legacy layouts and file version 1.4.2: OK");
+    puts("24 exports, ABI 1.5, legacy layouts and file version 1.5.0: OK");
     return 0;
 }

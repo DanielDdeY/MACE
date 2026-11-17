@@ -63,7 +63,10 @@ MaceMetricState LhmWire_State(const LhmFrame* f, const LhmMetric* m, bool cpu, u
     if (f->timestamp>now || now-f->timestamp>LHM_MAX_AGE_MS) return MACE_METRIC_READ_FAILED;
     if (f->helper==1) return MACE_METRIC_WARMING_UP;
     if (f->helper!=2) return MACE_METRIC_READ_FAILED;
-    if (cpu && (f->driver!=3 || !(f->flags&1))) return MACE_METRIC_NO_PROVIDER;
+    if (cpu && !(f->flags&1)) return MACE_METRIC_NOT_ELEVATED;
+    if (cpu && f->driver==1) return MACE_METRIC_PAWNIO_MISSING;
+    if (cpu && f->driver==2) return MACE_METRIC_PAWNIO_STOPPED;
+    if (cpu && f->driver!=3) return MACE_METRIC_NO_PROVIDER;
     if (m->state==2) return MACE_METRIC_WARMING_UP;
     if (m->state==3) return MACE_METRIC_NO_PROVIDER;
     if (m->state==4) return MACE_METRIC_UNSUPPORTED;

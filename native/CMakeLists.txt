@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(mace_native VERSION 1.4.2 LANGUAGES C RC)
+project(mace_native VERSION 1.5.0 LANGUAGES C RC)
 
 if (NOT WIN32 OR NOT CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     message(FATAL_ERROR "mace_native requires Windows with the MSVC C compiler")

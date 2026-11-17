@@ -54,29 +54,33 @@ int wmain(int argc,wchar_t** argv) {
         wcscmp(argv[2],L"wrong-client")==0 || wcscmp(argv[2],L"stale-arrival")==0 || wcscmp(argv[2],L"nan")==0 ||
         wcscmp(argv[2],L"bad-server-pid")==0 || wcscmp(argv[2],L"hash-mismatch")==0;
     bool unprivileged=wcscmp(argv[2],L"no-elevation")==0 || wcscmp(argv[2],L"driver-missing")==0 || wcscmp(argv[2],L"driver-stopped")==0 || wcscmp(argv[2],L"zero-unprivileged")==0;
-    MaceMetricState expected=failed || wcscmp(argv[2],L"zero-cpu")==0 ? MACE_METRIC_READ_FAILED :
-        unprivileged || missing ? MACE_METRIC_NO_PROVIDER : MACE_METRIC_VALID;
+    MaceMetricState expected=failed ? (wcscmp(argv[2],L"hash-mismatch")==0 ? MACE_METRIC_HELPER_UNTRUSTED : MACE_METRIC_HELPER_UNAVAILABLE) :
+        wcscmp(argv[2],L"zero-cpu")==0 ? MACE_METRIC_READ_FAILED :
+        missing ? MACE_METRIC_HELPER_UNAVAILABLE :
+        wcscmp(argv[2],L"driver-missing")==0 ? MACE_METRIC_PAWNIO_MISSING :
+        wcscmp(argv[2],L"driver-stopped")==0 ? MACE_METRIC_PAWNIO_STOPPED :
+        unprivileged ? MACE_METRIC_NOT_ELEVATED : MACE_METRIC_VALID;
     CHECK(wait_cpu(expected,7000,&cpu,&gpu));
     CHECK(cpu.power_w.state==expected);
     if (expected!=MACE_METRIC_VALID) CHECK(cpu.temperature_c.value==0 && cpu.power_w.value==0);
     if (missing) {
         ULONGLONG until=GetTickCount64()+3000;
         do { CHECK(poll(&cpu,&gpu));
-            if (gpu.temperature_c.state==MACE_METRIC_NO_PROVIDER &&
-                gpu.video_memory_total_bytes.state==(MaceMetricState)(duplicate ? MACE_METRIC_NO_PROVIDER : MACE_METRIC_VALID)) break;
+            if (gpu.temperature_c.state==MACE_METRIC_HELPER_UNAVAILABLE &&
+                gpu.video_memory_total_bytes.state==(MaceMetricState)(duplicate ? MACE_METRIC_HELPER_UNAVAILABLE : MACE_METRIC_VALID)) break;
             Sleep(10); }
         while (GetTickCount64()<until);
         CHECK(cpu.provider_id==MACE_PROVIDER_LHM);
-        CHECK(gpu.temperature_c.state==MACE_METRIC_NO_PROVIDER && gpu.temperature_c.value==0);
-        CHECK(gpu.power_w.state==MACE_METRIC_NO_PROVIDER && gpu.power_w.value==0 && gpu.power_scope==MACE_POWER_SCOPE_UNKNOWN);
-        CHECK(gpu.usage_percent.state==MACE_METRIC_NO_PROVIDER && gpu.usage_percent.value==0);
-        CHECK(gpu.fan_rpm.state==MACE_METRIC_NO_PROVIDER && gpu.fan_rpm.value==0);
-        CHECK(gpu.fan_percent.state==MACE_METRIC_NO_PROVIDER && gpu.fan_percent.value==0);
-        CHECK(gpu.video_memory_used_bytes.state==MACE_METRIC_NO_PROVIDER && gpu.video_memory_used_bytes.value==0);
+        CHECK(gpu.temperature_c.state==MACE_METRIC_HELPER_UNAVAILABLE && gpu.temperature_c.value==0);
+        CHECK(gpu.power_w.state==MACE_METRIC_HELPER_UNAVAILABLE && gpu.power_w.value==0 && gpu.power_scope==MACE_POWER_SCOPE_UNKNOWN);
+        CHECK(gpu.usage_percent.state==MACE_METRIC_HELPER_UNAVAILABLE && gpu.usage_percent.value==0);
+        CHECK(gpu.fan_rpm.state==MACE_METRIC_HELPER_UNAVAILABLE && gpu.fan_rpm.value==0);
+        CHECK(gpu.fan_percent.state==MACE_METRIC_HELPER_UNAVAILABLE && gpu.fan_percent.value==0);
+        CHECK(gpu.video_memory_used_bytes.state==MACE_METRIC_HELPER_UNAVAILABLE && gpu.video_memory_used_bytes.value==0);
         CHECK(duplicate ? gpu.video_memory_total_bytes.state!=MACE_METRIC_VALID && gpu.video_memory_total_bytes.value==0 :
             gpu.provider_id==MACE_PROVIDER_WINDOWS && gpu.video_memory_total_bytes.state==MACE_METRIC_VALID && gpu.video_memory_total_bytes.value==4294967296ULL);
     }
-    else if (failed) { CHECK(gpu.temperature_c.state==MACE_METRIC_READ_FAILED); }
+    else if (failed) { CHECK(gpu.temperature_c.state==expected); }
     else {
         MaceMetricState gpu_expected=duplicate || wcscmp(argv[2],L"unknown-gpu")==0 ? MACE_METRIC_UNSUPPORTED : MACE_METRIC_VALID;
         CHECK(wait_gpu(gpu_expected,4000,&cpu,&gpu));
@@ -97,12 +101,12 @@ int wmain(int argc,wchar_t** argv) {
             gpu.power_scope==MACE_POWER_SCOPE_UNKNOWN);
         if (wcscmp(argv[2],L"stale")==0) {
             Sleep(2100); CHECK(poll(&cpu,&gpu)); CHECK(cpu.temperature_c.state==MACE_METRIC_VALID);
-            CHECK(wait_cpu(MACE_METRIC_READ_FAILED,2000,&cpu,&gpu));
-            CHECK(cpu.temperature_c.value==0 && gpu.temperature_c.state==MACE_METRIC_READ_FAILED && gpu.temperature_c.value==0);
+            CHECK(wait_cpu(MACE_METRIC_HELPER_UNAVAILABLE,2000,&cpu,&gpu));
+            CHECK(cpu.temperature_c.value==0 && gpu.temperature_c.state==MACE_METRIC_HELPER_UNAVAILABLE && gpu.temperature_c.value==0);
         }
         if (wcscmp(argv[2],L"disconnect")==0 || wcscmp(argv[2],L"replay")==0) {
-            CHECK(wait_cpu(MACE_METRIC_READ_FAILED,2500,&cpu,&gpu));
-            CHECK(cpu.temperature_c.value==0 && gpu.temperature_c.state==MACE_METRIC_READ_FAILED);
+            CHECK(wait_cpu(MACE_METRIC_HELPER_UNAVAILABLE,2500,&cpu,&gpu));
+            CHECK(cpu.temperature_c.value==0 && gpu.temperature_c.state==MACE_METRIC_HELPER_UNAVAILABLE);
             if (wcscmp(argv[2],L"disconnect")==0) CHECK(wait_cpu(MACE_METRIC_VALID,4000,&cpu,&gpu));
         }
         /* Primaries must survive the secondary helper's data. */

@@ -13,6 +13,7 @@ static SRWLOCK cache_lock=SRWLOCK_INIT;
 static HANDLE stop_event, worker;
 static LhmFrame cache;
 static bool have_frame;
+static bool missing_helper_capacity;
 static MaceMetricState cache_state=MACE_METRIC_WARMING_UP;
 #ifdef MACE_LHM_TEST_HOOKS
 #include "../../tests/lhm_retry_evidence.h"
@@ -58,6 +59,13 @@ static bool usable_frame(const LhmFrame* f,uint64_t now) {
 static void invalidate(MaceMetricState state) {
     AcquireSRWLockExclusive(&cache_lock);
     have_frame=false; memset(&cache,0,sizeof(cache)); cache_state=state;
+    missing_helper_capacity=false;
+    ReleaseSRWLockExclusive(&cache_lock);
+}
+static void helper_missing(void) {
+    AcquireSRWLockExclusive(&cache_lock);
+    have_frame=false; memset(&cache,0,sizeof(cache));
+    cache_state=MACE_METRIC_HELPER_UNAVAILABLE; missing_helper_capacity=true;
     ReleaseSRWLockExclusive(&cache_lock);
 }
 static bool helper_path(wchar_t* path, DWORD capacity) {
@@ -78,12 +86,12 @@ static DWORD WINAPI receive_worker(void* unused) {
     LhmRetry retry; LhmRetry_Init(&retry); evidence(&retry,0);
     wchar_t path[32768];
     if (!helper_path(path,32768)) {
-        retry.blocked=true; evidence(&retry,1); invalidate(MACE_METRIC_NO_PROVIDER); return 0;
+        retry.blocked=true; evidence(&retry,1); helper_missing(); return 0;
     }
     if (GetFileAttributesW(path)==INVALID_FILE_ATTRIBUTES) {
         DWORD error=GetLastError(); bool missing=error==ERROR_FILE_NOT_FOUND || error==ERROR_PATH_NOT_FOUND;
         retry.blocked=true; evidence(&retry,missing ? 1u : 2u);
-        invalidate(missing ? MACE_METRIC_NO_PROVIDER : MACE_METRIC_READ_FAILED);
+        if (missing) helper_missing(); else invalidate(MACE_METRIC_HELPER_UNTRUSTED);
         return 0;
     }
     while (WaitForSingleObject(stop_event,0)==WAIT_TIMEOUT) {
@@ -119,14 +127,15 @@ static DWORD WINAPI receive_worker(void* unused) {
             LhmRetry_Sample(&retry,usable_frame(&frame,received)); last_sample=received;
             evidence(&retry,0);
             AcquireSRWLockExclusive(&cache_lock);
-            cache=frame; have_frame=true; cache_state=MACE_METRIC_VALID;
+            cache=frame; have_frame=true; cache_state=MACE_METRIC_VALID; missing_helper_capacity=false;
             ReleaseSRWLockExclusive(&cache_lock);
         }
-        invalidate(MACE_METRIC_READ_FAILED);
+        invalidate(opened ? MACE_METRIC_HELPER_UNAVAILABLE : LhmTransport_FailureState(failure));
         LhmTransport_Close(&session);
         if (WaitForSingleObject(stop_event,0)!=WAIT_TIMEOUT) break;
         if (!awake_ms(&now)) { retry.blocked=true; evidence(&retry,5); break; }
         LhmRetry_Failed(&retry,now,!opened && failure!=LHM_OPEN_TRANSIENT);
+        if (retry.slow && !retry.blocked) invalidate(MACE_METRIC_HELPER_RETRYING);
         evidence(&retry,!opened && failure!=LHM_OPEN_TRANSIENT ? (uint32_t)failure+1 : 0);
         if (retry.blocked) break;
     }
@@ -159,10 +168,11 @@ bool LhmReceiver_StopUntil(uint64_t deadline_ms) {
     invalidate(MACE_METRIC_NOT_INITIALIZED);
     return true;
 }
-static void snapshot(LhmFrame* f, MaceMetricState* state) {
+static bool snapshot(LhmFrame* f, MaceMetricState* state) {
     *state=MACE_METRIC_WARMING_UP;
     memset(f,0,sizeof(*f));
-    if (!TryAcquireSRWLockShared(&cache_lock)) return;
+    if (!TryAcquireSRWLockShared(&cache_lock)) return false;
+    bool capacity=missing_helper_capacity;
     *state=cache_state;
     if (have_frame) {
         *f=cache;
@@ -172,13 +182,22 @@ static void snapshot(LhmFrame* f, MaceMetricState* state) {
         else if (f->helper!=2) *state=MACE_METRIC_READ_FAILED;
     }
     ReleaseSRWLockShared(&cache_lock);
+    return capacity;
 }
 bool LhmReceiver_ApplyCpu(MaceCpuTelemetryV2* s) {
     LhmFrame f; MaceMetricState state;
     snapshot(&f,&state);
     s->provider_id=MACE_PROVIDER_LHM; s->power_scope=MACE_POWER_SCOPE_UNKNOWN;
     s->temperature_c=(MaceMetricF32V2){0,state}; s->power_w=s->temperature_c;
+    // Even an initial fresh WarmingUp frame can report missing elevation.
+    if (f.pid && (state==MACE_METRIC_VALID || state==MACE_METRIC_WARMING_UP) && !(f.flags&1)) {
+        s->temperature_c.state=s->power_w.state=MACE_METRIC_NOT_ELEVATED; return true;
+    }
     if (state!=MACE_METRIC_VALID) return true;
+    if (f.driver==1 || f.driver==2) {
+        s->temperature_c.state=s->power_w.state=f.driver==1 ? MACE_METRIC_PAWNIO_MISSING : MACE_METRIC_PAWNIO_STOPPED;
+        return true;
+    }
     const LhmDevice* cpu=NULL;
     for (uint32_t i=0;i<f.count;i++) if (f.devices[i].kind==1) cpu=&f.devices[i];
     if (!cpu) { s->temperature_c.state=s->power_w.state=MACE_METRIC_NO_PROVIDER; return true; }
@@ -192,7 +211,7 @@ bool LhmReceiver_ApplyCpu(MaceCpuTelemetryV2* s) {
 }
 bool LhmReceiver_ApplyGpu(const MaceGpuAdapterInfoV2* a, MaceGpuTelemetryV2* s) {
     LhmFrame f; MaceMetricState state;
-    snapshot(&f,&state);
+    bool missing=snapshot(&f,&state);
     /* A missing helper does not invalidate independently known Windows capacity.
      * Never restore capacity for ambiguous PCI, malformed data or stale samples. */
     MaceMetricU64V2 capacity=s->video_memory_total_bytes;
@@ -200,7 +219,7 @@ bool LhmReceiver_ApplyGpu(const MaceGpuAdapterInfoV2* a, MaceGpuTelemetryV2* s) 
     s->provider_id=MACE_PROVIDER_LHM;
     LegacyTelemetry_GpuState(s,state);
     if (state!=MACE_METRIC_VALID) {
-        if (state==MACE_METRIC_NO_PROVIDER && windows_capacity &&
+        if (missing && state==MACE_METRIC_HELPER_UNAVAILABLE && windows_capacity &&
             capacity.state==MACE_METRIC_VALID && LegacyTelemetry_PciMatches(a)==1) {
             s->video_memory_total_bytes=capacity;
             s->provider_id=MACE_PROVIDER_WINDOWS;

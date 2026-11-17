@@ -170,9 +170,9 @@ helper/RESULTADOS-1D-PASO1.md	48	11	adlx	Informe fechado y conservado de migraci
 helper/RESULTADOS-1D-PASO2.md	91	65	WinRing0	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
 helper/RESULTADOS-1D-PASO2.md	92	45	WinRing0	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
 helper/RESULTADOS-1D-PASO2.md	98	74	WinRing0	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
-native/include/mace_status.h	43	19	INTEL_MSR	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
-native/include/mace_status.h	44	19	AMD_RYZEN_SDK	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
-native/include/mace_status.h	47	23	ADLX	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
+native/include/mace_status.h	52	19	INTEL_MSR	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
+native/include/mace_status.h	53	19	AMD_RYZEN_SDK	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
+native/include/mace_status.h	56	23	ADLX	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
 native/test_main.c	31	28	INTEL_MSR	Etiqueta diagnostica de ID ABI reservado; no invoca proveedores retirados
 native/test_main.c	32	28	AMD_RYZEN_SDK	Etiqueta diagnostica de ID ABI reservado; no invoca proveedores retirados
 native/test_main.c	35	32	ADLX	Etiqueta diagnostica de ID ABI reservado; no invoca proveedores retirados

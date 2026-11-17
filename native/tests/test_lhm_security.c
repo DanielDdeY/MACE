@@ -57,7 +57,7 @@ int wmain(int argc,wchar_t** argv) {
         DWORD written=0; CHECK(WriteFile(file,"!",1,&written,NULL)); CloseHandle(file);
     }
     CHECK(CP_InitializeTelemetry()==0);
-    CHECK(wait_state(valid ? MACE_METRIC_VALID : ignore ? MACE_METRIC_NO_PROVIDER : MACE_METRIC_READ_FAILED,5000));
+    CHECK(wait_state(valid ? MACE_METRIC_VALID : ignore ? MACE_METRIC_HELPER_UNAVAILABLE : MACE_METRIC_HELPER_UNTRUSTED,5000));
     CHECK(WaitForSingleObject(started,0)==(valid ? WAIT_OBJECT_0 : WAIT_TIMEOUT));
     if (!wcscmp(mode,L"locks")) {
         for (unsigned i=0;i<3;i++) {
@@ -70,12 +70,12 @@ int wmain(int argc,wchar_t** argv) {
     }
     if (!wcscmp(mode,L"relaunch")) {
         HANDLE child=own_helper(); CHECK(child); CHECK(TerminateProcess(child,1)); CHECK(WaitForSingleObject(child,2000)==WAIT_OBJECT_0); CloseHandle(child);
-        CHECK(wait_state(MACE_METRIC_READ_FAILED,2000)); ResetEvent(started);
+        CHECK(wait_state(MACE_METRIC_HELPER_UNAVAILABLE,2000)); ResetEvent(started);
         swprintf_s(destination,32768,L"%s\\dependency.dll",root);
         HANDLE file=INVALID_HANDLE_VALUE; ULONGLONG until=GetTickCount64()+500;
         do { file=CreateFileW(destination,FILE_APPEND_DATA,0,NULL,OPEN_EXISTING,0,NULL); if (file!=INVALID_HANDLE_VALUE) break; Sleep(1); } while (GetTickCount64()<until);
         CHECK(file!=INVALID_HANDLE_VALUE); DWORD written=0; CHECK(WriteFile(file,"!",1,&written,NULL)); CloseHandle(file);
-        Sleep(1700); CHECK(wait_state(MACE_METRIC_READ_FAILED,100)); CHECK(WaitForSingleObject(started,0)==WAIT_TIMEOUT);
+        Sleep(1700); CHECK(wait_state(MACE_METRIC_HELPER_UNTRUSTED,100)); CHECK(WaitForSingleObject(started,0)==WAIT_TIMEOUT);
     }
     CP_ShutdownTelemetry();
     if (!wcscmp(mode,L"extra")) CHECK(DeleteFileW(destination));

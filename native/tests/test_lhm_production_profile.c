@@ -18,10 +18,10 @@ int wmain(int argc,wchar_t** argv) {
     CHECK(initialize && shutdown && poll); CHECK(initialize()==0);
     MaceCpuTelemetryV2 cpu={0}; ULONGLONG until=GetTickCount64()+3000;
     do { CHECK(poll(&cpu,sizeof(cpu))==MACE_OK);
-        if (cpu.temperature_c.state==MACE_METRIC_NO_PROVIDER && cpu.usage_percent.state==MACE_METRIC_VALID) break;
+        if (cpu.temperature_c.state==MACE_METRIC_HELPER_UNAVAILABLE && cpu.usage_percent.state==MACE_METRIC_VALID) break;
         Sleep(20);
     } while (GetTickCount64()<until);
-    CHECK(cpu.temperature_c.state==MACE_METRIC_NO_PROVIDER && cpu.temperature_c.value==0 && cpu.usage_percent.state==MACE_METRIC_VALID);
+    CHECK(cpu.temperature_c.state==MACE_METRIC_HELPER_UNAVAILABLE && cpu.temperature_c.value==0 && cpu.usage_percent.state==MACE_METRIC_VALID);
     shutdown(); FreeLibrary(library);
     puts("actual production DLL ignores inherited helper path/hash; Windows CPU usage survives: OK");
     return 0;

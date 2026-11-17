@@ -3,7 +3,8 @@
 Vigente desde **Fase 2, Paso 1B**. Los helpers de aplicación 1.1.0/1.1.1 y la DLL
 compilada con MACE_LHM_PROTOCOL=2 se distribuyen juntos. No hay negociación ni
 downgrade: mezclar versiones 1 y 2 falla de forma conservadora. La versión del
-protocolo privado es independiente del ABI público de MACE, que continúa en 1.4.
+protocolo privado es independiente del ABI público de MACE: desde Fase 2 4B es
+1.5 por estados aditivos, con los mismos tamaños/offsets de 1.4. El wire no cambia.
 
 ## Compatibilidad de distribución
 

@@ -35,9 +35,9 @@ int main(void) {
     CHECK(LhmWire_State(&f,&f.devices[0].metrics[0],true,10000)==MACE_METRIC_VALID);
     CHECK(LhmWire_State(&f,&f.devices[0].metrics[0],true,13001)==MACE_METRIC_READ_FAILED);
     f.flags=0;
-    CHECK(LhmWire_State(&f,&f.devices[0].metrics[0],true,10000)==MACE_METRIC_NO_PROVIDER);
+    CHECK(LhmWire_State(&f,&f.devices[0].metrics[0],true,10000)==MACE_METRIC_NOT_ELEVATED);
     f.flags=1; f.driver=1;
-    CHECK(LhmWire_State(&f,&f.devices[0].metrics[0],true,10000)==MACE_METRIC_NO_PROVIDER);
+    CHECK(LhmWire_State(&f,&f.devices[0].metrics[0],true,10000)==MACE_METRIC_PAWNIO_MISSING);
     f.driver=3; f.helper=1;
     CHECK(LhmWire_State(&f,&f.devices[0].metrics[0],true,10000)==MACE_METRIC_WARMING_UP);
     f.helper=3;
