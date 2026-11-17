@@ -4,7 +4,10 @@
 #include <stdio.h>
 #include <string.h>
 #include "../src/telemetry/lhm_wire.h"
+#include "lhm_retry_fixture.h"
 static wchar_t scenario[64];
+static LhmRetryFixture* retry_fixture;
+static LONG retry_launch;
 static void put32(unsigned char* b,uint32_t v) { memcpy(b,&v,4); }
 static void put64(unsigned char* b,uint64_t v) { memcpy(b,&v,8); }
 static void metric(unsigned char* d,unsigned i,double value,uint32_t meaning) {
@@ -45,6 +48,10 @@ static void frame(unsigned char* b,uint64_t seq,bool warming) {
     put32(b+32,GetCurrentProcessId()+(mode(L"bad-pid") ? 1 : 0));
     put32(b+36,mode(L"driver-missing") || mode(L"zero-unprivileged") ? 1 : mode(L"driver-stopped") ? 2 : 3);
     put32(b+40,warming ? 1 : 2); put32(b+44,warming ? 0 : 4);
+    if (mode(L"retry-pawn") && retry_fixture) {
+        LONG phase=InterlockedCompareExchange(&retry_fixture->phase,0,0);
+        put32(b+36,phase==0 ? 1 : phase==2 ? 2 : 3);
+    }
     if (warming) return;
     for (unsigned i=0;i<4;i++) {
         unsigned char* d=b+48+i*144;
@@ -63,8 +70,16 @@ static void frame(unsigned char* b,uint64_t seq,bool warming) {
             for (unsigned m=0;m<7;m++) { memset(d+32+m*16,0,16); put32(d+40+m*16,4); }
         }
     }
-    if (mode(L"malformed")) put32(b+8,0xFFFFFFFF);
+    if (mode(L"malformed") || (mode(L"retry-invalid") && retry_launch==1)) put32(b+8,0xFFFFFFFF);
     if (mode(L"nan")) { double value=0.0; uint64_t nanbits=UINT64_C(0x7ff8000000000000); memcpy(&value,&nanbits,8); memcpy(b+80,&value,8); }
+    if (mode(L"retry-streak")) {
+        put64(b+16,seq+1000);
+        if (retry_fixture && !InterlockedCompareExchange(&retry_fixture->phase,0,0))
+            for (unsigned i=0;i<4;i++) for (unsigned m=0;m<7;m++) {
+                unsigned char* metric_bytes=b+48+i*144+32+m*16;
+                memset(metric_bytes,0,16); put32(metric_bytes+8,4);
+            }
+    }
 }
 static bool pipe_security(const wchar_t* path) {
     HANDLE duplicate=CreateNamedPipeW(path,PIPE_ACCESS_INBOUND|FILE_FLAG_FIRST_PIPE_INSTANCE,PIPE_REJECT_REMOTE_CLIENTS,1,4096,4096,0,NULL);
@@ -114,6 +129,17 @@ int wmain(int argc,wchar_t** argv) {
         offset+=read;
     }
     if (LhmWire_U32(bootstrap)!=0x3142434D || LhmWire_U32(bootstrap+4)!=LHM_PROTOCOL_VERSION || LhmWire_U32(bootstrap+12)!=73) return 3;
+    if (!wcsncmp(scenario,L"retry-",6)) {
+        wchar_t mapping[100]; swprintf_s(mapping,100,L"Local\\MaceRetryFixture_%lu",LhmWire_U32(bootstrap+8));
+        HANDLE memory=OpenFileMappingW(FILE_MAP_ALL_ACCESS,FALSE,mapping);
+        if (!memory) return 30;
+        retry_fixture=MapViewOfFile(memory,FILE_MAP_ALL_ACCESS,0,0,sizeof(*retry_fixture));
+        if (!retry_fixture) return 31;
+        retry_launch=InterlockedIncrement(&retry_fixture->launches);
+        InterlockedExchange(&retry_fixture->pid,(LONG)GetCurrentProcessId());
+        if (mode(L"retry-loop") || (mode(L"retry-recover") && retry_launch<=4) ||
+            (mode(L"retry-streak") && retry_launch==1)) return 0;
+    }
 #ifdef MACE_SECURE_TEST_HELPER
     wchar_t signal[100]; swprintf_s(signal,100,L"Local\\MaceSecureStarted_%lu",LhmWire_U32(bootstrap+8));
     HANDLE started=OpenEventW(EVENT_MODIFY_STATE,FALSE,signal);
@@ -140,7 +166,7 @@ int wmain(int argc,wchar_t** argv) {
     unsigned char bytes[LHM_MAX_FRAME]; DWORD written=0;
     frame(bytes,1,true);
     if (!WriteFile(pipe,bytes,48,&written,NULL)) { CloseHandle(pipe); return 7; }
-    if (mode(L"hang-close")) { Sleep(60000); CloseHandle(pipe); return 0; }
+    if (mode(L"hang-close") || (mode(L"retry-hung") && retry_launch==1)) { Sleep(60000); CloseHandle(pipe); return 0; }
     if (mode(L"slow")) Sleep(1200);
     for (uint64_t sequence=2;;sequence++) {
         int control=read_control(pipe,LhmWire_U32(bootstrap+8));
@@ -152,6 +178,7 @@ int wmain(int argc,wchar_t** argv) {
         } else if (!WriteFile(pipe,bytes,size,&written,NULL)) { CloseHandle(pipe); return 0; }
         if (mode(L"stale")) { Sleep(8000); CloseHandle(pipe); return 0; }
         if (mode(L"disconnect")) { Sleep(600); CloseHandle(pipe); return 0; }
+        if (mode(L"retry-broken") && retry_launch==1) { Sleep(100); CloseHandle(pipe); return 0; }
         Sleep(1000);
     }
 }

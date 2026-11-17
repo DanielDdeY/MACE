@@ -42,15 +42,23 @@ try
     try
     {
         shutdown.Token.ThrowIfCancellationRequested();
-        await Send(HelperState.WarmingUp, PawnIoStatus.Read(), []);
-        using var sampler = new SensorSampler();
-        sampler.Open();
+        DriverState initialDriver = PawnIoStatus.Read();
+        await Send(HelperState.WarmingUp, initialDriver, []);
+        using var sampler = new RecoverableSampler();
+        sampler.Open(initialDriver);
         shutdown.Token.ThrowIfCancellationRequested();
         using var interval = new PeriodicTimer(TimeSpan.FromSeconds(1));
         do
         {
             shutdown.Token.ThrowIfCancellationRequested();
             DriverState driver = PawnIoStatus.Read();
+            if (sampler.NeedsRecovery(driver))
+            {
+                await Send(HelperState.WarmingUp, driver, []);
+                // The DLL's existing 3 s read deadline/job contains a blocked reopen/dispose.
+                sampler.Reopen();
+                shutdown.Token.ThrowIfCancellationRequested();
+            }
             DeviceSample[] devices;
             try { devices = sampler.Poll(driver); }
             catch (Exception error) when (error is not OutOfMemoryException)

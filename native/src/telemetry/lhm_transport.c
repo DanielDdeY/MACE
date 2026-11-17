@@ -14,9 +14,9 @@ void LhmTransport_AbortActive(void) {
     ReleaseSRWLockShared(&active_lock);
 }
 
-static bool wait_io(HANDLE pipe, HANDLE stop, OVERLAPPED* operation, DWORD timeout, DWORD* transferred) {
-    HANDLE waits[2]={stop,operation->hEvent};
-    if (WaitForMultipleObjects(2,waits,FALSE,timeout)!=WAIT_OBJECT_0+1) {
+static bool wait_io(HANDLE pipe, HANDLE stop, HANDLE process, OVERLAPPED* operation, DWORD timeout, DWORD* transferred) {
+    HANDLE waits[3]={stop,operation->hEvent,process};
+    if (WaitForMultipleObjects(process ? 3 : 2,waits,FALSE,timeout)!=WAIT_OBJECT_0+1) {
         CancelIoEx(pipe,operation);
         GetOverlappedResult(pipe,operation,transferred,TRUE);
         return false;
@@ -35,7 +35,7 @@ bool LhmTransport_Read(LhmSession* s, HANDLE stop, unsigned char* data, DWORD si
         BOOL done=ReadFile(s->pipe,data+offset,size-offset,&read,&op);
         bool ok=done!=0;
         if (!done && GetLastError()==ERROR_IO_PENDING)
-            ok=wait_io(s->pipe,stop,&op,(DWORD)(deadline-now),&read);
+            ok=wait_io(s->pipe,stop,s->process,&op,(DWORD)(deadline-now),&read);
         CloseHandle(op.hEvent);
         if (!ok || !read) return false;
         offset+=read;
@@ -110,9 +110,15 @@ void LhmTransport_Close(LhmSession* s) {
 }
 
 bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* s) {
+    LhmOpenFailure failure;
+    return LhmTransport_OpenEx(executable,stop,s,&failure);
+}
+bool LhmTransport_OpenEx(const wchar_t* executable,HANDLE stop,LhmSession* s,LhmOpenFailure* failure) {
     OutputDebugStringA(LHM_PROTOCOL_MARKER);
     memset(s,0,sizeof(*s));
+    *failure=LHM_OPEN_TRUST;
     if (!LhmTrust_Acquire(executable,stop,&s->trust)) return false;
+    *failure=LHM_OPEN_TRANSIENT;
     executable=LhmTrust_Executable(s->trust);
     unsigned char random[32], bootstrap[128]={0};
     wchar_t name[74]=L"mace-lhm-", path[96], command[32768];
@@ -164,7 +170,9 @@ bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* s) {
                 CreateProcessW(executable,command,NULL,NULL,TRUE,
                     CREATE_SUSPENDED|CREATE_NO_WINDOW|CREATE_UNICODE_ENVIRONMENT|EXTENDED_STARTUPINFO_PRESENT,
                     (LPVOID)LhmTrust_Environment(s->trust),LhmTrust_Directory(s->trust),&start.StartupInfo,&child)!=0;
-        } else ok=false;
+        } else { *failure=LHM_OPEN_CONTAINMENT; ok=false; }
+        if (!ok && *failure!=LHM_OPEN_CONTAINMENT && WaitForSingleObject(stop,0)==WAIT_TIMEOUT)
+            *failure=LHM_OPEN_LAUNCH_BLOCKED;
         if (ok) {
             s->process=child.hProcess; s->pid=child.dwProcessId;
             BOOL assigned=FALSE;
@@ -176,7 +184,7 @@ bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* s) {
                 for (unsigned i=0;i<73;i++) bootstrap[16+i]=(unsigned char)name[i];
                 DWORD written=0;
                 ok=WriteFile(writer,bootstrap,sizeof(bootstrap),&written,NULL) && written==sizeof(bootstrap);
-            } else ok=false;
+            } else { *failure=LHM_OPEN_CONTAINMENT; ok=false; }
             CloseHandle(child.hThread);
         } else OutputDebugStringW(L"MACE LHM: contained helper creation failed; telemetry degraded.\n");
     } else ok=false;
@@ -188,7 +196,7 @@ bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* s) {
     ok=ConnectNamedPipe(s->pipe,&connect)!=0;
     if (!ok) {
         DWORD error=GetLastError(), transferred=0;
-        ok=error==ERROR_PIPE_CONNECTED || (error==ERROR_IO_PENDING && wait_io(s->pipe,stop,&connect,5000,&transferred));
+        ok=error==ERROR_PIPE_CONNECTED || (error==ERROR_IO_PENDING && wait_io(s->pipe,stop,s->process,&connect,5000,&transferred));
     }
     CloseHandle(connect.hEvent);
     ULONG peer=0;

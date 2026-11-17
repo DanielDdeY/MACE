@@ -50,6 +50,7 @@ set(MACE_NATIVE_SOURCES
     src/telemetry/lhm_transport.c
     src/telemetry/lhm_trust.c
     src/telemetry/lhm_receiver.c
+    src/telemetry/lhm_retry.c
     src/hardware/gpu_inventory.c
     src/extensions/hang_detector.c
     src/extensions/shared_buffer.c
@@ -115,6 +116,30 @@ if (BUILD_TESTING)
         set_target_properties(${target} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     endforeach()
     add_executable(test_lhm_job tests/test_lhm_job.c src/telemetry/lhm_transport.c src/telemetry/lhm_trust.c)
+    # Separate disposable DLL: accelerated ACTIVE retry time only; wire age stays real 3000 ms.
+    add_library(mace_native_lhm_retry_test SHARED ${LHM_FIXTURE_SOURCES}
+        tests/lhm_fixture_providers.c tests/lhm_fixture_cpu.c)
+    target_include_directories(mace_native_lhm_retry_test PRIVATE include src/process "${CMAKE_CURRENT_BINARY_DIR}/generated")
+    target_compile_definitions(mace_native_lhm_retry_test PRIVATE MACE_EXPORTS _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE
+        MACE_LHM_DEVELOPMENT=1 MACE_LHM_REQUIRE_AUTHENTICODE=0 MACE_LHM_TEST_HOOKS=1 MACE_LHM_RETRY_TEST_TIME_SCALE=10)
+    target_link_libraries(mace_native_lhm_retry_test PRIVATE psapi user32 dxgi dxguid gdi32 shell32 ole32 advapi32 bcrypt wintrust crypt32)
+    add_executable(test_lhm_retry_receiver tests/test_lhm_retry_receiver.c)
+    target_include_directories(test_lhm_retry_receiver PRIVATE include)
+    target_compile_definitions(test_lhm_retry_receiver PRIVATE UNICODE _UNICODE)
+    target_link_libraries(test_lhm_retry_receiver PRIVATE mace_native_lhm_retry_test)
+    add_executable(test_lhm_retry_policy tests/test_lhm_retry_policy.c src/telemetry/lhm_retry.c)
+    foreach(target mace_native_lhm_retry_test test_lhm_retry_receiver test_lhm_retry_policy)
+        target_compile_options(${target} PRIVATE /W4 /WX /utf-8)
+        set_target_properties(${target} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endforeach()
+    foreach(scenario budget streak permanent suspend recovery slow-cap)
+        add_test(NAME lhm_retry_policy_${scenario} COMMAND test_lhm_retry_policy ${scenario})
+    endforeach()
+    foreach(scenario retry-loop retry-recover retry-streak retry-hung retry-broken retry-invalid retry-pawn
+        permanent-missing permanent-trust permanent-job)
+        add_test(NAME lhm_retry_${scenario} COMMAND test_lhm_retry_receiver "$<TARGET_FILE:lhm_fake_helper>" ${scenario})
+        set_tests_properties(lhm_retry_${scenario} PROPERTIES TIMEOUT 30)
+    endforeach()
     target_include_directories(test_lhm_job PRIVATE include "${CMAKE_CURRENT_BINARY_DIR}/generated")
     target_compile_definitions(test_lhm_job PRIVATE MACE_LHM_DEVELOPMENT=1 MACE_LHM_REQUIRE_AUTHENTICODE=0)
     target_link_libraries(test_lhm_job PRIVATE mace_native_lhm_test advapi32 bcrypt shell32 ole32 wintrust crypt32)

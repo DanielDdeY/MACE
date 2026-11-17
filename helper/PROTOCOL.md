@@ -1,6 +1,6 @@
 # Contrato privado LHM1/MCB1/MCC1, versión 2
 
-Vigente desde **Fase 2, Paso 1B**. El helper de aplicación 1.1.0 y la DLL
+Vigente desde **Fase 2, Paso 1B**. Los helpers de aplicación 1.1.0/1.1.1 y la DLL
 compilada con MACE_LHM_PROTOCOL=2 se distribuyen juntos. No hay negociación ni
 downgrade: mezclar versiones 1 y 2 falla de forma conservadora. La versión del
 protocolo privado es independiente del ABI público de MACE, que continúa en 1.4.
@@ -9,7 +9,7 @@ protocolo privado es independiente del ABI público de MACE, que continúa en 1.
 
 | DLL | Helper | Resultado |
 |---|---|---|
-| Privado 2 | Privado 2, aplicación 1.1.0 | Dúplex, muestras LHM1 versión 2, bootstrap MCB1 versión 2 y control MCC1 versión 2 |
+| Privado 2 | Privado 2, aplicación 1.1.0/1.1.1 | Dúplex, muestras LHM1 versión 2, bootstrap MCB1 versión 2 y control MCC1 versión 2; 1.1.1 incorpora recuperación de PawnIO de 4A |
 | Privado 2 | Privado 1 | El helper antiguo rechaza el bootstrap; no se aceptan muestras v1 ni se hace downgrade |
 | Privado 1 | Privado 2 | El helper nuevo rechaza el bootstrap antiguo; no funciona como pareja compatible |
 | Privado 1 | Privado 1 | Pareja histórica; no incorpora el cierre de Fase 2 Paso 1B |
@@ -17,7 +17,8 @@ protocolo privado es independiente del ABI público de MACE, que continúa en 1.
 Los manifiestos de publicación y runtime declaran protocolo 2. El staging exige
 esa versión del helper y la marca MACE_LHM_PROTOCOL=2 dentro de la DLL; rechaza
 componentes declarados de versión 1. La marca/manifiesto no son autenticación del
-publicador. Firma y confianza fijada de dependencias siguen pendientes del Paso 2.
+publicador. La confianza fijada de dependencias se implementó en el Paso 2;
+la firma del publicador sigue pendiente.
 La imagen histórica de 1D permanece sin regenerar: reconstruir y distribuir
 ambos componentes juntos, nunca reemplazar uno solo dentro de esa imagen.
 
@@ -144,7 +145,11 @@ El bloque de bootstrap mide 128 bytes, little endian. La DLL escribe el bloque u
 
 La comprobación del PID mediante Windows es independiente del PID declarado en la cabecera LHM1. Se comprueban ambos. Cada reconexión crea otro hijo y nombre, invalida la caché y reinicia la secuencia local a cero; no se reutiliza el canal anterior.
 
-El plazo de conexión es 5.000 ms. Cada mensaje completo tiene un plazo de lectura de 3.000 ms desde que comienza la lectura del prefijo; el sondeo de caché verifica además la edad del timestamp original, como máximo 3.000 ms. Se toleran dos intervalos perdidos de 1 Hz; al agotarse el tercero no se conservan cifras válidas. EOF, PID incorrecto, mensaje inválido o replay invalidan inmediatamente al detectarse. El backoff es 1, 2, 4 y 8 segundos, con techo de 8; la implementación actual lo reinicia al recibir sequence >= 3, lo que no demuestra tres muestras válidas. La corrección por muestras válidas, el límite de reinicios y su recuperación/presentación quedan para el Paso 4 de Fase 2; no se adelantan en 1B.
+El plazo de conexión es 5.000 ms. Cada mensaje completo tiene un plazo de lectura de 3.000 ms desde que comienza la lectura del prefijo; el sondeo de caché verifica además la edad del timestamp original, como máximo 3.000 ms. Se toleran dos intervalos perdidos de 1 Hz; al agotarse el tercero no se conservan cifras válidas. EOF, PID incorrecto, mensaje inválido o replay invalidan inmediatamente al detectarse. La muerte del hijo también despierta la espera de conexión/lectura.
+
+Desde Fase 2 Paso 4A, el backoff de 1/2/4/8 s (techo 8) solo vuelve a 1 s tras tres mensajes consecutivos decodificados, frescos, Ready y con al menos una métrica promovible a VALID por las reglas CPU/GPU y asociación PCI única local; UnknownPower no cuenta como potencia utilizable. Una muestra no utilizable o un hueco mayor de 3.000 ms rompe la racha. La secuencia solo protege contra replay: su magnitud no reinicia el backoff. Hay un arranque inicial y como máximo tres relanzamientos en una ventana móvil de 60 s de tiempo activo monótono (QueryUnbiasedInterruptTime, excluye suspensión). Las muestras buenas nunca borran ese historial. Al agotarse hay sondeos lentos de 30/60/120/240/300 s, con techo 300 s, respetando además la ventana de 60 s. Tres muestras utilizables salen del modo lento. Ausencia del helper, rechazo de confianza o creación/contención bloqueada requieren reparación y reiniciar MACE, sin bucle automático. Entretanto se conservan NO_PROVIDER o READ_FAILED ya existentes; no se añadieron estados al ABI 1.4. Ver tabla completa en FASE2-PASO4A.md.
+
+El helper 1.1.1 observa Missing/Stopped → Running y recrea su muestreador, uno a la vez, con un enfriamiento mínimo de 30 s activos y coalescencia de transiciones. Esto no crea otro proceso ni consume relanzamientos. Usa WarmingUp y las métricas existentes: no hay control nuevo, campo adicional ni cambio de protocolo. Una recuperación diferida mantiene CPU en WarmingUp; al parar PawnIO, CPU queda NoProvider. GPU conserva validación independiente. La recuperación física en hardware debe verificarse; las simulaciones no garantizan disponibilidad de cada sensor.
 
 El nombre aleatorio dificulta adivinar/precrear la tubería, pero no es una credencial frente al mismo usuario: el espacio de nombres puede enumerarse y un administrador o depurador puede leer memoria o duplicar handles. stdin evita su exposición rutinaria en argumentos. No protege frente a un equipo/usuario comprometido. Desde Fase 2 Paso 2, MACE_LHM_HELPER y MACE_LHM_HELPER_SHA256 solo se leen con MACE_LHM_DEVELOPMENT=ON. Producción las ignora, localiza el helper junto a la DLL y fija en compilación el hash de helper-runtime.manifest. Verifica sus 202 archivos antes de cada lanzamiento y retiene handles sin compartir escritura/borrado. El entorno del hijo es explícito y su directorio de trabajo es el runtime verificado. Firma y autenticidad del publicador siguen pendientes; los límites de TOCTOU/carpeta escribible están en FASE2-PASO2.md.
 

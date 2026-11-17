@@ -46,6 +46,7 @@ void Reject(Action action, string label)
     { passed++; return; }
     throw new Exception("FAILED: accepted " + label);
 }
+RecoveryTests.Run(Check);
 DeviceSample Cpu() => new(DeviceKind.Cpu, IdentityKind.Cpu, new(0,0,0,0),
     Enumerable.Range(0,7).Select(_ => Reading.Missing()).ToArray());
 Snapshot Sample() => new(1, 10000, 123, DriverState.Running, HelperState.Ready, [Cpu()]);

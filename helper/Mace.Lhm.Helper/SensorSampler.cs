@@ -4,7 +4,7 @@ using Mace.Lhm.Protocol;
 
 namespace Mace.Lhm.Helper;
 
-public sealed class SensorSampler : IDisposable
+public sealed class SensorSampler : ISensorSampler
 {
     private readonly Computer computer = new() { IsCpuEnabled = true, IsGpuEnabled = true };
     public void Open() => computer.Open();
