@@ -12,7 +12,7 @@ $repoRoot=Split-Path -Parent $nativeRoot
 $toolchain=Get-MaceToolchain -VisualStudio $VisualStudio
 if (-not $BuildDirectory) { $BuildDirectory=Join-Path $nativeRoot 'build\lhm1b' }
 $BuildDirectory=[IO.Path]::GetFullPath($BuildDirectory)
-& $toolchain.CMake -S $nativeRoot -B $BuildDirectory -G $toolchain.Generator -A x64 -DBUILD_TESTING=ON
+& $toolchain.CMake -S $nativeRoot -B $BuildDirectory -G $toolchain.Generator -A x64 -DBUILD_TESTING=ON -DMACE_LHM_DEVELOPMENT=ON
 Assert-MaceCommandSucceeded 'Configuracion 1B'
 & $toolchain.CMake --build $BuildDirectory --config Release --parallel 4
 Assert-MaceCommandSucceeded 'Compilacion 1B'

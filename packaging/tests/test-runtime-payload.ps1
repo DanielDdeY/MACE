@@ -2,7 +2,8 @@
     [Parameter(Mandatory=$true)][string]$NativeDll,
     [Parameter(Mandatory=$true)][string]$PawnIoInstaller,
     [string]$HelperDirectory,
-    [string]$JavaExe
+    [string]$JavaExe,
+    [string]$DevelopmentDll
 )
 $ErrorActionPreference='Stop'
 $repoRoot=Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
@@ -64,6 +65,11 @@ $oldHelper=Join-Path $testRoot 'helper-protocol1'
 New-Item -ItemType Directory -Path $oldHelper | Out-Null
 '{"protocol":1}' | Set-Content -LiteralPath (Join-Path $oldHelper 'artifact-manifest.json') -Encoding UTF8
 Expect-Rejection { & (Join-Path $repoRoot 'helper\Verify-Artifacts.ps1') -Directory $oldHelper } 'Versiones del artefacto'
+if ($DevelopmentDll) {
+    $devHash=(Get-FileHash -LiteralPath $DevelopmentDll -Algorithm SHA256).Hash
+    Expect-Rejection { & (Join-Path $packaging 'stage-runtime.ps1') -StageDirectory $bad -AppJar $jar -NativeDll $DevelopmentDll -NativeSha256 $devHash -HelperDirectory $HelperDirectory -PawnIoInstaller $PawnIoInstaller } 'DLL de produccion'
+    Write-Host 'PASS: development DLL rejected by staging.'
+}
 $extra=Join-Path $good 'internal.log'
 [IO.File]::WriteAllText($extra,'development-only')
 Expect-Rejection { & (Join-Path $packaging 'verify-runtime.ps1') -RuntimeDirectory $good } 'Archivos no declarados'

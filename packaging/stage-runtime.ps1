@@ -35,6 +35,12 @@ if (-not $HelperDirectory) {
 $helper=(Resolve-Path -LiteralPath $HelperDirectory).Path
 & (Join-Path $repoRoot 'helper\Verify-Artifacts.ps1') -Directory $helper | Out-Host
 $sourceManifest=Get-Content -LiteralPath (Join-Path $helper 'artifact-manifest.json') -Raw | ConvertFrom-Json
+$helperManifest=Join-Path $helper 'helper-runtime.manifest'
+$helperManifestSha=(Get-FileHash -LiteralPath $helperManifest -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($binaryText.Contains('MACE_LHM_PROFILE=DEVELOPMENT') -or -not $binaryText.Contains('MACE_LHM_PROFILE=PRODUCTION;MACE_LHM_MANIFEST_SHA256='+$helperManifestSha)) {
+    throw 'Se exige DLL de produccion ligada al manifiesto final del helper; no desarrollo ni firma posterior al hash.'
+}
+if ($SigningScript -and -not $sourceManifest.signed) { throw 'Firma el helper con Build-Helper.ps1 antes de compilar la DLL; staging no vuelve a firmarlo.' }
 if (-not $PawnIoInstaller) { throw 'Define MACE_PAWNIO_INSTALLER con el instalador oficial intacto; este script no lo descarga ni ejecuta.' }
 $pawn=(Resolve-Path -LiteralPath $PawnIoInstaller).Path
 $pawnPolicy=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'pawnio-2.2.0.json') -Raw | ConvertFrom-Json
@@ -60,22 +66,16 @@ Copy-Item -LiteralPath $dll -Destination (Join-Path $stage 'mace_native.dll') -F
 foreach ($entry in $entries) {
     Copy-Item -LiteralPath (Join-Path $helper $entry.file) -Destination (Join-Path $helperStage $entry.file)
 }
+Copy-Item -LiteralPath $helperManifest -Destination $helperStage
 Copy-Item -LiteralPath $pawn -Destination (Join-Path $prerequisites 'PawnIO_setup.exe')
 Copy-Item -LiteralPath $notices -Destination (Join-Path $stage 'THIRD-PARTY-NOTICES.txt')
 Get-ChildItem -LiteralPath $legalSources -File | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $legalStage }
-if ($SigningScript) {
-    # Sign only MACE-owned files. NEVER alter the signed PawnIO installer or third-party assemblies.
-    foreach ($relative in @('lhm\Mace.Lhm.Helper.exe','lhm\Mace.Lhm.Helper.dll','lhm\Mace.Lhm.Protocol.dll')) {
-        $owned=Join-Path $stage $relative
-        & $SigningScript -FilePath $owned
-        if (-not $?) { throw "Falló la firma: $relative" }
-        if ((Get-AuthenticodeSignature -LiteralPath $owned).Status -ne 'Valid') { throw "Firma no válida: $relative" }
-    }
-} else { Write-Warning 'Firma MACE omitida: certificado pendiente. PawnIO conserva su firma original.' }
+# Never sign a helper after its manifest was pinned into the DLL.
+if (-not $SigningScript) { Write-Warning 'Firma MACE omitida: certificado pendiente. PawnIO conserva su firma original.' }
 $files=@(Get-ChildItem -LiteralPath $stage -Recurse -File | Sort-Object FullName | ForEach-Object {
     [ordered]@{file=$_.FullName.Substring($stage.Length+1).Replace('\','/');sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}
 })
-[ordered]@{schema=1;helperProtocol=2;helperVersion=$sourceManifest.lhm;pawnIoVersion=$pawnPolicy.version;files=$files} |
+[ordered]@{schema=1;helperProtocol=2;helperVersion=$sourceManifest.lhm;helperManifestSha256=$helperManifestSha;pawnIoVersion=$pawnPolicy.version;files=$files} |
     ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $stage 'runtime-manifest.json') -Encoding UTF8
 & (Join-Path $PSScriptRoot 'verify-runtime.ps1') -RuntimeDirectory $stage
 Write-Host 'Staging completo: aplicación, DLL, helper, PawnIO intacto y avisos. No se ejecutó el instalador.'

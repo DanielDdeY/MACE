@@ -13,7 +13,7 @@ foreach ($entry in $manifest.files) {
     $path = Join-Path $root $entry.file
     if ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ne $entry.sha256) { throw ('Hash incorrecto: ' + $entry.file) }
 }
-if (@(Get-ChildItem -LiteralPath $root -File | Where-Object {$_.Name -ne 'artifact-manifest.json'}).Count -ne $manifest.files.Count) {
+if (@(Get-ChildItem -LiteralPath $root -File | Where-Object {$_.Name -notin @('artifact-manifest.json','helper-runtime.manifest')}).Count -ne $manifest.files.Count) {
     throw 'Hay archivos adicionales o faltantes en el paquete.'
 }
 $runtime = Get-Content -LiteralPath (Join-Path $root 'Mace.Lhm.Helper.runtimeconfig.json') -Raw | ConvertFrom-Json
@@ -21,3 +21,4 @@ if (@($runtime.runtimeOptions.includedFrameworks | Where-Object {$_.name -eq 'Mi
     throw 'El runtime autocontenido esperado no esta presente.'
 }
 Write-Host ('Artefactos verificados: ' + $manifest.files.Count)
+& (Join-Path $PSScriptRoot 'Write-RuntimeManifest.ps1') -Directory $root -VerifyOnly

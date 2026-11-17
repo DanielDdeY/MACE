@@ -5,6 +5,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <string.h>
+#include "lhm_security_config.h"
 
 extern IMAGE_DOS_HEADER __ImageBase;
 static SRWLOCK cache_lock=SRWLOCK_INIT;
@@ -19,11 +20,13 @@ static void invalidate(MaceMetricState state) {
     ReleaseSRWLockExclusive(&cache_lock);
 }
 static bool helper_path(wchar_t* path, DWORD capacity) {
+#if MACE_LHM_DEVELOPMENT
     DWORD size=GetEnvironmentVariableW(L"MACE_LHM_HELPER",path,capacity);
     if (size>=capacity) return false;
     if (size) return size>3 && path[1]==L':' && (path[2]==L'\\' || path[2]==L'/');
-    size=GetModuleFileNameW((HMODULE)&__ImageBase,path,capacity);
-    if (!size || size>=capacity) return false;
+#endif
+    DWORD size_default=GetModuleFileNameW((HMODULE)&__ImageBase,path,capacity);
+    if (!size_default || size_default>=capacity) return false;
     wchar_t* slash=wcsrchr(path,L'\\');
     if (!slash) return false;
     *slash=0;
@@ -31,14 +34,12 @@ static bool helper_path(wchar_t* path, DWORD capacity) {
 }
 static DWORD WINAPI receive_worker(void* unused) {
     (void)unused;
-    wchar_t path[32768], expected[65]={0};
+    wchar_t path[32768];
     if (!helper_path(path,32768)) { invalidate(MACE_METRIC_NO_PROVIDER); return 0; }
     if (GetFileAttributesW(path)==INVALID_FILE_ATTRIBUTES) {
         invalidate(MACE_METRIC_NO_PROVIDER);
         return 0;
     }
-    DWORD hash_size=GetEnvironmentVariableW(L"MACE_LHM_HELPER_SHA256",expected,65);
-    if (hash_size>=65 || !LhmTransport_VerifyHash(path,expected)) { invalidate(MACE_METRIC_READ_FAILED); return 0; }
     DWORD backoff=1000;
     while (WaitForSingleObject(stop_event,0)==WAIT_TIMEOUT) {
         LhmSession session={0};

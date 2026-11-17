@@ -2,7 +2,9 @@
     [ValidateSet('Release', 'Debug')][string]$Configuration = 'Release',
     [ValidateSet('Auto', 'VS2022', 'VS2026')][string]$VisualStudio = 'Auto',
     [string]$BuildDirectory,
-    [switch]$EnableTerminationTest
+    [switch]$EnableTerminationTest,
+    [switch]$Development,
+    [string]$HelperDirectory
 )
 
 . (Join-Path $PSScriptRoot 'native-common.ps1')
@@ -14,6 +16,11 @@ Write-Host "MACE native: $($toolchain.Generator), CMake $($toolchain.CMakeVersio
 $configureArgs = @('-S', $nativeRoot, '-B', $build, '-G', $toolchain.Generator,
     '-A', 'x64', '-DBUILD_TESTING=ON',
     "-DMACE_TEST_PROCESS_TERMINATION=$([int]$EnableTerminationTest.IsPresent)")
+$configureArgs+="-DMACE_LHM_DEVELOPMENT=$([int]$Development.IsPresent)"
+if (-not $Development) {
+    $helperManifest=Get-MaceHelperManifest -HelperDirectory $HelperDirectory
+    $configureArgs+="-DMACE_LHM_RUNTIME_MANIFEST:FILEPATH=$helperManifest"
+}
 & $toolchain.CMake @configureArgs
 Assert-MaceCommandSucceeded 'Configuración CMake'
 & $toolchain.CMake --build $build --config $Configuration

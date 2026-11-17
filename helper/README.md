@@ -1,5 +1,13 @@
 # Helper LHM de MACE — protocolo privado 2
 
+Fase 2 Paso 2: se conserva el inventario de 205 archivos publicados y se genera
+helper-runtime.manifest con los 202 necesarios en ejecución. Los dos PDB y
+createdump.exe no se distribuyen. El manifiesto se genera después de firmar y su
+SHA-256 se compila en la DLL de producción. Esa DLL ignora anulaciones de entorno,
+verifica en cada lanzamiento y mantiene los archivos abiertos sin compartir
+escritura/borrado durante la sesión. El modo Development requiere una opción
+explícita y nunca se empaqueta. Véase FASE2-PASO2.md para límites y comandos.
+
 La entrega de 1C y la corrección de potencia AMD están en [RESULTADOS-1C.md](RESULTADOS-1C.md). Desde la Fase 2 Paso 1B se usa protocolo privado 2: helper de aplicación 1.1.0 y DLL compatible se distribuyen juntos. Los tamaños/offsets de las muestras y el ABI público V2 permanecen intactos; no se mezclan componentes privados 1 y 2. Véanse [PROTOCOL.md](PROTOCOL.md) y [FASE2-PASO1B.md](FASE2-PASO1B.md).
 
 Helper Windows x64 autocontenido, con .NET 10.0.12 y LibreHardwareMonitorLib 0.9.6. Se compila con SDK 10.0.401, dependencias exactas y archivos `packages.lock.json`. `global.json` rechaza otros SDK para conservar la configuración verificada.

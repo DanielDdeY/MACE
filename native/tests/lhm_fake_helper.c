@@ -86,6 +86,17 @@ static int read_control(HANDLE pipe,DWORD parent) {
     return 1;
 }
 int wmain(int argc,wchar_t** argv) {
+#ifdef MACE_SECURE_TEST_HELPER
+    wchar_t unexpected[32768],module[32768],cwd[32768];
+    const wchar_t* forbidden[]={L"MACE_LHM_HELPER",L"MACE_LHM_HELPER_SHA256",L"DOTNET_STARTUP_HOOKS",L"CORECLR_ENABLE_PROFILING",L"USERPROFILE",L"USERNAME",L"COMPUTERNAME"};
+    for (unsigned i=0;i<sizeof(forbidden)/sizeof(forbidden[0]);i++)
+        if (GetEnvironmentVariableW(forbidden[i],unexpected,32768)) return 20;
+    GetModuleFileNameW(NULL,module,32768); wchar_t* slash=wcsrchr(module,L'\\'); if (!slash) return 21; *slash=0;
+    GetCurrentDirectoryW(32768,cwd);
+    const wchar_t* m=_wcsnicmp(module,L"\\\\?\\",4)==0 ? module+4 : module;
+    const wchar_t* c=_wcsnicmp(cwd,L"\\\\?\\",4)==0 ? cwd+4 : cwd;
+    if (_wcsicmp(m,c)) return 22;
+#endif
     if (argc==2 && wcscmp(argv[1],L"--job-descendant")==0) { Sleep(60000); return 0; }
     GetEnvironmentVariableW(L"MACE_SIM_SCENARIO",scenario,64);
     if (mode(L"wrong-client") && !(argc==2 && wcscmp(argv[1],L"--fake-child")==0)) {
@@ -103,6 +114,11 @@ int wmain(int argc,wchar_t** argv) {
         offset+=read;
     }
     if (LhmWire_U32(bootstrap)!=0x3142434D || LhmWire_U32(bootstrap+4)!=LHM_PROTOCOL_VERSION || LhmWire_U32(bootstrap+12)!=73) return 3;
+#ifdef MACE_SECURE_TEST_HELPER
+    wchar_t signal[100]; swprintf_s(signal,100,L"Local\\MaceSecureStarted_%lu",LhmWire_U32(bootstrap+8));
+    HANDLE started=OpenEventW(EVENT_MODIFY_STATE,FALSE,signal);
+    if (started) { SetEvent(started); CloseHandle(started); }
+#endif
     wchar_t path[96]=L"\\\\.\\pipe\\";
     for (unsigned i=0;i<73;i++) path[9+i]=(wchar_t)bootstrap[16+i];
     path[82]=0;

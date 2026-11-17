@@ -1,7 +1,8 @@
 ﻿param(
     [ValidateSet('Auto', 'VS2022', 'VS2026')][string]$VisualStudio = 'Auto',
     [string]$BuildDirectory,
-    [string]$SigningScript = $env:MACE_SIGNING_SCRIPT
+    [string]$SigningScript = $env:MACE_SIGNING_SCRIPT,
+    [string]$HelperDirectory
 )
 
 . (Join-Path $PSScriptRoot 'native-common.ps1')
@@ -9,6 +10,8 @@ $nativeRoot = Get-MaceNativeRoot
 $repositoryRoot = [IO.Path]::GetFullPath((Join-Path $nativeRoot '..'))
 $toolchain = Get-MaceToolchain -VisualStudio $VisualStudio
 $build = Get-MaceBuildDirectory -BuildDirectory $BuildDirectory -Preset $toolchain.Preset
+$helperManifest=Get-MaceHelperManifest -HelperDirectory $HelperDirectory
+$HelperDirectory=Split-Path -Parent $helperManifest
 
 $sourceStatus = (& git -C $repositoryRoot status --porcelain -- native) -join "`n"
 Assert-MaceCommandSucceeded 'Consulta de estado Git'
@@ -19,7 +22,7 @@ $sourceRevision = (& git -C $repositoryRoot rev-parse HEAD).Trim()
 Assert-MaceCommandSucceeded 'Consulta de revisión Git'
 
 & (Join-Path $PSScriptRoot 'build-native.ps1') -Configuration Release `
-    -VisualStudio $VisualStudio -BuildDirectory $build
+    -VisualStudio $VisualStudio -BuildDirectory $build -HelperDirectory $HelperDirectory
 
 $sourceDll = Join-Path $build 'Release\mace_native.dll'
 $sourceLib = Join-Path $build 'Release\mace_native.lib'
@@ -103,6 +106,9 @@ $metadata = [ordered]@{
     importLibrarySha256 = $sourceLibHash
     diagnosticExeSha256 = $sourceDiagnosticHash
     telemetryArchitecture = 'LHM1'
+    helperProtocol = 2
+    developmentOverrides = $false
+    helperManifestSha256 = (Get-FileHash -LiteralPath $helperManifest -Algorithm SHA256).Hash
     retiredProvidersRemoved = $true
     tests = @($testListing.tests | ForEach-Object { 'CTest ' + $_.name }) + @('Packaged test_mace.exe startup', 'C exports on distributed DLL', 'JDK 22 FFM on distributed DLL')
 }

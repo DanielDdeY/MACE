@@ -44,10 +44,14 @@ No se ha validado aquí una instalación limpia ni MSI/EXE.
 
 ## Firma y publicación
 
-MACE_SIGNING_SCRIPT es un hook opcional que recibe -FilePath. La DLL se firma
-en package-native.ps1 antes de fijar su hash. El helper propio se puede firmar
-en Build-Helper.ps1 o durante staging. PawnIO y las bibliotecas de terceros
-no se firman ni modifican. Sin hook se emite un aviso; la firma sigue pendiente.
+MACE_SIGNING_SCRIPT es un hook opcional que recibe -FilePath. Orden obligatorio:
+Build-Helper compila y firma sus archivos propios; después genera el inventario
+de 205 archivos y helper-runtime.manifest (202 de ejecución, excluidos dos PDB y
+createdump.exe). La DLL de producción se compila con el hash de ese manifiesto;
+package-native la firma y fija el SHA-256 de la DLL. Staging verifica y copia,
+sin volver a firmar el helper. Refirmarlo exige regenerar manifiestos y recompilar
+la DLL; una modificación sin esos pasos se rechaza por hash/vínculo compilado.
+PawnIO y terceros no se firman ni modifican. Sin hook aparece aviso; certificado pendiente.
 
 THIRD-PARTY-NOTICES.txt registra versiones, metadatos y URL de código fuente.
 Se conservan los textos incluidos en los paquetes restaurados. La licencia de
@@ -67,7 +71,7 @@ del helper como en la declaración compilada de la DLL. Ambos se reconstruyen y
 distribuyen juntos; no se sustituye uno solo en una imagen de protocolo 1. El ABI
 público sigue en 1.4. La versión privada y la tabla de compatibilidad están en
 ../helper/PROTOCOL.md. La declaración no autentica al publicador; la confianza
-fijada y la firma siguen pendientes del Paso 2.
+fijada en compilación se implementó en Paso 2; la firma y autenticación del publicador siguen pendientes.
 
 packaging/tests/test-runtime-payload.ps1 recibe -NativeDll y -PawnIoInstaller;
 opcionalmente -HelperDirectory y -JavaExe (JDK 22+, o JAVA_HOME/PATH). Comprueba

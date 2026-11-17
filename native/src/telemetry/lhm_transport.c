@@ -105,24 +105,27 @@ void LhmTransport_Close(LhmSession* s) {
         CloseHandle(s->job);
         ReleaseSRWLockExclusive(&active_lock);
     }
+    LhmTrust_Release(s->trust);
     memset(s,0,sizeof(*s));
 }
 
 bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* s) {
     OutputDebugStringA(LHM_PROTOCOL_MARKER);
     memset(s,0,sizeof(*s));
+    if (!LhmTrust_Acquire(executable,stop,&s->trust)) return false;
+    executable=LhmTrust_Executable(s->trust);
     unsigned char random[32], bootstrap[128]={0};
     wchar_t name[74]=L"mace-lhm-", path[96], command[32768];
     const wchar_t hex[]=L"0123456789abcdef";
-    if (BCryptGenRandom(NULL,random,sizeof(random),BCRYPT_USE_SYSTEM_PREFERRED_RNG)!=0) return false;
+    if (BCryptGenRandom(NULL,random,sizeof(random),BCRYPT_USE_SYSTEM_PREFERRED_RNG)!=0) { LhmTransport_Close(s); return false; }
     for (unsigned i=0;i<32;i++) { name[9+i*2]=hex[random[i]>>4]; name[10+i*2]=hex[random[i]&15]; }
-    if (swprintf_s(path,96,L"\\\\.\\pipe\\%s",name)<0) return false;
+    if (swprintf_s(path,96,L"\\\\.\\pipe\\%s",name)<0) { LhmTransport_Close(s); return false; }
     PSECURITY_DESCRIPTOR descriptor=private_descriptor();
-    if (!descriptor) return false;
+    if (!descriptor) { LhmTransport_Close(s); return false; }
     SECURITY_ATTRIBUTES sa={sizeof(sa),descriptor,FALSE};
     s->pipe=CreateNamedPipeW(path,PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED|FILE_FLAG_FIRST_PIPE_INSTANCE,
         PIPE_TYPE_BYTE|PIPE_READMODE_BYTE|PIPE_REJECT_REMOTE_CLIENTS,1,LHM_MAX_FRAME,LHM_MAX_FRAME,0,&sa);
-    if (s->pipe==INVALID_HANDLE_VALUE) { LocalFree(descriptor); s->pipe=NULL; return false; }
+    if (s->pipe==INVALID_HANDLE_VALUE) { LocalFree(descriptor); s->pipe=NULL; LhmTransport_Close(s); return false; }
     HANDLE input=NULL, writer=NULL, null_output=INVALID_HANDLE_VALUE;
     sa.bInheritHandle=TRUE;
     bool ok=CreatePipe(&input,&writer,&sa,4096)!=0;
@@ -159,8 +162,8 @@ bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* s) {
              * No breakaway flags; restrictive enclosing jobs fail closed. */
             ok=WaitForSingleObject(stop,0)==WAIT_TIMEOUT &&
                 CreateProcessW(executable,command,NULL,NULL,TRUE,
-                    CREATE_SUSPENDED|CREATE_NO_WINDOW|EXTENDED_STARTUPINFO_PRESENT,
-                    NULL,NULL,&start.StartupInfo,&child)!=0;
+                    CREATE_SUSPENDED|CREATE_NO_WINDOW|CREATE_UNICODE_ENVIRONMENT|EXTENDED_STARTUPINFO_PRESENT,
+                    (LPVOID)LhmTrust_Environment(s->trust),LhmTrust_Directory(s->trust),&start.StartupInfo,&child)!=0;
         } else ok=false;
         if (ok) {
             s->process=child.hProcess; s->pid=child.dwProcessId;
@@ -198,30 +201,5 @@ cleanup:
     if (null_output!=INVALID_HANDLE_VALUE) CloseHandle(null_output);
     SecureZeroMemory(bootstrap,sizeof(bootstrap));
     if (!ok) LhmTransport_Close(s);
-    return ok;
-}
-
-bool LhmTransport_VerifyHash(const wchar_t* executable, const wchar_t* expected) {
-    if (!expected[0]) { OutputDebugStringW(L"MACE LHM: signature pending; no pinned helper hash configured.\n"); return true; }
-    if (wcslen(expected)!=64) return false;
-    HANDLE file=CreateFileW(executable,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN,NULL);
-    if (file==INVALID_HANDLE_VALUE) return false;
-    BCRYPT_ALG_HANDLE algorithm=NULL; BCRYPT_HASH_HANDLE hash=NULL;
-    unsigned char digest[32], buffer[4096]; DWORD read=0; bool ok=false;
-    if (BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,NULL,0)!=0) goto finish;
-    if (BCryptCreateHash(algorithm,&hash,NULL,0,NULL,0,0)!=0) goto finish;
-    for (;;) {
-        if (!ReadFile(file,buffer,sizeof(buffer),&read,NULL)) goto finish;
-        if (!read) break;
-        if (BCryptHashData(hash,buffer,read,0)!=0) goto finish;
-    }
-    if (BCryptFinishHash(hash,digest,sizeof(digest),0)!=0) goto finish;
-    wchar_t actual[65];
-    for (unsigned i=0;i<32;i++) swprintf_s(actual+i*2,65-i*2,L"%02x",digest[i]);
-    ok=_wcsicmp(actual,expected)==0;
-finish:
-    if (hash) BCryptDestroyHash(hash);
-    if (algorithm) BCryptCloseAlgorithmProvider(algorithm,0);
-    CloseHandle(file);
     return ok;
 }

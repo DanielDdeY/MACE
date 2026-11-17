@@ -30,6 +30,7 @@ try {
     })
     [pscustomobject]@{protocol=2;sdk='10.0.401';runtime='10.0.12';lhm='0.9.6';signed=$signed;files=$files} |
         ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $output 'artifact-manifest.json') -Encoding UTF8
+    & (Join-Path $PSScriptRoot 'Write-RuntimeManifest.ps1') -Directory $output
     & (Join-Path $PSScriptRoot 'Verify-Artifacts.ps1') -Directory $output
     $output | Set-Content -LiteralPath (Join-Path $PSScriptRoot 'artifacts\latest.txt') -Encoding UTF8
     Write-Host ('Helper publicado en ' + $output)

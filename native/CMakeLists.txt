@@ -13,6 +13,18 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated")
+option(MACE_LHM_DEVELOPMENT "Allow helper path/hash overrides (never ship this profile)" OFF)
+option(MACE_LHM_REQUIRE_AUTHENTICODE "Require cached Authenticode validation (certificate pending)" OFF)
+set(MACE_LHM_RUNTIME_MANIFEST "" CACHE FILEPATH "Trusted, final helper runtime manifest after signing")
+if (NOT MACE_LHM_DEVELOPMENT AND NOT EXISTS "${MACE_LHM_RUNTIME_MANIFEST}")
+    message(FATAL_ERROR "Production requires -DMACE_LHM_RUNTIME_MANIFEST=<published helper/helper-runtime.manifest> or use explicit development profile")
+endif()
+set(MACE_LHM_MANIFEST_SHA256 "")
+if (EXISTS "${MACE_LHM_RUNTIME_MANIFEST}")
+    file(SHA256 "${MACE_LHM_RUNTIME_MANIFEST}" MACE_LHM_MANIFEST_SHA256)
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${MACE_LHM_RUNTIME_MANIFEST}")
+endif()
+configure_file(cmake/lhm_security_config.h.in "${CMAKE_CURRENT_BINARY_DIR}/generated/lhm_security_config.h" @ONLY)
 configure_file(cmake/mace_version.h.in
     "${CMAKE_CURRENT_BINARY_DIR}/generated/mace_version.h" @ONLY)
 configure_file(resources/mace_native.rc.in
@@ -36,6 +48,7 @@ set(MACE_NATIVE_SOURCES
     src/telemetry/legacy_telemetry.c
     src/telemetry/lhm_wire.c
     src/telemetry/lhm_transport.c
+    src/telemetry/lhm_trust.c
     src/telemetry/lhm_receiver.c
     src/hardware/gpu_inventory.c
     src/extensions/hang_detector.c
@@ -52,7 +65,7 @@ target_include_directories(mace_native PRIVATE include
 target_compile_definitions(mace_native PRIVATE MACE_EXPORTS
     _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE)
 target_compile_options(mace_native PRIVATE /W4 /WX /utf-8)
-target_link_libraries(mace_native PRIVATE kernel32 psapi user32 dxgi dxguid gdi32 shell32 ole32 advapi32 bcrypt)
+target_link_libraries(mace_native PRIVATE kernel32 psapi user32 dxgi dxguid gdi32 shell32 ole32 advapi32 bcrypt wintrust crypt32)
 set_target_properties(mace_native PROPERTIES
     OUTPUT_NAME mace_native
     PREFIX ""
@@ -88,8 +101,8 @@ if (BUILD_TESTING)
         tests/lhm_fixture_providers.c tests/lhm_fixture_cpu.c)
     target_include_directories(mace_native_lhm_test PRIVATE include src/process
         "${CMAKE_CURRENT_BINARY_DIR}/generated")
-    target_compile_definitions(mace_native_lhm_test PRIVATE MACE_EXPORTS _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE)
-    target_link_libraries(mace_native_lhm_test PRIVATE psapi user32 dxgi dxguid gdi32 shell32 ole32 advapi32 bcrypt)
+    target_compile_definitions(mace_native_lhm_test PRIVATE MACE_EXPORTS _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE MACE_LHM_DEVELOPMENT=1 MACE_LHM_REQUIRE_AUTHENTICODE=0)
+    target_link_libraries(mace_native_lhm_test PRIVATE psapi user32 dxgi dxguid gdi32 shell32 ole32 advapi32 bcrypt wintrust crypt32)
     add_executable(lhm_fake_helper tests/lhm_fake_helper.c src/telemetry/lhm_wire.c)
     target_include_directories(lhm_fake_helper PRIVATE include)
     target_link_libraries(lhm_fake_helper PRIVATE advapi32)
@@ -101,9 +114,10 @@ if (BUILD_TESTING)
         target_compile_definitions(${target} PRIVATE UNICODE _UNICODE)
         set_target_properties(${target} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     endforeach()
-    add_executable(test_lhm_job tests/test_lhm_job.c src/telemetry/lhm_transport.c)
-    target_include_directories(test_lhm_job PRIVATE include)
-    target_link_libraries(test_lhm_job PRIVATE mace_native_lhm_test advapi32 bcrypt)
+    add_executable(test_lhm_job tests/test_lhm_job.c src/telemetry/lhm_transport.c src/telemetry/lhm_trust.c)
+    target_include_directories(test_lhm_job PRIVATE include "${CMAKE_CURRENT_BINARY_DIR}/generated")
+    target_compile_definitions(test_lhm_job PRIVATE MACE_LHM_DEVELOPMENT=1 MACE_LHM_REQUIRE_AUTHENTICODE=0)
+    target_link_libraries(test_lhm_job PRIVATE mace_native_lhm_test advapi32 bcrypt shell32 ole32 wintrust crypt32)
     add_executable(test_lhm_shutdown tests/test_lhm_shutdown.c)
     target_include_directories(test_lhm_shutdown PRIVATE include)
     target_link_libraries(test_lhm_shutdown PRIVATE mace_native_lhm_test)
@@ -118,6 +132,46 @@ if (BUILD_TESTING)
     endforeach()
     add_test(NAME lhm_shutdown_budget COMMAND test_lhm_shutdown "$<TARGET_FILE:lhm_fake_helper>")
     set_tests_properties(lhm_shutdown_budget PROPERTIES TIMEOUT 20)
+    add_executable(lhm_secure_fake_helper tests/lhm_fake_helper.c src/telemetry/lhm_wire.c)
+    target_include_directories(lhm_secure_fake_helper PRIVATE include)
+    target_compile_definitions(lhm_secure_fake_helper PRIVATE MACE_SECURE_TEST_HELPER=1 UNICODE _UNICODE)
+    target_compile_options(lhm_secure_fake_helper PRIVATE /W4 /WX /utf-8)
+    target_link_libraries(lhm_secure_fake_helper PRIVATE advapi32)
+    set(security_fixture "${CMAKE_CURRENT_BINARY_DIR}/security-fixture")
+    add_custom_command(OUTPUT "${security_fixture}/lhm_security_config.h"
+        COMMAND powershell -NoProfile -ExecutionPolicy Bypass -File "${CMAKE_CURRENT_SOURCE_DIR}/scripts/make-lhm-security-fixture.ps1"
+            -HelperExe "$<TARGET_FILE:lhm_secure_fake_helper>" -OutputDirectory "${security_fixture}"
+        DEPENDS lhm_secure_fake_helper "${CMAKE_CURRENT_SOURCE_DIR}/scripts/make-lhm-security-fixture.ps1" VERBATIM)
+    add_custom_target(lhm_security_fixture DEPENDS "${security_fixture}/lhm_security_config.h")
+    add_library(mace_native_secure_test SHARED ${LHM_FIXTURE_SOURCES} tests/lhm_fixture_providers.c tests/lhm_fixture_cpu.c)
+    add_dependencies(mace_native_secure_test lhm_security_fixture)
+    target_include_directories(mace_native_secure_test PRIVATE "${security_fixture}" include src/process "${CMAKE_CURRENT_BINARY_DIR}/generated")
+    target_compile_definitions(mace_native_secure_test PRIVATE MACE_EXPORTS _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE)
+    target_compile_options(mace_native_secure_test PRIVATE /W4 /WX /utf-8)
+    target_link_libraries(mace_native_secure_test PRIVATE psapi user32 dxgi dxguid gdi32 shell32 ole32 advapi32 bcrypt wintrust crypt32)
+    set_target_properties(mace_native_secure_test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/security")
+    add_executable(test_lhm_security tests/test_lhm_security.c)
+    target_include_directories(test_lhm_security PRIVATE include)
+    target_compile_definitions(test_lhm_security PRIVATE UNICODE _UNICODE)
+    target_compile_options(test_lhm_security PRIVATE /W4 /WX /utf-8)
+    target_link_libraries(test_lhm_security PRIVATE mace_native_secure_test)
+    set_target_properties(test_lhm_security PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/security")
+    foreach(scenario valid ignore-env missing manifest tampered extra locks relaunch)
+        add_test(NAME lhm_security_${scenario} COMMAND test_lhm_security "$<TARGET_FILE:lhm_fake_helper>" "${security_fixture}/runtime" ${scenario})
+        set_tests_properties(lhm_security_${scenario} PROPERTIES TIMEOUT 20 RESOURCE_LOCK lhm_security_files)
+    endforeach()
+    foreach(target lhm_secure_fake_helper mace_native_secure_test test_lhm_security)
+        set_target_properties(${target} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endforeach()
+    if (NOT MACE_LHM_DEVELOPMENT)
+        add_executable(test_lhm_production_profile tests/test_lhm_production_profile.c)
+        target_include_directories(test_lhm_production_profile PRIVATE include)
+        target_compile_options(test_lhm_production_profile PRIVATE /W4 /WX /utf-8)
+        target_compile_definitions(test_lhm_production_profile PRIVATE UNICODE _UNICODE)
+        set_target_properties(test_lhm_production_profile PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+        add_test(NAME lhm_actual_production_ignores_environment COMMAND test_lhm_production_profile "$<TARGET_FILE:mace_native>" "$<TARGET_FILE:lhm_fake_helper>")
+        set_tests_properties(lhm_actual_production_ignores_environment PROPERTIES TIMEOUT 15)
+    endif()
     foreach(scenario slow valid stale stale-arrival bad-pid wrong-client malformed disconnect
         no-elevation driver-missing zero-cpu zero-unprivileged unknown-power unknown-gpu duplicate-pci replay nan fragmented fallback
         gpu-zero bad-server-pid hash-mismatch init-race amd-chip

@@ -5,6 +5,18 @@ function Get-MaceNativeRoot {
     return [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 }
 
+function Get-MaceHelperManifest {
+    param([string]$HelperDirectory)
+    $helperRoot=Join-Path (Split-Path -Parent (Get-MaceNativeRoot)) 'helper'
+    if (-not $HelperDirectory) {
+        $latest=Join-Path $helperRoot 'artifacts\latest.txt'
+        if (-not (Test-Path -LiteralPath $latest)) { throw 'Publica y firma primero el helper con helper/Build-Helper.ps1.' }
+        $HelperDirectory=(Get-Content -LiteralPath $latest -Raw).Trim()
+    }
+    & (Join-Path $helperRoot 'Verify-Artifacts.ps1') -Directory $HelperDirectory | Out-Host
+    return (Resolve-Path -LiteralPath (Join-Path $HelperDirectory 'helper-runtime.manifest')).Path
+}
+
 function Repair-MacePathEnvironment {
     # Algunos lanzadores inyectan PATH y Path simultáneamente. CMake no encuentra
     # cl.exe en ese entorno; la corrección afecta solo a este proceso de PowerShell.
