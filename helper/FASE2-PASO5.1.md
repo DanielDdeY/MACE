@@ -1,17 +1,20 @@
 # Fase 2 — Subpaso 5.1: imagen regenerada y verificada
 
-Actualización posterior: la primera ejecución elevada del usuario falló en el
-arnés pese a mostrar el dashboard. Se corrigió la observación launcher/JVM sin
-cambiar esta imagen. Véase [el diagnóstico y prueba](FASE2-DIAGNOSTICO-5.1.md).
+Actualización del 2026-11-18: **VERIFICADO POR EL USUARIO, PASS y código 0** en
+la prueba de cuatro variables ajenas sobre MACE.exe elevado. La corrección del
+arnés contempla launcher y JVM hija; se utilizó la misma imagen, sin cambiar
+sus binarios. Véase [el diagnóstico y prueba](FASE2-DIAGNOSTICO-5.1.md).
 
-Fecha: 2026-11-17. Rama: `LHM_implementado`.
+Construcción y verificación inicial: 2026-11-17. Rama: `LHM_implementado`.
 Commit de partida: `2ef7dbf63bb3bbc725b3dfc87d32a2646c11dc19`.
 Árbol limpio confirmado antes de empezar. Los tres TXT de diagnóstico siguen
 intactos y excluidos localmente; no se modifica `.gitignore`.
 
 El usuario aprobó 5.0/endurecimiento y confirmó **13 casos, código 0, solo en
 administrador**. Se registra esa batería aislada como VERIFICADO POR EL USUARIO;
-no se extrapola a los 347 casos Java ni a la imagen final elevada.
+no se extrapola a los 347 casos Java. La prueba específica de la imagen final
+elevada se verificó posteriormente por el usuario, con el alcance documentado
+abajo; es evidencia separada de aquellos 13 casos.
 
 ## Resultado y construcción
 
@@ -88,6 +91,8 @@ recursos PE como **1.1.1**. No se cambió ese esquema.
 | Helper/dependencias | AUTOMATIZADO: publicación de 205 archivos verificada antes de seleccionar 202 runtime; helper-runtime.manifest cotejado contra cada dependencia y contra el hash compilado de la DLL |
 | PawnIO intacto | AUTOMATIZADO: hash coincide con política 2.2.0 y firma original Valid; se copió sin ejecutarlo, extraerlo, alterarlo ni volverlo a firmar |
 | Avisos y separación repositorio/producto | AUTOMATIZADO: notices/textos de terceros presentes; whitelist del payload y escaneo total sin docs internos, pruebas, scripts, artifacts, logs, PDB, bibliotecas de desarrollo o clases de test |
+| MACE.exe elevado con cuatro variables ajenas | VERIFICADO POR EL USUARIO: arnés corregido, PASS y código 0; DLL/helper empaquetados, sin uso de los componentes ajenos; selección de componentes, no validez física de sensores |
+| Observador launcher/JVM | AUTOMATIZADO: fixtures jpackage 22.0.2 con JVM directa, JVM hija y árboles simultáneos del mismo nombre; auxiliar bajo la JVM correcta, captura saneada y salida real 17 conservada |
 | Firma de archivos propios | NO VERIFICADO como firma de publicación: MACE/Preview/DLL/helper están NotSigned. Certificado/estrategia pendientes; ganchos conservados |
 
 Los avisos legales de terceros y del JDK son parte del producto; no se
@@ -110,7 +115,7 @@ ese driver ni proveedor activo de MACE. La prueba copió los mismos bytes a
 otra ruta y comprobó el rechazo: el hash por sí solo no amplía la excepción.
 No se cambiaron ruta, hash, offsets, cantidad ni política.
 
-## Anulaciones: qué se probó y qué falta
+## Anulaciones: verificaciones y alcance
 
 1. **AUTOMATIZADO, componentes de la imagen:** Java incluido + JAR/DLL incluidos,
    con las cuatro variables ajenas y pins de CFG, cargan la DLL esperada y pasan
@@ -120,22 +125,78 @@ No se cambiaron ruta, hash, offsets, cantidad ni política.
    helper. Resultado HELPER_UNAVAILABLE y uso CPU Windows válido; no usa el
    helper ajeno. El binario copiado conserva el hash de la imagen.
 3. **VERIFICADO POR EL USUARIO:** 13 pruebas del endurecimiento Java en consola
-   administradora, código 0. No es el launcher final ejecutado.
-4. **NO VERIFICADO / pendiente del usuario:** MACE.exe completo de la imagen
-   elevada con las cuatro variables ajenas. Este agente no solicita elevación
-   ni ejecuta el launcher requireAdministrator.
+   administradora, código 0. Es una batería aislada, independiente de la prueba
+   del launcher final del punto siguiente.
+4. **VERIFICADO POR EL USUARIO:** MACE.exe completo de la imagen elevada con las
+   cuatro variables ajenas, mediante el arnés corregido: PASS y código 0.
+   Se observaron DLL/helper de la imagen; no se cargó la DLL ajena ni se inició
+   el helper ajeno. Este agente no solicitó elevación ni ejecutó ese launcher.
 
 Para el punto 4 se entrega `packaging/tests/test-image-environment.ps1`, fuera
 de la imagen. Se verificó su sintaxis y su negativa en token normal: código 2,
-NO_VERIFICADO/ADMIN_REQUIRED y ningún proceso iniciado. El tramo elevado está
-**NO VERIFICADO** hasta tu resultado; no se presenta el control normal como
-prueba de la UI elevada.
+NO_VERIFICADO/ADMIN_REQUIRED y ningún proceso iniciado. Ese control normal no
+se presenta como prueba elevada: el punto 4 se apoya en la ejecución y el log
+aportados por el usuario.
 
-## Comando exacto para confirmar la imagen
+## Corrección del arnés y evidencia elevada del usuario
 
-Cierra tú las instancias MACE/Preview, incluidas las iniciadas desde fuentes.
-Abre una consola de administrador manualmente, sitúate en la raíz del
-repositorio y ejecuta:
+La primera ejecución informó MACE_EXITED_BEFORE_OBSERVATION con código 1 y el
+usuario confirmó que apareció el dashboard. El arnés suponía que el PID inicial
+alojaba JVM y telemetría. Con jpackage en Windows puede haber un wrapper y un
+segundo MACE.exe que aloja la JVM; el helper pertenece a este segundo proceso.
+La corrección `9586105` sigue exclusivamente el árbol iniciado, verifica ruta y
+creación, exige una única JVM de la imagen y observa sus módulos y su helper.
+No busca una JVM global por nombre ni cambia PATH para evitar el wrapper.
+
+Se probaron en consola normal dos árboles simultáneos con el mismo EXE:
+uno con JVM directa y otro con JVM hija. Se distinguieron sus JVM, se verificó
+el padre del auxiliar y los fixtures terminaron naturalmente. También se
+verificaron flags saneados de salida y la propagación de un código real 17.
+No hubo MACE/helper reales ni sensores en esos fixtures.
+
+El hresult -2146233087 del primer fallo provenía de la excepción controlada del
+test, no de MACE o GetLastError. El arnés corregido registra LAUNCHER_EXIT con
+el código real y clasifica stdout/stderr en flags fijos. **La causa concreta de
+la terminación de aquella ejecución anterior sigue NO VERIFICADA**; el éxito
+posterior no permite atribuirla al usuario ni a un fallo de producto.
+
+Después de la corrección, el usuario confirmó éxito con esta evidencia:
+
+```text
+TEST_CONTEXT Administrator=True
+Runtime verificado: 223 archivos y los cinco componentes obligatorios.
+PREFLIGHT production_java=1 launcher_pins=1 runtime_verified=1 foreign_variables=4
+START image_process=1 user_or_machine_environment_changed=0
+TREE image_processes=2 jvm_processes=1
+OBSERVED launcher_is_jvm=0 helper_parent_is_jvm=1
+PASS actual_MACE_exe=1 packaged_native_loaded=1 packaged_helper_started=1 foreign_native_loaded=0 foreign_helper_started=0
+SCOPE component_selection_only=1 cpu_sensor_validity_not_asserted=1
+HANDOFF close_the_visible_MACE_manually=1 no_process_terminated_by_script=1
+```
+
+Resultado: **VERIFICADO POR EL USUARIO, código 0**. Confirma dos procesos de
+imagen, una JVM hija y helper bajo esa JVM, con los componentes empaquetados y
+las cuatro variables ajenas definidas. El log declara que el arnés no modificó
+variables User/Machine ni terminó procesos. El código 0 es del test, no un
+código observado de cierre de MACE.
+
+No verifica temperatura/potencia CPU ni otras lecturas físicas válidas, cierre
+normal/forzado, ausencia de helper tras cerrar, recuperación, suspensión ni
+la matriz completa elevada. No se repitió esta prueba al actualizar documentos
+ni fue necesario reempaquetar; los 370 hashes cotejados tras corregir el arnés
+seguían coincidiendo con el inventario de esta imagen.
+
+| Commit | Cambio / evidencia |
+|---|---|
+| `2e8f557` | Informe inicial de imagen y arnés de las cuatro variables |
+| `9586105` | Corrección del seguimiento launcher/JVM, fixtures y diagnóstico |
+| `6b6e1e2` | Registro de PASS elevado y código 0 aportados por el usuario en FASE2-DIAGNOSTICO-5.1.md |
+
+## Comando ejecutado y procedimiento de referencia
+
+El procedimiento de la prueba verificada fue cerrar las instancias MACE/Preview,
+incluidas las iniciadas desde fuentes, y ejecutar desde la raíz en una consola
+de administrador abierta manualmente:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\packaging\tests\test-image-environment.ps1
@@ -169,6 +230,8 @@ completos. La salida cruda se clasifica en indicadores fijos y se descarta; si
 el launcher termina se registra su código de salida real. Los fixtures
 permanecen ignorados fuera de la imagen. Comunica el
 resultado saneado y el código de salida; no hace falta compartir logs brutos.
+El resultado exitoso recibido ya quedó registrado; este procedimiento se
+conserva como referencia, sin solicitar una nueva ejecución por esta actualización.
 
 ## Regresión y alcance de evidencias
 
@@ -180,6 +243,8 @@ resultado saneado y el código de salida; no hace falta compartir logs brutos.
 | Java completo | **347 PASS + 1 omitida**, 348 total, repetido tras compilar/empaquetar; cero fallos/errores | Solo los 13 casos de política verificados por el usuario; resto NO VERIFICADO |
 | Payload | **8 PASS + rechazo DLL Development + rechazo Java Development**, repetido | NO VERIFICADO |
 | Protegidos / referencias retiradas | PASS; **181 aceptadas, 0 inesperadas**, auditoría final de este subpaso; TSV sin cambios | NO VERIFICADO |
+| Observador del arnés | PASS: JVM directa/anidada, aislamiento entre árboles homónimos, padre del auxiliar, captura saneada y salida 17 | No se atribuye una ejecución elevada de estos fixtures |
+| MACE.exe de imagen con cuatro variables ajenas | Componentes Java/FFM/DLL e ignorado de anulaciones del helper comprobados de forma aislada | **VERIFICADO POR EL USUARIO: PASS, código 0**, selección de componentes con el launcher real |
 
 El fixture de payload declara 214 archivos y usa un único JAR de prueba con
 clases principales. La app-image real declara 223: añade nueve dependencias
@@ -189,9 +254,12 @@ Los ocho casos de watchdog/instancia con fixture sí se ejecutaron.
 
 ## Pendientes, cambios y parada
 
-**NO VERIFICADO:** la ejecución integral elevada anterior; cierre/kill/reinicio
-del producto completo, instancia mixta, coexistencia con LHM y suspensión
-física que corresponden a 5.2. Recuperación real de PawnIO sigue NO VERIFICADA:
+La selección de componentes de la imagen elevada con las cuatro variables
+ajenas queda **VERIFICADA POR EL USUARIO**. **NO VERIFICADO:** validez física de
+sus sensores en esa prueba; cierre/kill/reinicio del producto completo, cierre
+en calentamiento, instancia mixta, coexistencia con LHM y suspensión física que
+corresponden a 5.2; causa de la primera terminación y matriz elevada completa.
+Recuperación real de PawnIO sigue NO VERIFICADA:
 el intento del usuario devolvió ERROR 1052 y el servicio siguió RUNNING; no se
 forzó ni se interpreta como transición observada. Ausente → instalado, 3010
 real, Intel/NVIDIA, HVCI y equipo limpio permanecen NO VERIFICADO. Firma,
@@ -203,6 +271,9 @@ licencia y revisión legal siguen pendientes, con sus ganchos.
 | helper/FASE2-H-5.0-JAVA.md | Registro posterior de tus 13 casos elevados, sin ampliar cobertura |
 | packaging/README.md | Imagen 5.1 y separación del empaquetado Production frente a fixtures Development |
 | packaging/tests/test-image-environment.ps1 | Prueba manual exclusiva de selección de componentes, con entorno del hijo y salida saneada |
+| packaging/tests/image-process-observer.ps1 | Seguimiento de la JVM dentro del árbol del launcher y captura de flags saneados, solo arnés |
+| packaging/tests/test-image-observer.ps1 | Fixtures directos/anidados/concurrentes y comprobación del código de salida real |
+| helper/FASE2-DIAGNOSTICO-5.1.md | Diagnóstico del arnés y resultado elevado exitoso verificado por el usuario |
 
 Outputs ignorados: packaging/dist/MACE, su inventario fuera de imagen, staging,
 runtime de construcción y evidencias bajo native/build/fase2-paso5.1. Los logs
@@ -214,7 +285,8 @@ manifiestos fuente o launchers. No se instala ni desinstala/ejecuta PawnIO,
 cambia HVCI, fuerza servicio, eleva o termina un proceso ajeno al arnés, ni se
 fusiona a principal. No se lee/escribe la señal de registro propuesta del 3010.
 
-**Fin de 5.1: detenerse y esperar tu confirmación de la imagen antes de 5.2.**
+**Fin de 5.1: prueba específica de la imagen elevada verificada por el usuario;
+detenerse y esperar aprobación expresa antes de 5.2.**
 No se entregan todavía FASE2-PASO5-PRUEBAS.md ni scripts de cierre, kill,
 recuperación o suspensión, y no se redacta aún el informe 5.3 ni se implementa
 Fase 3. El inventario de escrituras ya preparado se incorporará en 5.3.
