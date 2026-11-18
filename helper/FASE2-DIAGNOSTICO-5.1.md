@@ -84,26 +84,49 @@ sin administrador del script principal sigue devolviendo 2 antes de iniciar
 un proceso. También se reprodujo el HRESULT de la excepción controlada de
 PowerShell; no se utilizó como código del producto.
 
-## Repetición del usuario
+## Verificación elevada por el usuario — exitosa
 
-Cierra tú las ventanas MACE/Preview anteriores, incluidas las iniciadas desde
-fuentes. Desde la raíz, en una consola de administrador abierta por ti:
+Estado actualizado: **VERIFICADO POR EL USUARIO**. En la repetición
+posterior a la corrección del arnés `9586105`, el usuario confirmó éxito y
+**código de salida 0**, con esta evidencia:
+
+```text
+TEST_CONTEXT Administrator=True
+Runtime verificado: 223 archivos y los cinco componentes obligatorios.
+PREFLIGHT production_java=1 launcher_pins=1 runtime_verified=1 foreign_variables=4
+START image_process=1 user_or_machine_environment_changed=0
+TREE image_processes=2 jvm_processes=1
+OBSERVED launcher_is_jvm=0 helper_parent_is_jvm=1
+PASS actual_MACE_exe=1 packaged_native_loaded=1 packaged_helper_started=1 foreign_native_loaded=0 foreign_helper_started=0
+SCOPE component_selection_only=1 cpu_sensor_validity_not_asserted=1
+HANDOFF close_the_visible_MACE_manually=1 no_process_terminated_by_script=1
+```
+
+La prueba confirma la selección de componentes en el MACE.exe real elevado de
+la imagen: dos procesos de imagen, una JVM alojada en el proceso hijo y el
+helper como hijo de esa JVM. Con las cuatro variables ajenas definidas, se
+observó la DLL y el helper empaquetados, sin cargar la DLL ajena ni iniciar el
+helper ajeno. El arnés informa que no cambió variables User/Machine ni terminó
+procesos.
+
+El alcance es **selección de componentes**. No acredita temperatura/potencia
+CPU ni otras lecturas físicas válidas, cierre normal/forzado, ausencia de
+helper tras cerrar, recuperación, suspensión o la matriz elevada completa.
+El código 0 corresponde al test; no afirma un código de cierre de MACE.
+La causa de la terminación de la ejecución anterior permanece NO VERIFICADA.
+
+### Comando de referencia
+
+El comando cuya repetición se informó exitosa, desde la raíz en administrador:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\packaging\tests\test-image-environment.ps1
 $LASTEXITCODE
 ```
 
-**Deja el dashboard abierto hasta el resultado del script.** Esperado: TREE con
-una JVM (puede mostrar dos procesos de imagen), OBSERVED con
-helper_parent_is_jvm=1, PASS y código 0. Después cierras tú la ventana.
-Si falla, comparte TREE, LAUNCHER_EXIT si aparece, OUTPUT y FAIL. Los datos de
-result.txt están saneados. Un código 0 de cierre del launcher no sustituye PASS
-de la selección de componentes; cerrar durante la observación sigue fallando.
-
-No hace falta reempaquetar: se utiliza la misma imagen. El tramo elevado
-corregido sigue **NO VERIFICADO** hasta tu resultado. No se declara aprobada la
-prueba de cuatro variables de la imagen ni se avanza al 5.2.
+Se utilizó la misma imagen, sin reempaquetar por la corrección del arnés. Esta
+actualización registra la evidencia recibida; no repite la prueba ni cambia
+binarios. **No se avanza al 5.2 sin aprobación del usuario.**
 
 ## Archivos y límites
 
