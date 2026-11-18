@@ -12,6 +12,7 @@ import com.mace.domain.service.MemoryLeakDetector;
 import com.mace.domain.service.SystemProcessGuard;
 import com.mace.domain.service.ThermalAlertEvaluator;
 import com.mace.infrastructure.InfrastructureAdapters;
+import com.mace.infrastructure.nativebridge.NativeLoadProfile;
 import com.mace.infrastructure.telemetry.BlackboxSettings;
 import com.mace.infrastructure.telemetry.SubmissionTelemetryPublisher;
 import com.mace.presentation.view.MainDashboardController;
@@ -81,6 +82,12 @@ public final class MaceApplication extends Application {
             Alert error = new Alert(Alert.AlertType.ERROR);
             error.setTitle("MACE - Biblioteca nativa no disponible");
             error.setHeaderText("No se pudo iniciar MACE con datos reales");
+            if (!NativeLoadProfile.isDevelopment()) {
+                error.setContentText(NativeLoadProfile.PRODUCTION_FAILURE);
+                error.showAndWait();
+                Platform.exit();
+                return; // No dashboard, monitoring, helper or persistent blackbox on load failure.
+            }
             error.setContentText(
                     nativeError.getMessage()
                             + System.lineSeparator()
@@ -93,8 +100,9 @@ public final class MaceApplication extends Application {
 
         if (adapters.isNative()) {
             System.out.println("[MACE] Modo NATIVO - datos reales");
-            adapters.nativeLibrary().ifPresent(path ->
-                    System.out.println("[MACE] DLL: " + path));
+            if (NativeLoadProfile.isDevelopment()) {
+                adapters.nativeLibrary().ifPresent(path -> System.out.println("[MACE] DLL: " + path));
+            }
         } else {
             System.out.println("[MACE] Modo MOCK - datos simulados");
         }

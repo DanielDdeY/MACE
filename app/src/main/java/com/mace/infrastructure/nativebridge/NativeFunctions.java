@@ -151,7 +151,7 @@ public final class NativeFunctions implements NativeApi, AutoCloseable {
         return load(path);
     }
 
-    /** Carga la DLL ubicada en {@code libraryPath} usando el hash esperado configurado, si existe. */
+    /** Carga explícita: producción exige los pins del launcher; desarrollo admite hash opcional. */
     public static NativeFunctions load(Path libraryPath) {
         return load(libraryPath, NativeLibraryIntegrity.expectedSha256());
     }
@@ -159,10 +159,29 @@ public final class NativeFunctions implements NativeApi, AutoCloseable {
     /**
      * Carga la DLL ubicada en {@code libraryPath}.
      *
-     * @param expectedSha256 hash obligatorio; vacío para aceptar cualquier DLL con ABI compatible
+     * @param expectedSha256 debe coincidir con el pin de producción; vacío solo en desarrollo
      */
     @SuppressWarnings("restricted") // SymbolLookup.libraryLookup es un método restringido de FFM
     public static NativeFunctions load(Path libraryPath, Optional<String> expectedSha256) {
+        if (!NativeLoadProfile.isDevelopment()) {
+            try {
+                var pinned = NativeLoadProfile.productionParameters();
+                if (libraryPath == null || !libraryPath.isAbsolute()
+                        || !pinned.path().equals(libraryPath.normalize())
+                        || expectedSha256 == null || expectedSha256.isEmpty()
+                        || !pinned.sha256().equalsIgnoreCase(expectedSha256.get())) {
+                    throw NativeLoadProfile.productionFailure();
+                }
+                return loadVerified(pinned.path(), Optional.of(pinned.sha256()));
+            } catch (RuntimeException | LinkageError error) {
+                throw NativeLoadProfile.productionFailure();
+            }
+        }
+        return loadVerified(libraryPath, expectedSha256);
+    }
+
+    @SuppressWarnings("restricted")
+    private static NativeFunctions loadVerified(Path libraryPath, Optional<String> expectedSha256) {
         Objects.requireNonNull(libraryPath, "libraryPath no puede ser null");
         Objects.requireNonNull(expectedSha256, "expectedSha256 no puede ser null");
         Path absolute = libraryPath.toAbsolutePath().normalize();
@@ -183,7 +202,8 @@ public final class NativeFunctions implements NativeApi, AutoCloseable {
 
     /** @return {@code true} si {@link NativeLibraryLocator} encuentra la DLL en disco. */
     public static boolean isAvailable() {
-        return NativeLibraryLocator.locate().isPresent();
+        try { return NativeLibraryLocator.locate().isPresent(); }
+        catch (NativeLibraryException unavailable) { return false; }
     }
 
     /** Ruta absoluta de la DLL cargada. */

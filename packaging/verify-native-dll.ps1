@@ -55,7 +55,7 @@ try {
 
     # stderr de un ejecutable nativo no debe convertirse en error terminante de PowerShell.
     $ErrorActionPreference = 'Continue'
-    $verifier = & $JavaExe --enable-native-access=ALL-UNNAMED -cp $AppJar `
+    $verifier = & $JavaExe --enable-native-access=ALL-UNNAMED "-Dmace.native.lib=$dll" "-Dmace.native.sha256=$actual" -cp $AppJar `
         com.mace.infrastructure.nativebridge.NativeAbiVerifier $dll $actual 2>&1 | ForEach-Object { "$_" }
     $verifierExit = $LASTEXITCODE
     $ErrorActionPreference = 'Stop'

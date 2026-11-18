@@ -110,7 +110,7 @@ Evidencias existentes en `native/build/fase2-paso4b/` (no se versionan):
 | Batería | Último resultado normal registrado | Administrador, matriz completa actual |
 |---|---|---|
 | Helper | 105 PASS (`helper.log`) | NO VERIFICADO |
-| CTest Development | 76/76 (`dev.log`) | NO VERIFICADO; controles job del usuario sí pasan |
+| CTest Development | 76/76 (`dev.log`) | VERIFICADO POR EL USUARIO después de aprobar 5.0: consola limpia, sin MACE_*, test-lhm1b -RealHelper -RequireCpu; código 0, CPU real con DLL 1.5.0 de desarrollo |
 | CTest Production | 77/77 (`prod.log`) | NO VERIFICADO; no atribuir el éxito job a los 77 casos |
 | Java | 334 PASS + 1 omitida, 335 total; sin fallos/errores (`java.log`) | NO VERIFICADO |
 | Payload | 8 PASS + rechazo Development PASS (`payload.log`) | NO VERIFICADO |
@@ -124,6 +124,11 @@ añadió instrumentación, no tests: mantiene 76/77. Los resultados previos de 4
 de la matriz 4B. La regresión completa exigida en ambos tipos de consola sigue
 pendiente de consolidar sobre los artefactos finales; la ejecutará el usuario
 cuando implique administración o terminación de procesos.
+
+Evidencia adicional posterior a 5.0: el usuario confirmó la fila Development
+elevada y CPU real indicada arriba. No cubre CTest Production, Java, helper,
+payload ni la nueva imagen. La decisión H-5.0-JAVA fue endurecer antes de 5.1;
+el cambio y la nueva regresión se documentan en [su informe](FASE2-H-5.0-JAVA.md).
 
 ## Historial de cambios de la fase
 

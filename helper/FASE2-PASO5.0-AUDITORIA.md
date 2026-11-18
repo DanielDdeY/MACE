@@ -1,6 +1,9 @@
 # Fase 2 — 5.0: auditoría de anulaciones de entorno
 
 Fecha: 2026-11-17. Base: `5f818cb7c0e6cceafab46300d8d350209088d208`.
+Actualización posterior a la aprobación de 5.0: el usuario eligió endurecer
+Java antes de 5.1; véase [el informe de implementación](FASE2-H-5.0-JAVA.md).
+El diagnóstico siguiente conserva la evidencia del estado anterior al cambio.
 Inspección de fuentes y evidencia ya existente; sin cambiar código ni ejecutar
 de nuevo las pruebas. No se modificaron variables de usuario/máquina, launchers,
 manifiestos ni claves de registro. La imagen final de Fase 2 aún no se regeneró.

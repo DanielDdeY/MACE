@@ -16,6 +16,10 @@ if (-not (Test-Path -LiteralPath $report)) { throw 'Ejecuta primero mvn -f app/p
 $xml=[xml](Get-Content -LiteralPath $report -Raw)
 $classpath=($xml.testsuite.properties.property | Where-Object name -eq 'surefire.test.class.path').value
 if (-not $classpath) { throw 'Falta el classpath de las pruebas.' }
+# Development is build metadata, never enabled by a runtime environment variable.
+& (Join-Path $repo 'app\scripts\run-source.ps1') -PrepareOnly -JavaExe $JavaExe
+if (-not $?) { throw 'No se pudo preparar el perfil Java de desarrollo.' }
+$classpath=(Join-Path $repo 'app\target\source-development\classes')+';'+$classpath
 $options=@('--enable-native-access=ALL-UNNAMED')
 $data=Join-Path $repo 'native\build\fase2-paso4b\ui-data'
 $options+="-Dmace.blackbox.dir=$data"

@@ -27,6 +27,17 @@ foreach ($needle in @(('Win'+'Ring0x64.dll'),('amdad'+'lx64.dll'),('RyzenMaster'
 if ([Text.Encoding]::ASCII.GetString($binary).IndexOf('MACE_LHM_PROTOCOL=2',[StringComparison]::Ordinal) -lt 0) {
     throw 'La DLL no declara el protocolo privado 2 requerido por el helper; recompila ambos componentes.'
 }
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$archive=[IO.Compression.ZipFile]::OpenRead($jar)
+try {
+    $entry=$archive.GetEntry('com/mace/infrastructure/nativebridge/native-profile.properties')
+    if (-not $entry) { throw 'Se exige perfil Java de produccion.' }
+    $reader=[IO.StreamReader]::new($entry.Open())
+    try { $javaProfile=$reader.ReadToEnd() } finally { $reader.Dispose() }
+    if ($javaProfile.Trim() -cne 'profile=production') {
+        throw 'Se exige perfil Java de produccion; no empaquetar desarrollo.'
+    }
+} finally { $archive.Dispose() }
 if (-not $HelperDirectory) {
     $latest=Join-Path $repoRoot 'helper\artifacts\latest.txt'
     if (-not (Test-Path -LiteralPath $latest)) { throw 'Publica el helper con helper\Build-Helper.ps1 o define MACE_HELPER_PUBLISH.' }

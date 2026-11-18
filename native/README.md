@@ -28,6 +28,12 @@ con perfil de producción. CMake directo requiere, en producción,
 El [README del arnés](tests/README.md) explica el aislamiento de MACE_*, los
 controles de diagnóstico y la diferencia entre CTest y la prueba física.
 
+Java usa perfil de producción por defecto y exige ruta/hash por propiedades
+del launcher. El [informe H-5.0-JAVA](../helper/FASE2-H-5.0-JAVA.md) documenta
+el endurecimiento. Para ejecutar desde fuentes, usar
+`powershell -NoProfile -ExecutionPolicy Bypass -File .\app\scripts\run-source.ps1`
+desde la raíz: compila un artefacto Java de desarrollo separado.
+
 El segundo comando genera un paquete de desarrollo con cabeceras y diagnóstico;
 no es el instalador del producto. packaging/package-windows.bat copia solo runtime
 y exige helper publicado, PawnIO intacto y avisos. Véanse docs/TESTING.md y

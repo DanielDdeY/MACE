@@ -88,10 +88,39 @@ Propuesta de entradas exactas, ancladas a la raíz, para .gitignore:
 
 Alternativa local sin cambiar la política compartida: las mismas entradas en
 .git/info/exclude. No usar *.txt, que ocultaría avisos de terceros/documentación.
-En 5.0 solo se propone la exclusión: no se modifican esos archivos de
-configuración, y los tres TXT originales permanecen intactos sin seguimiento.
+Tras aprobar 5.0, el usuario autorizó y se añadieron esas tres entradas a
+.git/info/exclude. Los TXT permanecen intactos, ignorados localmente y fuera
+del historial; no se cambió .gitignore.
 
 Evitar git add . / git add -A para esta entrega; añadir solo los documentos
 aprobados y revisar git diff --cached --name-only antes de hacer commit. Los
 logs ignorados de native/build y app/target siguen siendo evidencia local,
 pueden contener datos de herramientas y no forman parte del producto.
+
+## Perfiles y regresión Java tras H-5.0-JAVA
+
+La política Java está en metadatos de compilación: producción por defecto,
+desarrollo con Maven -Pdevelopment. Las variables MACE_* y propiedades JVM de
+perfil no pueden activar desarrollo dentro del artefacto de producción.
+Los recursos de test habilitan el perfil de desarrollo únicamente en el
+classpath de pruebas; jamás se incluyen en el JAR de aplicación.
+
+Desde la raíz, con las dos compilaciones nativas 4B preparadas:
+
+```powershell
+# 13 pruebas de producción en JVM separadas: sin UI ni helper real.
+powershell -NoProfile -ExecutionPolicy Bypass -File .\native\scripts\test-java-production.ps1
+# Regresión completa Java, fixtures para watchdog/instancia única, y payload.
+powershell -NoProfile -ExecutionPolicy Bypass -File .\native\scripts\test-java-regression.ps1 -Payload
+```
+
+No reconstruir la DLL nativa mientras Java la está copiando/cargando. Ejecutar
+las baterías nativas antes de Java. La regresión Java configura temporalmente
+sus overrides verificados y MACE_WATCHDOG_FAKE_HELPER en el proceso, restaurando
+el entorno en finally; así evita omitir ocho pruebas por falta de fixture.
+La prueba opcional de DLL antigua sigue omitida si no se proporciona ese artefacto.
+
+El script de producción acepta -ShowFailure para que el usuario vea el rechazo
+genérico de arranque sin pins; no abre UI a menos que se solicite. El nuevo
+informe es [H-5.0-JAVA](../../helper/FASE2-H-5.0-JAVA.md). La aplicación desde
+fuentes se ejecuta con app/scripts/run-source.ps1; no requiere pegar variables.

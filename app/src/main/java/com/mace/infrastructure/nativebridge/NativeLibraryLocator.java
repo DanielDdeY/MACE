@@ -15,7 +15,8 @@ import java.util.Set;
 /**
  * Localiza en disco la DLL nativa de MACE sin acoplarse a una ruta fija.
  *
- * <p>Orden de resolución:</p>
+ * <p>Producción exige ruta absoluta y hash fijados por propiedades del launcher,
+ * sin consultar el entorno ni buscar otras carpetas. Orden solo en desarrollo:</p>
  * <ol>
  *   <li>Propiedad del sistema {@value #SYSTEM_PROPERTY} (ruta a la DLL o a su carpeta).</li>
  *   <li>Variable de entorno {@value #ENV_VARIABLE} (ídem).</li>
@@ -69,6 +70,15 @@ public final class NativeLibraryLocator {
      * @return ruta absoluta al archivo si existe, o vacío si no se encontró
      */
     public static Optional<Path> locate() {
+        if (!NativeLoadProfile.isDevelopment()) {
+            Path pinned = NativeLoadProfile.productionParameters().path();
+            try {
+                if (!Files.isRegularFile(pinned)) throw NativeLoadProfile.productionFailure();
+                return Optional.of(pinned);
+            } catch (RuntimeException error) {
+                throw NativeLoadProfile.productionFailure();
+            }
+        }
         Optional<Path> explicit = explicitLocation();
         if (explicit.isPresent()) {
             return resolveExplicit(explicit.get());
@@ -121,6 +131,7 @@ public final class NativeLibraryLocator {
 
     /** Mensaje de diagnóstico para cuando no se localiza la DLL. */
     public static String notFoundMessage() {
+        if (!NativeLoadProfile.isDevelopment()) return NativeLoadProfile.PRODUCTION_FAILURE;
         StringBuilder message = new StringBuilder(512);
         message.append("No se encontró la biblioteca nativa de MACE (")
                 .append(String.join(" | ", libraryFileNames()))

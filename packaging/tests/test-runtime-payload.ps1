@@ -70,6 +70,18 @@ if ($DevelopmentDll) {
     Expect-Rejection { & (Join-Path $packaging 'stage-runtime.ps1') -StageDirectory $bad -AppJar $jar -NativeDll $DevelopmentDll -NativeSha256 $devHash -HelperDirectory $HelperDirectory -PawnIoInstaller $PawnIoInstaller } 'DLL de produccion'
     Write-Host 'PASS: development DLL rejected by staging.'
 }
+$devJar=Join-Path $testRoot 'development-app.jar'
+Copy-Item -LiteralPath $jar -Destination $devJar
+$developmentArchive=[IO.Compression.ZipFile]::Open($devJar,[IO.Compression.ZipArchiveMode]::Update)
+try {
+    $entry=$developmentArchive.GetEntry('com/mace/infrastructure/nativebridge/native-profile.properties')
+    $entry.Delete()
+    $entry=$developmentArchive.CreateEntry('com/mace/infrastructure/nativebridge/native-profile.properties')
+    $writer=[IO.StreamWriter]::new($entry.Open())
+    try { $writer.WriteLine('profile=development') } finally { $writer.Dispose() }
+} finally { $developmentArchive.Dispose() }
+Expect-Rejection { & (Join-Path $packaging 'stage-runtime.ps1') -StageDirectory $bad -AppJar $devJar -NativeDll $NativeDll -NativeSha256 $sha -HelperDirectory $HelperDirectory -PawnIoInstaller $PawnIoInstaller } 'perfil Java de produccion'
+Write-Host 'PASS: development Java rejected by staging.'
 $extra=Join-Path $good 'internal.log'
 [IO.File]::WriteAllText($extra,'development-only')
 Expect-Rejection { & (Join-Path $packaging 'verify-runtime.ps1') -RuntimeDirectory $good } 'Archivos no declarados'

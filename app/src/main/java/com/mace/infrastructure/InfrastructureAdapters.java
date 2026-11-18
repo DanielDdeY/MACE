@@ -12,6 +12,7 @@ import com.mace.infrastructure.nativebridge.FfmSensorsAdapter;
 import com.mace.infrastructure.nativebridge.NativeBlackboxRing;
 import com.mace.infrastructure.nativebridge.NativeFunctions;
 import com.mace.infrastructure.nativebridge.NativeLibraryException;
+import com.mace.infrastructure.nativebridge.NativeLoadProfile;
 import com.mace.infrastructure.telemetry.BlackboxRing;
 import com.mace.infrastructure.telemetry.BlackboxSettings;
 import com.mace.infrastructure.telemetry.InMemoryBlackboxRing;
@@ -150,6 +151,8 @@ public final class InfrastructureAdapters implements AutoCloseable {
     }
 
     private static InfrastructureAdapters autoDetect() {
+        // Production must not hide a missing/invalid launcher pin behind simulated data.
+        if (!NativeLoadProfile.isDevelopment()) return nativeOrThrow();
         if (!isWindows()) {
             String reason = "Sistema operativo no Windows";
             LOG.log(Level.INFO, "{0}: se usan adaptadores simulados", reason);
