@@ -30,7 +30,12 @@ ejecución a lhm/. No se incluyen su ejecutable de pruebas ni createdump.exe.
    desde la URL registrada en pawnio-2.2.0.json. No se guarda el EXE en Git.
 5. Opcional: MACE_HELPER_PUBLISH fija el directorio publicado; por defecto se lee
    helper/artifacts/latest.txt. JAVA_HOME debe apuntar al JDK completo 22+.
-6. Ejecutar package-windows.bat app-image --with-tests; msi/exe requieren WiX.
+6. Ejecutar package-windows.bat app-image; msi/exe requieren WiX.
+   Ejecutar la regresión Java por separado con native/scripts/test-java-regression.ps1
+   -Payload: el empaquetador recibe la DLL Production, mientras que los fixtures
+   de watchdog/instancia única necesitan la DLL Development y el helper simulado.
+   Así se conserva la separación de perfiles y se evitan omisiones por fixtures
+   ausentes. El script de regresión exige los builds nativos 4B preparados.
 
 stage-runtime.ps1 verifica el helper completo antes de seleccionar archivos,
 comprueba hashes y firma de PawnIO, copia las cinco piezas y genera el manifiesto.
@@ -41,6 +46,27 @@ aceptados allí son sus dos archivos CFG y .jpackage.xml.
 La copia de PawnIO no ejecuta su instalador. Instalación compartida, código 3010,
 reinicio y conservación durante desinstalación requieren la fase posterior.
 No se ha validado aquí una instalación limpia ni MSI/EXE.
+
+## Imagen de Fase 2, subpaso 5.1
+
+Véase [el informe de la imagen](../helper/FASE2-PASO5.1.md) para versiones,
+tamaños, hashes, verificaciones y límites de cobertura. La imagen se genera
+en dist/MACE y sus hashes en dist/MACE-SHA256SUMS.txt, fuera del producto.
+
+La prueba de las cuatro variables ajenas sobre MACE.exe la ejecuta el usuario
+desde una consola ya administradora, con MACE/Preview y ejecuciones desde
+fuentes cerradas manualmente:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\packaging\tests\test-image-environment.ps1
+```
+
+Ejecutar desde la raíz del repositorio. El script no solicita elevación,
+instala componentes, cambia variables persistentes ni termina procesos. Abre
+la UI real con entorno controlado y comprueba DLL/helper de la imagen; al
+terminar, el usuario cierra la ventana. Es selección de componentes, no prueba
+de validez física de sensores ni el plan de cierre del 5.2. El resultado saneado
+queda en native/build/fase2-paso5.1/environment-*/result.txt.
 
 ## Firma y publicación
 

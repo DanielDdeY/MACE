@@ -1,5 +1,9 @@
 # Fase 2 — H-5.0-JAVA: carga de producción cerrada
 
+Actualización posterior: el usuario confirmó los 13 casos con código 0 en
+consola de administrador. Es evidencia de esa batería aislada, no de la matriz
+Java completa elevada ni de MACE.exe de la imagen; véase [5.1](FASE2-PASO5.1.md).
+
 Fecha: 2026-11-17. Commit de partida confirmado:
 `b305d3f10cc4b0b09ef5e233d871040d4ddaa556`, rama `LHM_implementado`.
 Al empezar solo estaban sin seguimiento `diagnostico-admin.txt`,
