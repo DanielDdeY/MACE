@@ -1,5 +1,9 @@
 # Fase 2 — Subpaso 5.1: imagen regenerada y verificada
 
+Actualización posterior: la primera ejecución elevada del usuario falló en el
+arnés pese a mostrar el dashboard. Se corrigió la observación launcher/JVM sin
+cambiar esta imagen. Véase [el diagnóstico y prueba](FASE2-DIAGNOSTICO-5.1.md).
+
 Fecha: 2026-11-17. Rama: `LHM_implementado`.
 Commit de partida: `2ef7dbf63bb3bbc725b3dfc87d32a2646c11dc19`.
 Árbol limpio confirmado antes de empezar. Los tres TXT de diagnóstico siguen
@@ -144,14 +148,16 @@ MACE_LHM_HELPER y MACE_LHM_HELPER_SHA256 con rutas/hashes ajenos válidos. No
 modifica variables User/Machine ni tu consola. Abre MACE.exe de la imagen sin
 RunAs: hereda la elevación que tú proporcionaste.
 
-Observa el módulo nativo cargado por MACE y su helper hijo mediante consultas
-de solo lectura, comprobando sus rutas de imagen en tres observaciones. La
+Observa la JVM del árbol iniciado por el launcher (puede ser un segundo proceso
+MACE.exe), el módulo nativo de esa JVM y su helper hijo mediante consultas de
+solo lectura, comprobando sus rutas de imagen en tres observaciones. La
 inspección de procesos del arnés no introduce WMI en la telemetría del producto.
 Éxito esperado: código **0**, PASS con packaged_native_loaded=1,
 packaged_helper_started=1 y ambos foreign_*=0. Confirma selección de componentes;
 no afirma temperatura/potencia físicas válidas por el mero hecho de arrancar.
 
-Al finalizar, **cierra tú la ventana visible de MACE**. El script no la cierra,
+Mantén abierta la ventana hasta que el script indique PASS o termine con un
+resultado. Al finalizar, **cierra tú la ventana visible de MACE**. El script no la cierra,
 oculta ni termina procesos; tampoco lo hace si falla. Código 2 sin administrador
 significa NO VERIFICADO. Código 1 exige revisar el motivo fijo del resultado;
 no se fuerza servicio ni se repara automáticamente.
@@ -159,7 +165,8 @@ no se fuerza servicio ni se repara automáticamente.
 Los resultados se guardan bajo
 `native/build/fase2-paso5.1/environment-<id>/result.txt`. Solo campos fijos,
 booleanos y códigos numéricos: sin perfiles, usuarios, máquina, SID o hashes
-completos. La salida cruda de la aplicación se drena y descarta. Los fixtures
+completos. La salida cruda se clasifica en indicadores fijos y se descarta; si
+el launcher termina se registra su código de salida real. Los fixtures
 permanecen ignorados fuera de la imagen. Comunica el
 resultado saneado y el código de salida; no hace falta compartir logs brutos.
 

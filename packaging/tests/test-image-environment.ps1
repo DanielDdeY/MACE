@@ -1,5 +1,6 @@
 param([string]$ImageDirectory,[ValidateRange(5,120)][int]$TimeoutSeconds=45)
 $ErrorActionPreference='Stop'
+. (Join-Path $PSScriptRoot 'image-process-observer.ps1')
 $repo=Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if (-not $ImageDirectory) { $ImageDirectory=Join-Path $repo 'packaging\dist\MACE' }
 $run=Join-Path $repo ('native\build\fase2-paso5.1\environment-'+[Guid]::NewGuid().ToString('N'))
@@ -10,13 +11,6 @@ function Record([string]$Message) {
     $Message | Add-Content -LiteralPath $log -Encoding UTF8
     Write-Host $Message
 }
-function SamePath([string]$Actual,[string]$Expected) {
-    if (-not $Actual -or -not $Expected) { return $false }
-    # Native trust can pass an extended-length canonical path to CreateProcess.
-    if ($Actual.StartsWith('\\?\')) { $Actual=$Actual.Substring(4) }
-    if ($Expected.StartsWith('\\?\')) { $Expected=$Expected.Substring(4) }
-    return [IO.Path]::GetFullPath($Actual).Equals([IO.Path]::GetFullPath($Expected),[StringComparison]::OrdinalIgnoreCase)
-}
 $admin=([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 Record "TEST_CONTEXT Administrator=$admin"
 if (-not $admin) {
@@ -24,6 +18,8 @@ if (-not $admin) {
     exit 2
 }
 $reason='INPUT_VALIDATION'
+$capture=$null
+$process=$null
 try {
     $image=(Resolve-Path -LiteralPath $ImageDirectory).Path
     $exe=Join-Path $image 'MACE.exe'
@@ -79,37 +75,54 @@ try {
     $start.EnvironmentVariables['MACE_LHM_HELPER_SHA256']=(Get-FileHash -LiteralPath $foreignHelper -Algorithm SHA256).Hash
     Record 'PREFLIGHT production_java=1 launcher_pins=1 runtime_verified=1 foreign_variables=4'
     $reason='START_FAILED'
+    $capture=New-ImageOutputSummary
     $process=[Diagnostics.Process]::Start($start) # Inherits administrator token supplied by USER; no RunAs.
-    # Drain/discard application output: existing runtime diagnostics may contain
-    # local paths. No callbacks into PowerShell and no raw lines in result.txt.
-    $process.BeginOutputReadLine()
-    $process.BeginErrorReadLine()
+    $startedUtc=$process.StartTime.ToUniversalTime()
+    # C# callbacks retain only fixed flags; no raw text or PowerShell runspace callbacks.
+    $capture.Attach($process)
     Record 'START image_process=1 user_or_machine_environment_changed=0'
     $reason='OBSERVATION_TIMEOUT'
     $deadline=[DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
     $stable=0
+    $lastJvm=0
+    $lastShape=''
     while ([DateTime]::UtcNow -lt $deadline) {
         $process.Refresh()
-        if ($process.HasExited) { $reason='MACE_EXITED_BEFORE_OBSERVATION'; throw 'Controlled rejection' }
-        $modules=@($process.Modules)
-        if (@($modules | Where-Object { SamePath $_.FileName $foreignDll }).Count) {
+        if ($process.HasExited) {
+            Record ("LAUNCHER_EXIT code="+$process.ExitCode)
+            $reason='MACE_EXITED_BEFORE_OBSERVATION'; throw 'Controlled rejection'
+        }
+        $reason='PROCESS_TREE_INSPECTION'
+        $state=Find-ImageJvmProcess -Launcher $process -Executable $exe -JvmLibrary (Join-Path $image 'runtime\bin\server\jvm.dll') -StartedUtc $startedUtc
+        $reason='OBSERVATION_TIMEOUT'
+        $shape="TREE image_processes=$($state.ImageProcesses) jvm_processes=$($state.JvmProcesses)"
+        if ($shape -ne $lastShape) { Record $shape; $lastShape=$shape }
+        $jvm=$state.Process
+        if (-not $jvm) { $stable=0; Start-Sleep -Milliseconds 500; continue }
+        if ($jvm.Id -ne $lastJvm) { $stable=0; $lastJvm=$jvm.Id }
+        $modules=@($jvm.Modules)
+        if (@($modules | Where-Object { Test-ImageSamePath $_.FileName $foreignDll }).Count) {
             $reason='FOREIGN_NATIVE_LOADED'; throw 'Controlled rejection'
         }
         $native=@($modules | Where-Object { $_.ModuleName -ieq 'mace_native.dll' })
-        if ($native.Count -and ($native.Count -ne 1 -or -not (SamePath $native[0].FileName $dll))) {
+        if ($native.Count -and ($native.Count -ne 1 -or -not (Test-ImageSamePath $native[0].FileName $dll))) {
             $reason='NATIVE_LOCATION_MISMATCH'; throw 'Controlled rejection'
         }
-        $children=@(Get-CimInstance Win32_Process -Filter ('ParentProcessId='+$process.Id))
-        if (@($children | Where-Object { SamePath $_.ExecutablePath $foreignHelper }).Count) {
+        $children=@($state.Rows | Where-Object { $_.ParentProcessId -eq $jvm.Id })
+        if (@($children | Where-Object { Test-ImageSamePath $_.ExecutablePath $foreignHelper }).Count) {
             $reason='FOREIGN_HELPER_STARTED'; throw 'Controlled rejection'
         }
         $owned=@($children | Where-Object { $_.Name -ieq 'Mace.Lhm.Helper.exe' })
-        if ($owned.Count -and ($owned.Count -ne 1 -or -not (SamePath $owned[0].ExecutablePath $helper))) {
+        if (@($owned | Where-Object { -not $_.CreationDate -or $_.CreationDate.ToUniversalTime() -lt $jvm.StartTime.ToUniversalTime().AddMilliseconds(-1) }).Count) {
+            $reason='HELPER_IDENTITY_UNVERIFIED'; throw 'Controlled rejection'
+        }
+        if ($owned.Count -and ($owned.Count -ne 1 -or -not (Test-ImageSamePath $owned[0].ExecutablePath $helper))) {
             $reason='HELPER_LOCATION_MISMATCH'; throw 'Controlled rejection'
         }
         if ($native.Count -eq 1 -and $owned.Count -eq 1) {
             $stable++
             if ($stable -ge 3) {
+                Record ("OBSERVED launcher_is_jvm="+[int]($jvm.Id -eq $process.Id)+" helper_parent_is_jvm=1")
                 Record 'PASS actual_MACE_exe=1 packaged_native_loaded=1 packaged_helper_started=1 foreign_native_loaded=0 foreign_helper_started=0'
                 Record 'SCOPE component_selection_only=1 cpu_sensor_validity_not_asserted=1'
                 Record 'HANDOFF close_the_visible_MACE_manually=1 no_process_terminated_by_script=1'
@@ -120,6 +133,11 @@ try {
     }
     throw 'Controlled rejection'
 } catch {
+    $fixedReasons=@('IMAGE_ROOT_IDENTITY_UNVERIFIED','IMAGE_PROCESS_IDENTITY_UNVERIFIED','IMAGE_JVM_LOCATION_MISMATCH','IMAGE_JVM_AMBIGUOUS')
+    if ($_.Exception.Message -cin $fixedReasons) { $reason=$_.Exception.Message }
+    if ($capture) {
+        Record ("OUTPUT native_mode=$($capture.NativeMode) mock_mode=$($capture.MockMode) fx_start_failure=$($capture.FxStartFailure) missing_class=$($capture.MissingClass) unsatisfied_link=$($capture.UnsatisfiedLink) out_of_memory=$($capture.OutOfMemory) lines=$($capture.OutputLines)")
+    }
     Record ("FAIL reason=$reason hresult="+$_.Exception.HResult)
     Record 'HANDOFF close_any_visible_MACE_manually=1 no_process_terminated_by_script=1'
     exit 1
