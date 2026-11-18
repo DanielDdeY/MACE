@@ -2,7 +2,7 @@
 
 # MACE native
 
-Biblioteca C17, Windows x64/MSVC, ABI 1.4. CPU uso: GetSystemTimes; RAM e inventario:
+Biblioteca C17, Windows x64/MSVC, ABI 1.5 (DLL 1.5.0). CPU uso: GetSystemTimes; RAM e inventario:
 Windows/DXGI. Sensores CPU y AMD GPU: helper LHM; NVML e IGCL se conservan primarios.
 La inicialización y los sondeos no esperan al helper. Los estados V2 distinguen
 ausencia, calentamiento, fallo y lecturas válidas.
@@ -23,7 +23,10 @@ MACE_LHM_HELPER/MACE_LHM_HELPER_SHA256; esa DLL no se puede empaquetar como prod
 test-lhm1b.ps1 selecciona desarrollo explícitamente y también ejecuta fixtures
 con perfil de producción. CMake directo requiere, en producción,
 -DMACE_LHM_RUNTIME_MANIFEST=<publicación/helper-runtime.manifest>; en desarrollo
--DMACE_LHM_DEVELOPMENT=ON. No se cambia el ABI 1.4.
+-DMACE_LHM_DEVELOPMENT=ON. Se conservan los layouts; ABI 1.5 añade estados no válidos.
+
+El [README del arnés](tests/README.md) explica el aislamiento de MACE_*, los
+controles de diagnóstico y la diferencia entre CTest y la prueba física.
 
 El segundo comando genera un paquete de desarrollo con cabeceras y diagnóstico;
 no es el instalador del producto. packaging/package-windows.bat copia solo runtime
