@@ -1,10 +1,29 @@
 #include "mace_api.h"
 #include "../src/telemetry/lhm_transport.h"
+#include "../src/telemetry/lhm_diagnostics.h"
 #include <windows.h>
 #include <stdio.h>
 #include <string.h>
 #define CHECK(x) do { if (!(x)) { fprintf(stderr,"line %d: %s\n",__LINE__,#x); return 1; } } while(0)
-typedef struct { DWORD pid, result; } Evidence;
+typedef struct { DWORD pid, result, open_cause, error_code, error_domain; char stage[64]; } Evidence;
+
+static bool open_test(const wchar_t* helper,HANDLE stop,LhmSession* session,Evidence* evidence) {
+    LhmOpenFailure cause=LHM_OPEN_TRANSIENT;
+    bool opened=LhmTransport_OpenEx(helper,stop,session,&cause);
+    if (!opened) {
+        const LhmOpenDiagnostic* d=&lhm_open_diagnostic;
+        const char* domains[]={"none","win32","validation","ntstatus","hresult","wait-result"};
+        const char* causes[]={"transient","trust","containment","launch-blocked"};
+        fprintf(stderr,"LHM_OPEN_FAILED cause=%s stage=%s domain=%s code=%lu hex=0x%08lX\n",
+            causes[(unsigned)cause<4 ? cause : 0],d->stage ? d->stage : "unknown",
+            domains[d->domain<6 ? d->domain : 0],d->code,d->code);
+        if (evidence) {
+            evidence->open_cause=(DWORD)cause; evidence->error_code=d->code; evidence->error_domain=d->domain;
+            strcpy_s(evidence->stage,sizeof(evidence->stage),d->stage ? d->stage : "unknown");
+        }
+    }
+    return opened;
+}
 
 static int parent(const wchar_t* helper,const wchar_t* mapping,const wchar_t* ready,bool restricted) {
     HANDLE memory=OpenFileMappingW(FILE_MAP_WRITE,FALSE,mapping);
@@ -28,7 +47,7 @@ static int parent(const wchar_t* helper,const wchar_t* mapping,const wchar_t* re
         UnmapViewOfFile(evidence); CloseHandle(memory); CloseHandle(event); return 0;
     }
     LhmSession session={0}; HANDLE stop=CreateEventW(NULL,TRUE,FALSE,NULL);
-    if (!LhmTransport_Open(helper,stop,&session)) {
+    if (!open_test(helper,stop,&session,evidence)) {
         evidence->result=1; SetEvent(event); return 1;
     }
     evidence->pid=session.pid; evidence->result=0; SetEvent(event);
@@ -72,6 +91,9 @@ static int parent_case(const wchar_t* helper,bool restricted) {
         HeapFree(GetProcessHeap(),0,startup.lpAttributeList);
     }
     CHECK(WaitForSingleObject(event,8000)==WAIT_OBJECT_0);
+    if (evidence->result!=0 && !restricted) fprintf(stderr,
+        "LHM_PARENT_OPEN_FAILED cause=%lu stage=%s domain=%lu code=%lu hex=0x%08lX\n",
+        evidence->open_cause,evidence->stage,evidence->error_domain,evidence->error_code,evidence->error_code);
     CHECK(evidence->result==0);
     if (!restricted) {
         HANDLE helper_process=OpenProcess(SYNCHRONIZE,FALSE,evidence->pid); CHECK(helper_process);
@@ -111,7 +133,7 @@ static int foreign_homonym(const wchar_t* helper) {
     CHECK(WaitForSingleObject(foreign.hProcess,100)==WAIT_TIMEOUT);
     SetEnvironmentVariableW(L"MACE_SIM_SCENARIO",L"valid");
     LhmSession session={0}; HANDLE stop=CreateEventW(NULL,TRUE,FALSE,NULL); CHECK(stop);
-    CHECK(LhmTransport_Open(helper,stop,&session));
+    CHECK(open_test(helper,stop,&session,NULL));
     CHECK(session.pid!=foreign.dwProcessId);
     HANDLE owned=NULL; CHECK(DuplicateHandle(GetCurrentProcess(),session.process,GetCurrentProcess(),&owned,SYNCHRONIZE,FALSE,0));
     unsigned char frame[48]; CHECK(LhmTransport_Read(&session,stop,frame,48,GetTickCount64()+5000));
@@ -129,6 +151,19 @@ int wmain(int argc,wchar_t** argv) {
     if (argc==6 && wcscmp(argv[1],L"--parent")==0)
         return parent(argv[2],argv[3],argv[4],wcscmp(argv[5],L"1")==0);
     CHECK(argc==3);
+    BOOL enclosing=FALSE; IsProcessInJob(GetCurrentProcess(),NULL,&enclosing);
+    HANDLE token=NULL; TOKEN_ELEVATION elevation={0}; DWORD returned=0;
+    bool token_known=OpenProcessToken(GetCurrentProcess(),TOKEN_QUERY,&token)!=0;
+    if (token_known) token_known=GetTokenInformation(token,TokenElevation,&elevation,sizeof(elevation),&returned)!=0;
+    if (token) CloseHandle(token);
+    printf("LHM_JOB_CONTEXT token_known=%u elevated=%u enclosing_job=%u helper_hash_present=%u\n",
+        (unsigned)token_known,(unsigned)elevation.TokenIsElevated,(unsigned)enclosing,
+        (unsigned)(GetEnvironmentVariableW(L"MACE_LHM_HELPER_SHA256",NULL,0)!=0));
+#ifdef MACE_LHM_TEST_HOOKS
+    puts("LHM_JOB_CONTEXT hooks_compiled=1");
+#else
+    puts("LHM_JOB_CONTEXT hooks_compiled=0");
+#endif
     if (wcscmp(argv[2],L"foreign-homonym")==0) return foreign_homonym(argv[1]);
     if (wcscmp(argv[2],L"abrupt-parent")==0) return parent_case(argv[1],false);
     if (wcscmp(argv[2],L"restrictive-job")==0) return parent_case(argv[1],true);
@@ -138,7 +173,7 @@ int wmain(int argc,wchar_t** argv) {
     bool eof_close=wcscmp(argv[2],L"eof-close")==0;
     SetEnvironmentVariableW(L"MACE_SIM_SCENARIO",forced ? L"hang-close" : descendants ? L"job-descendant" : L"valid");
     LhmSession session={0}; HANDLE stop=CreateEventW(NULL,TRUE,FALSE,NULL); CHECK(stop);
-    CHECK(LhmTransport_Open(argv[1],stop,&session));
+    CHECK(open_test(argv[1],stop,&session,NULL));
     BOOL assigned=FALSE; CHECK(IsProcessInJob(session.process,session.job,&assigned) && assigned);
     DWORD flags=0; CHECK(GetHandleInformation(session.job,&flags) && !(flags&HANDLE_FLAG_INHERIT));
     JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits={0};

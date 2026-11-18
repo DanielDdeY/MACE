@@ -1,5 +1,6 @@
 #include "lhm_trust.h"
 #include "lhm_security_config.h"
+#include "lhm_diagnostics.h"
 #include <bcrypt.h>
 #include <shlobj.h>
 #include <wintrust.h>
@@ -17,20 +18,26 @@ struct LhmTrustLease {
 };
 
 static bool hash_handle(HANDLE file,HANDLE stop,char hex[65]) {
+    LHM_DIAG_STAGE("trust-hash-file-read");
     LARGE_INTEGER zero={0},size;
     if (!GetFileSizeEx(file,&size) || size.QuadPart>512LL*1024*1024 ||
-        !SetFilePointerEx(file,zero,NULL,FILE_BEGIN)) return false;
+        !SetFilePointerEx(file,zero,NULL,FILE_BEGIN)) { LHM_DIAG_OS(); return false; }
     BCRYPT_ALG_HANDLE algorithm=NULL; BCRYPT_HASH_HANDLE hash=NULL;
     unsigned char digest[32],buffer[8192]; DWORD read=0; bool ok=false;
-    if (BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,NULL,0)!=0) goto done;
-    if (BCryptCreateHash(algorithm,&hash,NULL,0,NULL,0,0)!=0) goto done;
+    NTSTATUS status=BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,NULL,0);
+    if (status!=0) { LHM_DIAG_NT("trust-hash-algorithm",status); goto done; }
+    status=BCryptCreateHash(algorithm,&hash,NULL,0,NULL,0,0);
+    if (status!=0) { LHM_DIAG_NT("trust-hash-create",status); goto done; }
     for (;;) {
-        if (stop && WaitForSingleObject(stop,0)!=WAIT_TIMEOUT) goto done;
-        if (!ReadFile(file,buffer,sizeof(buffer),&read,NULL)) goto done;
+        if (stop && WaitForSingleObject(stop,0)!=WAIT_TIMEOUT) { LHM_DIAG_VALID("trust-cancelled",ERROR_OPERATION_ABORTED); goto done; }
+        LHM_DIAG_STAGE("trust-hash-read");
+        if (!ReadFile(file,buffer,sizeof(buffer),&read,NULL)) { LHM_DIAG_OS(); goto done; }
         if (!read) break;
-        if (BCryptHashData(hash,buffer,read,0)!=0) goto done;
+        status=BCryptHashData(hash,buffer,read,0);
+        if (status!=0) { LHM_DIAG_NT("trust-hash-data",status); goto done; }
     }
-    if (BCryptFinishHash(hash,digest,sizeof(digest),0)!=0) goto done;
+    status=BCryptFinishHash(hash,digest,sizeof(digest),0);
+    if (status!=0) { LHM_DIAG_NT("trust-hash-finish",status); goto done; }
     for (unsigned i=0;i<32;i++) sprintf_s(hex+i*2,65-i*2,"%02x",digest[i]);
     ok=true;
 done:
@@ -49,35 +56,47 @@ const wchar_t* LhmTrust_Directory(const LhmTrustLease* lease) { return lease->ro
 const wchar_t* LhmTrust_Environment(const LhmTrustLease* lease) { return lease->environment; }
 
 static bool final_name(HANDLE file,wchar_t* name) {
+    LHM_DIAG_STAGE("trust-canonical-name");
     DWORD n=GetFinalPathNameByHandleW(file,name,TRUST_PATH,FILE_NAME_NORMALIZED|VOLUME_NAME_DOS);
+    if (!n) { LHM_DIAG_OS(); }
     return n && n<TRUST_PATH && _wcsnicmp(name,L"\\\\?\\UNC\\",8)!=0;
 }
 static HANDLE lock_file(LhmTrustLease* lease,const wchar_t* name,bool directory) {
+    LHM_DIAG_STAGE(directory ? "trust-lock-directory" : "trust-lock-file");
     HANDLE file=CreateFileW(name,directory ? FILE_READ_ATTRIBUTES : GENERIC_READ,FILE_SHARE_READ,
         NULL,OPEN_EXISTING,FILE_FLAG_OPEN_REPARSE_POINT|(directory ? FILE_FLAG_BACKUP_SEMANTICS : FILE_FLAG_SEQUENTIAL_SCAN),NULL);
-    if (file==INVALID_HANDLE_VALUE) return NULL;
+    if (file==INVALID_HANDLE_VALUE) { LHM_DIAG_OS(); return NULL; }
+    LHM_DIAG_STAGE("trust-file-attributes");
     FILE_ATTRIBUTE_TAG_INFO attributes={0};
     if (lease->count>=TRUST_MAX_FILES+2 || !GetFileInformationByHandleEx(file,FileAttributeTagInfo,&attributes,sizeof(attributes)) ||
         (attributes.FileAttributes&FILE_ATTRIBUTE_REPARSE_POINT) ||
-        !!(attributes.FileAttributes&FILE_ATTRIBUTE_DIRECTORY)!=directory) { CloseHandle(file); return NULL; }
+        !!(attributes.FileAttributes&FILE_ATTRIBUTE_DIRECTORY)!=directory) { LHM_DIAG_OS(); CloseHandle(file); return NULL; }
     lease->handles[lease->count++]=file; return file;
 }
 static bool env_add(LhmTrustLease* lease,size_t* offset,const wchar_t* name,const wchar_t* value) {
     int n=swprintf_s(lease->environment+*offset,TRUST_PATH-*offset,L"%s=%s",name,value);
-    if (n<0 || *offset+(size_t)n+2>TRUST_PATH) return false;
+    if (n<0 || *offset+(size_t)n+2>TRUST_PATH) { LHM_DIAG_VALID("child-environment-size",ERROR_INVALID_DATA); return false; }
     *offset+=(size_t)n+1; lease->environment[*offset]=0; return true;
 }
 static bool environment(LhmTrustLease* lease) {
     wchar_t windows[MAX_PATH],system[MAX_PATH],local[MAX_PATH],temp[MAX_PATH],path[MAX_PATH*2+2];
-    DWORD wn=GetWindowsDirectoryW(windows,MAX_PATH),sn=GetSystemDirectoryW(system,MAX_PATH);
-    if (!wn || wn>=MAX_PATH || !sn || sn>=MAX_PATH ||
-        SHGetFolderPathW(NULL,CSIDL_LOCAL_APPDATA,NULL,SHGFP_TYPE_CURRENT,local)!=S_OK ||
-        swprintf_s(temp,MAX_PATH,L"%s\\Temp",local)<0 ||
-        swprintf_s(path,sizeof(path)/sizeof(*path),L"%s;%s",system,windows)<0) return false;
+    LHM_DIAG_STAGE("child-windows-directory");
+    DWORD wn=GetWindowsDirectoryW(windows,MAX_PATH);
+    if (!wn) { LHM_DIAG_OS(); }
+    LHM_DIAG_STAGE("child-system-directory");
+    DWORD sn=GetSystemDirectoryW(system,MAX_PATH);
+    if (!sn) { LHM_DIAG_OS(); }
+    if (!wn || wn>=MAX_PATH || !sn || sn>=MAX_PATH) { LHM_DIAG_OS(); return false; }
+    HRESULT local_result=SHGetFolderPathW(NULL,CSIDL_LOCAL_APPDATA,NULL,SHGFP_TYPE_CURRENT,local);
+    if (local_result!=S_OK) { LHM_DIAG_HR("child-local-appdata",local_result); return false; }
+    if (swprintf_s(temp,MAX_PATH,L"%s\\Temp",local)<0 ||
+        swprintf_s(path,sizeof(path)/sizeof(*path),L"%s;%s",system,windows)<0) {
+        LHM_DIAG_VALID("child-environment-format",ERROR_INVALID_DATA); return false;
+    }
     size_t offset=0;
 #if MACE_LHM_DEVELOPMENT
     wchar_t scenario[64]; DWORD n=GetEnvironmentVariableW(L"MACE_SIM_SCENARIO",scenario,64);
-    if (n>=64) return false;
+    if (n>=64) { LHM_DIAG_VALID("child-scenario-length",ERROR_INVALID_DATA); return false; }
     if (n && !env_add(lease,&offset,L"MACE_SIM_SCENARIO",scenario)) return false;
 #endif
     return env_add(lease,&offset,L"PATH",path) && env_add(lease,&offset,L"SystemRoot",windows) &&
@@ -168,8 +187,10 @@ static bool manifest(LhmTrustLease* lease,HANDLE stop) {
 #endif
 
 bool LhmTrust_Acquire(const wchar_t* executable,HANDLE stop,LhmTrustLease** output) {
+    LHM_DIAG_STAGE("trust-acquire");
     *output=NULL;
-    LhmTrustLease* lease=HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(*lease)); if (!lease) return false;
+    LhmTrustLease* lease=HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(*lease));
+    if (!lease) { LHM_DIAG_VALID("trust-allocation",ERROR_NOT_ENOUGH_MEMORY); return false; }
     if (wcscpy_s(lease->exe,TRUST_PATH,executable)) goto failed;
     wchar_t* slash=wcsrchr(lease->exe,L'\\');
     wchar_t* forward=wcsrchr(lease->exe,L'/'); if (forward && (!slash || forward>slash)) slash=forward;
@@ -185,17 +206,23 @@ bool LhmTrust_Acquire(const wchar_t* executable,HANDLE stop,LhmTrustLease** outp
     if (swprintf_s(lease->exe,TRUST_PATH,L"%s\\%s",lease->root,basename)<0) goto failed;
     HANDLE file=lock_file(lease,lease->exe,false); if (!file) goto failed;
     wchar_t expected[65]; DWORD n=GetEnvironmentVariableW(L"MACE_LHM_HELPER_SHA256",expected,65);
-    if (n>=65) goto failed;
+    if (n>=65) { LHM_DIAG_VALID("dev-hash-length",ERROR_INVALID_DATA); goto failed; }
     if (n) {
-        char actual[65]; if (n!=64 || !hash_handle(file,stop,actual)) goto failed;
-        for (unsigned i=0;i<64;i++) if ((wchar_t)actual[i]!=towlower(expected[i])) goto failed;
+        char actual[65];
+        if (n!=64) { LHM_DIAG_VALID("dev-hash-length",ERROR_INVALID_DATA); goto failed; }
+        if (!hash_handle(file,stop,actual)) goto failed;
+        for (unsigned i=0;i<64;i++) if ((wchar_t)actual[i]!=towlower(expected[i])) {
+            LHM_DIAG_VALID("dev-hash-mismatch",ERROR_CRC); goto failed;
+        }
     }
 #else
     OutputDebugStringA("MACE_LHM_PROFILE=PRODUCTION;MACE_LHM_MANIFEST_SHA256=" MACE_LHM_MANIFEST_SHA256 "\n");
     if (!production_root(lease) || swprintf_s(lease->exe,TRUST_PATH,L"%s\\Mace.Lhm.Helper.exe",lease->root)<0 || !manifest(lease,stop)) goto failed;
 #endif
+    LHM_DIAG_STAGE("trust-child-environment");
     if (!environment(lease)) goto failed;
     *output=lease; return true;
 failed:
+    LHM_DIAG_OS(); // Preserve the first error BEFORE release/CloseHandle can replace it.
     OutputDebugStringA("LHM_TRUST_REJECTED\n"); LhmTrust_Release(lease); return false;
 }

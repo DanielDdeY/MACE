@@ -1,5 +1,6 @@
 #include "lhm_transport.h"
 #include "lhm_wire.h"
+#include "lhm_diagnostics.h"
 #include <bcrypt.h>
 #include <sddl.h>
 #include <stdio.h>
@@ -7,6 +8,9 @@
 
 static SRWLOCK active_lock=SRWLOCK_INIT;
 static HANDLE active_job;
+#if defined(MACE_LHM_DIAGNOSTICS) && MACE_LHM_DIAGNOSTICS
+__declspec(thread) LhmOpenDiagnostic lhm_open_diagnostic;
+#endif
 
 void LhmTransport_AbortActive(void) {
     AcquireSRWLockShared(&active_lock);
@@ -16,7 +20,9 @@ void LhmTransport_AbortActive(void) {
 
 static bool wait_io(HANDLE pipe, HANDLE stop, HANDLE process, OVERLAPPED* operation, DWORD timeout, DWORD* transferred) {
     HANDLE waits[3]={stop,operation->hEvent,process};
-    if (WaitForMultipleObjects(process ? 3 : 2,waits,FALSE,timeout)!=WAIT_OBJECT_0+1) {
+    DWORD result=WaitForMultipleObjects(process ? 3 : 2,waits,FALSE,timeout);
+    if (result!=WAIT_OBJECT_0+1) {
+        if (result==WAIT_FAILED) { LHM_DIAG_OS(); } else { LHM_DIAG_WAIT(result); }
         CancelIoEx(pipe,operation);
         GetOverlappedResult(pipe,operation,transferred,TRUE);
         return false;
@@ -45,15 +51,20 @@ bool LhmTransport_Read(LhmSession* s, HANDLE stop, unsigned char* data, DWORD si
 
 static PSECURITY_DESCRIPTOR private_descriptor(void) {
     HANDLE token=NULL; DWORD size=0;
-    if (!OpenProcessToken(GetCurrentProcess(),TOKEN_QUERY,&token)) return NULL;
+    LHM_DIAG_STAGE("pipe-token-open");
+    if (!OpenProcessToken(GetCurrentProcess(),TOKEN_QUERY,&token)) { LHM_DIAG_OS(); return NULL; }
     GetTokenInformation(token,TokenUser,NULL,0,&size);
     TOKEN_USER* user=HeapAlloc(GetProcessHeap(),0,size);
+    if (!user) { LHM_DIAG_VALID("pipe-token-allocation",ERROR_NOT_ENOUGH_MEMORY); }
     LPWSTR sid=NULL; PSECURITY_DESCRIPTOR descriptor=NULL;
+    LHM_DIAG_STAGE("pipe-token-query-or-sid");
     if (user && GetTokenInformation(token,TokenUser,user,size,&size) && ConvertSidToStringSidW(user->User.Sid,&sid)) {
         wchar_t sddl[256];
+        LHM_DIAG_STAGE("pipe-security-descriptor");
         if (swprintf_s(sddl,256,L"D:P(A;;GRGW;;;SY)(A;;GRGW;;;%s)",sid)>0)
             ConvertStringSecurityDescriptorToSecurityDescriptorW(sddl,SDDL_REVISION_1,&descriptor,NULL);
     }
+    if (!descriptor) { LHM_DIAG_OS(); }
     if (sid) LocalFree(sid);
     if (user) HeapFree(GetProcessHeap(),0,user);
     CloseHandle(token);
@@ -114,6 +125,7 @@ bool LhmTransport_Open(const wchar_t* executable, HANDLE stop, LhmSession* s) {
     return LhmTransport_OpenEx(executable,stop,s,&failure);
 }
 bool LhmTransport_OpenEx(const wchar_t* executable,HANDLE stop,LhmSession* s,LhmOpenFailure* failure) {
+    LHM_DIAG_RESET();
     OutputDebugStringA(LHM_PROTOCOL_MARKER);
     memset(s,0,sizeof(*s));
     *failure=LHM_OPEN_TRUST;
@@ -123,46 +135,59 @@ bool LhmTransport_OpenEx(const wchar_t* executable,HANDLE stop,LhmSession* s,Lhm
     unsigned char random[32], bootstrap[128]={0};
     wchar_t name[74]=L"mace-lhm-", path[96], command[32768];
     const wchar_t hex[]=L"0123456789abcdef";
-    if (BCryptGenRandom(NULL,random,sizeof(random),BCRYPT_USE_SYSTEM_PREFERRED_RNG)!=0) { LhmTransport_Close(s); return false; }
+    NTSTATUS random_status=BCryptGenRandom(NULL,random,sizeof(random),BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+    if (random_status!=0) { LHM_DIAG_NT("pipe-random",random_status); LhmTransport_Close(s); return false; }
     for (unsigned i=0;i<32;i++) { name[9+i*2]=hex[random[i]>>4]; name[10+i*2]=hex[random[i]&15]; }
-    if (swprintf_s(path,96,L"\\\\.\\pipe\\%s",name)<0) { LhmTransport_Close(s); return false; }
+    if (swprintf_s(path,96,L"\\\\.\\pipe\\%s",name)<0) { LHM_DIAG_VALID("pipe-name-format",ERROR_INVALID_DATA); LhmTransport_Close(s); return false; }
     PSECURITY_DESCRIPTOR descriptor=private_descriptor();
     if (!descriptor) { LhmTransport_Close(s); return false; }
     SECURITY_ATTRIBUTES sa={sizeof(sa),descriptor,FALSE};
+    LHM_DIAG_STAGE("create-private-pipe");
     s->pipe=CreateNamedPipeW(path,PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED|FILE_FLAG_FIRST_PIPE_INSTANCE,
         PIPE_TYPE_BYTE|PIPE_READMODE_BYTE|PIPE_REJECT_REMOTE_CLIENTS,1,LHM_MAX_FRAME,LHM_MAX_FRAME,0,&sa);
-    if (s->pipe==INVALID_HANDLE_VALUE) { LocalFree(descriptor); s->pipe=NULL; LhmTransport_Close(s); return false; }
+    if (s->pipe==INVALID_HANDLE_VALUE) { LHM_DIAG_OS(); LocalFree(descriptor); s->pipe=NULL; LhmTransport_Close(s); return false; }
     HANDLE input=NULL, writer=NULL, null_output=INVALID_HANDLE_VALUE;
     sa.bInheritHandle=TRUE;
+    LHM_DIAG_STAGE("create-bootstrap-pipe");
     bool ok=CreatePipe(&input,&writer,&sa,4096)!=0;
+    if (!ok) { LHM_DIAG_OS(); }
     LocalFree(descriptor);
     sa.lpSecurityDescriptor=NULL;
     if (!ok) goto cleanup;
+    LHM_DIAG_STAGE("bootstrap-inheritance");
     ok=SetHandleInformation(writer,HANDLE_FLAG_INHERIT,0)!=0;
+    if (!ok) { LHM_DIAG_OS(); }
     if (!ok) goto cleanup;
+    LHM_DIAG_STAGE("open-null-output");
     null_output=CreateFileW(L"NUL",GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,&sa,OPEN_EXISTING,0,NULL);
     /* NUL uses the default descriptor, never the freed pipe descriptor. */
-    if (null_output==INVALID_HANDLE_VALUE) { ok=false; goto cleanup; }
+    if (null_output==INVALID_HANDLE_VALUE) { LHM_DIAG_OS(); ok=false; goto cleanup; }
     STARTUPINFOEXW start={0}; start.StartupInfo.cb=sizeof(start);
     start.StartupInfo.dwFlags=STARTF_USESTDHANDLES;
     start.StartupInfo.hStdInput=input; start.StartupInfo.hStdOutput=null_output; start.StartupInfo.hStdError=null_output;
     SIZE_T attribute_size=0;
     InitializeProcThreadAttributeList(NULL,2,0,&attribute_size);
     start.lpAttributeList=HeapAlloc(GetProcessHeap(),0,attribute_size);
-    if (!start.lpAttributeList) { ok=false; goto cleanup; }
+    if (!start.lpAttributeList) { LHM_DIAG_VALID("startup-allocation",ERROR_NOT_ENOUGH_MEMORY); ok=false; goto cleanup; }
+    LHM_DIAG_STAGE("startup-attributes");
     bool attributes_ready=InitializeProcThreadAttributeList(start.lpAttributeList,2,0,&attribute_size)!=0;
+    if (!attributes_ready) { LHM_DIAG_OS(); }
     HANDLE inherited[2]={input,null_output};
     PROCESS_INFORMATION child={0};
+    LHM_DIAG_STAGE("startup-handle-list-or-command");
     if (attributes_ready && UpdateProcThreadAttribute(start.lpAttributeList,0,PROC_THREAD_ATTRIBUTE_HANDLE_LIST,
         inherited,sizeof(inherited),NULL,NULL) && swprintf_s(command,32768,L"\"%s\" --bootstrap-stdin",executable)>0) {
 #ifdef MACE_LHM_TEST_HOOKS
         wchar_t test_mode[64]={0}; GetEnvironmentVariableW(L"MACE_SIM_SCENARIO",test_mode,64);
         s->job=wcscmp(test_mode,L"permanent-containment")==0 ? NULL : CreateJobObjectW(NULL,NULL);
 #else
+        LHM_DIAG_STAGE("create-owned-job");
         s->job=CreateJobObjectW(NULL,NULL);
 #endif
+        if (!s->job) { LHM_DIAG_OS(); }
         JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits={0};
         limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+        LHM_DIAG_STAGE("configure-job-or-job-list");
         if (s->job && SetInformationJobObject(s->job,JobObjectExtendedLimitInformation,&limits,sizeof(limits)) &&
             UpdateProcThreadAttribute(start.lpAttributeList,0,PROC_THREAD_ATTRIBUTE_JOB_LIST,
                 &s->job,sizeof(s->job),NULL,NULL)) {
@@ -171,16 +196,19 @@ bool LhmTransport_OpenEx(const wchar_t* executable,HANDLE stop,LhmSession* s,Lhm
             ReleaseSRWLockExclusive(&active_lock);
             /* Creation-time assignment closes the create/assign crash window.
              * No breakaway flags; restrictive enclosing jobs fail closed. */
+            LHM_DIAG_STAGE("create-contained-process");
             ok=WaitForSingleObject(stop,0)==WAIT_TIMEOUT &&
                 CreateProcessW(executable,command,NULL,NULL,TRUE,
                     CREATE_SUSPENDED|CREATE_NO_WINDOW|CREATE_UNICODE_ENVIRONMENT|EXTENDED_STARTUPINFO_PRESENT,
                     (LPVOID)LhmTrust_Environment(s->trust),LhmTrust_Directory(s->trust),&start.StartupInfo,&child)!=0;
-        } else { *failure=LHM_OPEN_CONTAINMENT; ok=false; }
+            if (!ok) { LHM_DIAG_OS(); }
+        } else { LHM_DIAG_OS(); *failure=LHM_OPEN_CONTAINMENT; ok=false; }
         if (!ok && *failure!=LHM_OPEN_CONTAINMENT && WaitForSingleObject(stop,0)==WAIT_TIMEOUT)
             *failure=LHM_OPEN_LAUNCH_BLOCKED;
         if (ok) {
             s->process=child.hProcess; s->pid=child.dwProcessId;
             BOOL assigned=FALSE;
+            LHM_DIAG_STAGE("verify-job-or-resume");
             if (IsProcessInJob(s->process,s->job,&assigned) && assigned &&
                 WaitForSingleObject(stop,0)==WAIT_TIMEOUT && ResumeThread(child.hThread)!=(DWORD)-1) {
                 uint32_t magic=0x3142434Du, version=LHM_PROTOCOL_VERSION, pid=GetCurrentProcessId(), length=73;
@@ -188,27 +216,35 @@ bool LhmTransport_OpenEx(const wchar_t* executable,HANDLE stop,LhmSession* s,Lhm
                 memcpy(bootstrap+8,&pid,4); memcpy(bootstrap+12,&length,4);
                 for (unsigned i=0;i<73;i++) bootstrap[16+i]=(unsigned char)name[i];
                 DWORD written=0;
+                LHM_DIAG_STAGE("write-bootstrap");
                 ok=WriteFile(writer,bootstrap,sizeof(bootstrap),&written,NULL) && written==sizeof(bootstrap);
-            } else { *failure=LHM_OPEN_CONTAINMENT; ok=false; }
+                if (!ok) { LHM_DIAG_OS(); }
+            } else { LHM_DIAG_OS(); *failure=LHM_OPEN_CONTAINMENT; ok=false; }
             CloseHandle(child.hThread);
         } else OutputDebugStringW(L"MACE LHM: contained helper creation failed; telemetry degraded.\n");
-    } else ok=false;
+    } else { LHM_DIAG_OS(); ok=false; }
     if (attributes_ready) DeleteProcThreadAttributeList(start.lpAttributeList);
     HeapFree(GetProcessHeap(),0,start.lpAttributeList);
     if (!ok || !s->process) goto cleanup;
+    LHM_DIAG_STAGE("connect-event");
     OVERLAPPED connect={0}; connect.hEvent=CreateEventW(NULL,TRUE,FALSE,NULL);
-    if (!connect.hEvent) { ok=false; goto cleanup; }
+    if (!connect.hEvent) { LHM_DIAG_OS(); ok=false; goto cleanup; }
+    LHM_DIAG_STAGE("connect-private-pipe");
     ok=ConnectNamedPipe(s->pipe,&connect)!=0;
     if (!ok) {
         DWORD error=GetLastError(), transferred=0;
         ok=error==ERROR_PIPE_CONNECTED || (error==ERROR_IO_PENDING && wait_io(s->pipe,stop,s->process,&connect,5000,&transferred));
+        if (!ok) { LHM_DIAG_OS(); }
     }
     CloseHandle(connect.hEvent);
     ULONG peer=0;
+    LHM_DIAG_STAGE("authenticate-pipe-peer");
     if (ok) ok=GetNamedPipeClientProcessId(s->pipe,&peer) && peer==s->pid && WaitForSingleObject(s->process,0)==WAIT_TIMEOUT;
+    if (!ok) { LHM_DIAG_OS(); }
     s->authenticated=ok;
 cleanup:
     ok=ok && s->process!=NULL;
+    if (!ok) { LHM_DIAG_OS(); }
     if (input) CloseHandle(input);
     if (writer) CloseHandle(writer);
     if (null_output!=INVALID_HANDLE_VALUE) CloseHandle(null_output);
