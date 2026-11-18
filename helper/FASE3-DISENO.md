@@ -12,6 +12,16 @@ Referencias de alcance: [preparación 3.0](FASE3-PASO0.md),
 Se relee prompt_mace_fase3.md; reemplaza su Fase 3 anterior. Ningún comando de
 instalación de este diseño se ha ejecutado en el host.
 
+**Estado posterior, 3.1b (2026-11-18):** diseño aprobado con condiciones;
+estados D1–D9 actualizados en la sección 11. La
+[adenda 3.1b](FASE3-DISENO-ADENDA.md) contiene las aclaraciones y prevalece
+sobre las propuestas del cuerpo original: **3.2 guía de VM, 3.3 instalador,
+3.4 señal/consumo 3010**, después 3.5–3.9. No se ha aprobado D1, la dependencia
+BootIdentifier, una licencia propia ni un cambio de JDK. Las referencias
+originales a 3.2 instalador/3.3 consumo/3.4 laptop no son la secuencia vigente.
+No se instala en un físico prestado: queda solo para sensores con las
+condiciones de D9. **Detenerse tras 3.1b y esperar aprobación antes de 3.2.**
+
 ## 1. Decisiones recibidas y recomendación
 
 Ya elegidos por el usuario: **EXE/bootstrapper**, instalación **por máquina**,
@@ -548,24 +558,24 @@ Windows externo; firma/redistribución/Mono pendiente; runtime Java NFTC/antiguo
 datos no atómicos ante halt; deuda de frescura UI/EndTask de Fase 2. No se
 eliminan mediante una tabla de diseño ni una simulación.
 
-| ID | Decisión solicitada antes de implementar |
+| ID | Estado comunicado por el usuario en 3.1b y límite de autorización |
 |---|---|
-| D1 | Aprobar B con **WiX 7.0.1 directo para MSI + Burn**, revisando elegibilidad/costo OSMF/EULA, o pedir alternativa mantenida. No se descargan herramientas sin resolverlo |
-| D2 | Aprobar orden **MSI MACE primero, PawnIO después**, consentimiento explícito UI/silencioso y lista compatible inicial exacta 2.2.0.0; versiones distintas se conservan sin actualización automática |
-| D3 | Aprobar máximo de espera 180 s **sin matar PawnIO**, con resultado indeterminado y posible proceso aún vivo/no captura de retorno tardío, o decidir rediseño antes de 3.2 |
-| D4 | Aprobar esquema propio volátil de un valor/32 B, propietario/ACL/vista y vínculo BootIdentifier; aceptar dependencia nativa defensiva condicionada a prueba, o mantener 3.3 bloqueado hasta otra solución |
-| D5 | Aprobar **aviso Java separado** reutilizando razón 12, sin cambiar V2 ni DLL, frente a exigir estado 12 nativo en métricas. Después se presentará diff mínimo para aprobación aparte en 3.3 |
-| D6 | Aprobar destino fijo Program Files, conservar datos/PawnIO, cierre manual sin kill, bloqueo de downgrade y versión/familia MSI propuesta; logs propios con retención indicada |
-| D7 | Elegir licencia MACE tras análisis; recomendación preliminar MPL-2.0, alternativa permisiva Apache-2.0/MIT. Decidir revisión/cambio del runtime Java de release, sin cambiar imagen congelada |
-| D8 | Firma: mantener builds de prueba explícitamente sin firma mientras se evalúa certificado prepagado/programa gratuito, sin pago mensual; solicitar servicio/enviar archivos requiere permiso posterior |
-| D9 | Confirmar laptop/restauración/HVCI y permiso del propietario antes de cualquier instalación; guía de preparación se entrega en 3.4, no ahora |
+| D1 | **NO APROBADA TODAVÍA**: WiX 7.0.1 directo MSI + Burn. Resumen EULA/OSMF y alternativas en la adenda; no descargar, instalar ni aceptar EULA |
+| D2 | **APROBADA**: MSI MACE primero, PawnIO después; consentimiento explícito UI/silencioso; lista compatible inicial exacta 2.2.0.0; conservar otras versiones sin actualización automática |
+| D3 | **APROBADA**: espera máxima 180 s sin matar el instalador de PawnIO; resultado indeterminado, sin señal 3010 ni segundo intento. Limitación y recuperación manual en la adenda |
+| D4 | **APROBADOS** un valor de 32 B, propietario, ACL y REG_OPTION_VOLATILE. **NO APROBADA** dependencia de BootIdentifier; alternativas y ajuste de ruta/campos pendientes de decisión en la adenda |
+| D5 | **APROBADA EN PRINCIPIO**: aviso Java separado con MetricState.REBOOT_REQUIRED, sin cambiar V2/DLL/helper/protocolo/política 4A. Diff mínimo aparte y aprobación antes de aplicarlo en 3.4 |
+| D6 | **APROBADA**: Program Files x64 fijo, datos/PawnIO conservados, cierre manual sin kill, bloqueo downgrade, familia MSI propuesta y retención de logs indicada. Revisar parte MSI si D1 elige EXE puro |
+| D7 | **PENDIENTE**: el campo de licencia no fue completado. Solo análisis de compatibilidad; no se elige licencia por el usuario. Cambio de JDK exige aprobación aparte |
+| D8 | **APROBADO** mantener builds de prueba explícitamente sin firma y con aviso. Firma pendiente; preferencia previa sin pago mensual, campo de confirmación actual sin completar. No solicitar servicios, enviar archivos ni adquirir certificados sin permiso posterior |
+| D9 | VM Hyper-V/otro físico, permiso y respaldo con restauración probada: **NO VERIFICADOS**, campos sin completar. Criterio provisional: instalación en VM limpia con instantánea; físico prestado solo sensores con permiso, respaldo probado y aprobación específica |
 
-Las reglas ya decididas no se reabren. D1–D3 afectan ejecutar 3.2 con seguridad;
-D4–D5 bloquean implementar el contrato 3.3 si no se resuelven. 3.2 puede probar
-su lógica con stubs sin afirmar que ya existe consumo real de 3010. Aprobación
-del diseño no autoriza instalar en el host ni aplicar automáticamente el diff
-de producto de 3.3. No se acepta una excepción de firma/licencia para publicar
-sin una decisión explícita y revisión del paquete final.
+Las reglas ya decididas no se reabren. La adenda registra la numeración vigente
+dictada en el mensaje de 3.1b, que difiere del prompt local. D1 sigue pendiente
+para implementar 3.3; D4 y la aprobación del diff D5 condicionan 3.4. La guía
+de VM de 3.2 requiere antes aprobación de este subpaso, sin presuponer VM
+disponible. Ninguna aprobación documental acepta una EULA ni autoriza instalar
+en el host, modificar el producto o publicar sin revisión legal del paquete.
 
 ## 12. Evidencias de este paso, cambio y parada
 
