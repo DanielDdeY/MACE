@@ -11,6 +11,7 @@ import com.mace.presentation.view.component.BlackboxHistoryPane;
 import com.mace.presentation.view.component.MetricCard;
 import com.mace.presentation.view.component.NavIcon;
 import com.mace.presentation.view.hud.HudPane;
+import com.mace.presentation.view.component.CpuThermometer;
 import com.mace.presentation.viewmodel.AlertItemViewModel;
 import com.mace.presentation.viewmodel.BlackboxHistoryViewModel;
 import com.mace.presentation.viewmodel.GpuCardViewModel;
@@ -136,6 +137,7 @@ public final class MainDashboardController {
     private GpuCardViewModel selectedGpu;
     private GpuAdapterId selectedGpuId;
     private boolean hasReceivedInventory;
+    private CpuThermometer cpuThermometer;
 
     private final ListChangeListener<MetricHistory.Point> selectedTempListener = change ->
             renderChart(gpuTempChart, selectedGpu == null ? null : selectedGpu.temperatureHistory());
@@ -243,21 +245,49 @@ public final class MainDashboardController {
                 ? "Último inventario conocido" : "Inventario no disponible");
     }
 
-    private void configureCpu() {
-        cpuVendorLabel.textProperty().bind(dashboardViewModel.cpuVendorProperty().map(v -> "Fabricante: " + v));
-        cpuProviderLabel.textProperty().bind(dashboardViewModel.cpuProviderProperty().map(v -> "Proveedor: " + v));
-        List<MetricCard> cpuCards = List.of(
-                new MetricCard("Temperatura CPU", dashboardViewModel.cpuTemperatureDisplayProperty()),
-                new MetricCard("Uso CPU", dashboardViewModel.cpuUsageDisplayProperty()));
-        metricCards.addAll(cpuCards);
-        cpuMetricsPane.getChildren().addAll(cpuCards);
-        dashboardViewModel.cpuTemperaturePoints().points().addListener(
-                (ListChangeListener<MetricHistory.Point>) change -> updateCpuStats());
-        dashboardViewModel.cpuTemperatureDisplayProperty().addListener((obs, oldValue, next) -> updateCpuStatus());
-        dashboardViewModel.alerts().addListener((ListChangeListener<AlertItemViewModel>) change -> updateCpuStatus());
-        updateCpuStatus();
-        updateCpuStats();
-    }
+    
+private void configureCpu() {
+    cpuVendorLabel.textProperty().bind(
+            dashboardViewModel.cpuVendorProperty().map(v -> "Fabricante: " + v));
+
+    cpuProviderLabel.textProperty().bind(
+            dashboardViewModel.cpuProviderProperty().map(v -> "Proveedor: " + v));
+
+    // Se conservan las dos tarjetas originales.
+    MetricCard temperatureCard = new MetricCard(
+            "Temperatura CPU",
+            dashboardViewModel.cpuTemperatureDisplayProperty());
+
+    MetricCard usageCard = new MetricCard(
+            "Uso CPU",
+            dashboardViewModel.cpuUsageDisplayProperty());
+
+    // Nuevo termómetro con la lectura real de temperatura.
+    cpuThermometer = new CpuThermometer(
+            dashboardViewModel.cpuTemperatureDisplayProperty());
+
+    metricCards.addAll(List.of(temperatureCard, usageCard));
+
+    // Dos tarjetas a la izquierda y termómetro a la derecha.
+    cpuMetricsPane.getChildren().setAll(
+            temperatureCard,
+            usageCard,
+            cpuThermometer
+    );
+
+    dashboardViewModel.cpuTemperaturePoints().points().addListener(
+            (ListChangeListener<MetricHistory.Point>) change -> updateCpuStats());
+
+    dashboardViewModel.cpuTemperatureDisplayProperty().addListener(
+            (obs, oldValue, next) -> updateCpuStatus());
+
+    dashboardViewModel.alerts().addListener(
+            (ListChangeListener<AlertItemViewModel>) change -> updateCpuStatus());
+
+    updateCpuStatus();
+    updateCpuStats();
+}
+
 
     private void configureRam() {
         List<MetricCard> ramCards = List.of(
@@ -641,5 +671,8 @@ public final class MainDashboardController {
         blackboxHistory.close();
         gpuCardsById.values().forEach(GpuCard::close);
         metricCards.forEach(MetricCard::close);
+        if (cpuThermometer != null) {
+    cpuThermometer.close();
+}
     }
 }
