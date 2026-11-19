@@ -15,6 +15,7 @@ import java.util.Optional;
  * Identificación exacta de la DLL cargada mediante SHA-256. El hash calculado se expone para el
  * informe de integración; si se configura un hash esperado ({@value #SYSTEM_PROPERTY} o
  * {@value #ENV_VARIABLE}), una DLL distinta se rechaza antes de cargarla.
+ * En producción se exige el pin por propiedad del launcher y no se consulta el entorno.
  */
 public final class NativeLibraryIntegrity {
 
@@ -44,6 +45,9 @@ public final class NativeLibraryIntegrity {
 
     /** Hash esperado configurado, normalizado a mayúsculas. */
     public static Optional<String> expectedSha256() {
+        if (!NativeLoadProfile.isDevelopment()) {
+            return Optional.of(NativeLoadProfile.productionParameters().sha256());
+        }
         String value = System.getProperty(SYSTEM_PROPERTY);
         if (value == null || value.isBlank()) {
             value = System.getenv(ENV_VARIABLE);

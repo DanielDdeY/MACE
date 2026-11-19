@@ -28,12 +28,13 @@ static const char* gpu_vendor_name(uint32_t vendor) {
 static const char* provider_name(MaceProviderId provider) {
     switch (provider) {
         case MACE_PROVIDER_WINDOWS: return "Windows";
-        case MACE_PROVIDER_INTEL_MSR: return "Intel MSR";
-        case MACE_PROVIDER_AMD_RYZEN_SDK: return "AMD Ryzen SDK";
+        case MACE_PROVIDER_INTEL_MSR: return "ID reservado Intel MSR"; /* Obsolete ABI; no live provider. */
+        case MACE_PROVIDER_AMD_RYZEN_SDK: return "ID reservado AMD Ryzen SDK"; /* Obsolete ABI; no live provider. */
         case MACE_PROVIDER_AMD_UPROF: return "AMD uProf";
         case MACE_PROVIDER_NVIDIA_NVML: return "NVIDIA NVML";
-        case MACE_PROVIDER_AMD_ADLX: return "AMD ADLX";
+        case MACE_PROVIDER_AMD_ADLX: return "ID reservado AMD ADLX"; /* Obsolete ABI; no live provider. */
         case MACE_PROVIDER_INTEL_IGCL: return "Intel IGCL";
+        case MACE_PROVIDER_LHM: return "LibreHardwareMonitor";
         default: return "Ninguno";
     }
 }

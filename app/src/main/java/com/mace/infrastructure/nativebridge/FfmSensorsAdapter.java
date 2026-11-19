@@ -17,6 +17,7 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.LongSupplier;
 
 import static java.lang.foreign.ValueLayout.JAVA_INT;
 
@@ -46,6 +47,7 @@ public final class FfmSensorsAdapter implements HardwareSensorsPort {
 
     private final NativeApi nativeApi;
     private final Clock clock;
+    private final TelemetryInitialization initialization;
 
     private List<GpuAdapter> adapters = List.of();
     private boolean adaptersDirty = true;
@@ -53,29 +55,36 @@ public final class FfmSensorsAdapter implements HardwareSensorsPort {
 
     /**
      * @param nativeApi enlace FFM ya cargado y con ABI verificado (la telemetría se inicializa aquí)
-     * @throws NativeLibraryException si {@code CP_InitializeTelemetry} falla
+     * @throws NativeLibraryException si falla con un código distinto de BUSY.
+     * BUSY devuelve estados transitorios y se reintenta desde el sondeo de fondo.
      */
     public FfmSensorsAdapter(NativeApi nativeApi) {
         this(nativeApi, Clock.systemUTC());
     }
 
     public FfmSensorsAdapter(NativeApi nativeApi, Clock clock) {
+        this(nativeApi,clock,System::nanoTime);
+    }
+
+    FfmSensorsAdapter(NativeApi nativeApi, Clock clock, LongSupplier nanoTime) {
         this.nativeApi = Objects.requireNonNull(nativeApi, "nativeApi no puede ser null");
         this.clock = Objects.requireNonNull(clock, "clock no puede ser null");
-        int result = nativeApi.ensureTelemetryInitialized();
-        if (result != 0) {
-            throw new NativeLibraryException(NativeFunctions.SYMBOL_INITIALIZE_TELEMETRY
-                    + " devolvió el código " + result);
-        }
+        initialization=new TelemetryInitialization(nativeApi,nanoTime);
+        initialization.ready(); // BUSY is transient; the monitoring worker retries later.
     }
 
     @Override
     public synchronized HardwareSnapshot fetchHardwareSnapshot() {
+        boolean ready=initialization.ready();
         if (adaptersDirty || pollsSinceEnumeration >= REENUMERATE_EVERY_POLLS) {
             refreshAdapters();
         }
         pollsSinceEnumeration++;
         try (Arena arena = Arena.ofConfined()) {
+            if (!ready) return new HardwareSnapshot(clock.instant(),
+                CpuReading.unavailable(initialization.state(),0),
+                adapters.stream().map(a->GpuReading.unavailable(a,initialization.state(),0)).toList(),
+                pollMemory(arena));
             CpuReading cpu = pollCpu(arena);
             List<GpuReading> gpus = new ArrayList<>(adapters.size());
             for (GpuAdapter adapter : adapters) {

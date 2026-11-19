@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  * temperatura sin ventilador propio ({@link MetricState#UNSUPPORTED} en {@code fanRpm}).</p>
  *
  * @param adapter              GPU a la que pertenecen las lecturas
- * @param provider             proveedor (NVML, ADLX, IGCL o ninguno)
+ * @param provider             proveedor (LHM, NVML, IGCL o ninguno)
  * @param powerScope           ámbito de {@code powerWatts} (GPU board / GPU chip)
  * @param temperatureCelsius   temperatura en °C
  * @param powerWatts           potencia en W

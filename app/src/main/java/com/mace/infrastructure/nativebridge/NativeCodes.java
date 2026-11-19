@@ -18,7 +18,7 @@ public final class NativeCodes {
     private NativeCodes() {
     }
 
-    // MaceMetricState: 0..8 en el mismo orden que MetricState.
+    // MaceMetricState: 0..8 históricos; 9..16 aditivos en ABI 1.5. Solo 0 es válido.
     public static MetricState metricState(int code) {
         MetricState[] states = MetricState.values();
         return code >= 0 && code < states.length ? states[code] : MetricState.READ_FAILED;
@@ -28,7 +28,7 @@ public final class NativeCodes {
         return state.ordinal();
     }
 
-    // MaceProviderId: 0..7 en el mismo orden que SensorProvider.
+    // MaceProviderId: 0..8 en el mismo orden que SensorProvider; LHM se añade al final.
     public static SensorProvider provider(int code) {
         SensorProvider[] providers = SensorProvider.values();
         return code >= 0 && code < providers.length ? providers[code] : SensorProvider.NONE;

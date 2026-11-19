@@ -234,9 +234,9 @@
               <tr><th scope="col">Componente</th><th scope="col">Qué muestra</th><th scope="col">Qué necesita</th></tr>
             </thead>
             <tbody>
-              <tr><td>CPU</td><td>Uso, temperatura y potencia</td><td>El uso funciona siempre. En Intel, la temperatura requiere el controlador WinRing0, que MACE no instala. En AMD Ryzen, requiere Ryzen Master Monitoring SDK y abrir MACE como administrador.</td></tr>
+              <tr><td>CPU</td><td>Uso, temperatura y potencia</td><td>El uso funciona siempre. En Intel y AMD, la temperatura y la potencia requieren el controlador PawnIO y abrir MACE como administrador.</td></tr>
               <tr><td>GPU NVIDIA</td><td>Temperatura, uso, potencia, ventilador y memoria de vídeo</td><td>El controlador de NVIDIA.</td></tr>
-              <tr><td>GPU AMD Radeon</td><td>Temperatura, uso, potencia, ventilador y memoria de vídeo</td><td>Un controlador AMD compatible con ADLX.</td></tr>
+              <tr><td>GPU AMD Radeon</td><td>Temperatura, uso, potencia, ventilador y memoria de vídeo</td><td>El controlador de AMD; MACE las lee mediante LibreHardwareMonitor (requiere PawnIO y administrador).</td></tr>
               <tr><td>GPU Intel</td><td>Uso y potencia; temperatura según el modelo</td><td>El controlador gráfico de Intel.</td></tr>
               <tr><td>Memoria</td><td>RAM total, disponible y en uso</td><td>Nada adicional.</td></tr>
               <tr><td>Programas</td><td>Lista con memoria usada, si responden y botón para cerrarlos con confirmación</td><td>Permiso de administrador para ver todos.</td></tr>

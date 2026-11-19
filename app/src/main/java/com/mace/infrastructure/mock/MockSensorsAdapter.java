@@ -143,6 +143,11 @@ public final class MockSensorsAdapter implements HardwareSensorsPort {
         MetricReading temperature = MetricReading.valid(round1(cpuTemp));
         MetricReading power = MetricReading.valid(round1(watts));
         MetricReading usagePercent = MetricReading.valid(round1(usage));
+        MetricState simulated = scenario.sensorState();
+        if (simulated != null) return new CpuReading(CpuVendor.INTEL, SensorProvider.LHM, PowerScope.UNKNOWN,
+                MetricReading.unavailable(simulated), MetricReading.unavailable(simulated), usagePercent, nanos);
+        if (recovering()) return new CpuReading(CpuVendor.AMD, SensorProvider.LHM, PowerScope.UNKNOWN,
+                MetricReading.unavailable(MetricState.WARMING_UP), MetricReading.unavailable(MetricState.WARMING_UP), usagePercent, nanos);
         boolean warming = scenario == MockScenario.WARMING_UP && polls <= MockScenario.WARM_UP_POLLS;
         if (warming) {
             power = MetricReading.unavailable(MetricState.WARMING_UP);
@@ -152,12 +157,13 @@ public final class MockSensorsAdapter implements HardwareSensorsPort {
             case CPU_NO_TEMPERATURE -> new CpuReading(CpuVendor.INTEL, SensorProvider.WINDOWS, PowerScope.UNKNOWN,
                     MetricReading.unavailable(MetricState.NO_PROVIDER), MetricReading.unavailable(MetricState.NO_PROVIDER),
                     usagePercent, nanos);
-            case AMD_NO_POWER -> new CpuReading(CpuVendor.AMD, SensorProvider.AMD_RYZEN_SDK, PowerScope.UNKNOWN,
+            case AMD_NO_POWER -> new CpuReading(CpuVendor.AMD, SensorProvider.LHM, PowerScope.UNKNOWN,
                     temperature, MetricReading.unavailable(MetricState.NO_PROVIDER), usagePercent, nanos);
-            case ACCESS_DENIED -> new CpuReading(CpuVendor.AMD, SensorProvider.AMD_RYZEN_SDK, PowerScope.UNKNOWN,
+            case ACCESS_DENIED -> new CpuReading(CpuVendor.AMD, SensorProvider.LHM, PowerScope.UNKNOWN,
                     MetricReading.unavailable(MetricState.ACCESS_DENIED), MetricReading.unavailable(MetricState.NO_PROVIDER),
                     usagePercent, nanos);
-            default -> new CpuReading(CpuVendor.INTEL, SensorProvider.INTEL_MSR, PowerScope.CPU_PACKAGE,
+            default -> new CpuReading(scenario == MockScenario.LHM_RECOVERY_SHORT || scenario == MockScenario.LHM_RECOVERY_LONG
+                    ? CpuVendor.AMD : CpuVendor.INTEL, SensorProvider.LHM, PowerScope.CPU_PACKAGE,
                     temperature, power, usagePercent, nanos);
         };
     }
@@ -168,6 +174,13 @@ public final class MockSensorsAdapter implements HardwareSensorsPort {
 
     private GpuReading nextGpu(int index, long nanos) {
         SimulatedGpu gpu = gpus.get(index);
+        MetricState failure = scenario.sensorState();
+        if (gpu.provider() == SensorProvider.LHM && (failure != null || recovering())) {
+            var absent = GpuReading.unavailable(gpu.adapter(), failure != null ? failure : MetricState.WARMING_UP, nanos);
+            return new GpuReading(gpu.adapter(), gpu.provider(), PowerScope.UNKNOWN, absent.temperatureCelsius(),
+                    absent.powerWatts(), absent.usagePercent(), absent.fanRpm(), absent.fanPercent(),
+                    absent.videoMemoryUsedBytes(), absent.videoMemoryTotalBytes(), nanos);
+        }
         if (gpu.kind() == GpuKind.INACTIVE) {
             GpuReading inactive = GpuReading.unavailable(gpu.adapter(), MetricState.DEVICE_INACTIVE, nanos);
             return new GpuReading(gpu.adapter(), gpu.provider(), gpu.scope(), inactive.temperatureCelsius(),
@@ -210,11 +223,12 @@ public final class MockSensorsAdapter implements HardwareSensorsPort {
         SimulatedGpu nvidia = new SimulatedGpu(adapter(0x0000_1A2B, 0x10DE, 0x2504, 0, "NVIDIA GeForce RTX 3060"),
                 GpuKind.DEDICATED_FULL, SensorProvider.NVIDIA_NVML, PowerScope.GPU_BOARD, 0f, 12L * GIB);
         SimulatedGpu radeon = new SimulatedGpu(adapter(0x0000_2C3D, 0x1002, 0x7340, 0, "AMD Radeon RX 5500 XT"),
-                GpuKind.DEDICATED_FULL, SensorProvider.AMD_ADLX, PowerScope.GPU_CHIP, 2f, 8L * GIB);
+                GpuKind.DEDICATED_FULL, SensorProvider.LHM, PowerScope.GPU_CHIP, 2f, 8L * GIB);
         SimulatedGpu intel = new SimulatedGpu(adapter(0x0000_0E4F, 0x8086, 0x9A49, 0, "Intel(R) Iris(R) Xe Graphics"),
                 GpuKind.INTEGRATED_NO_FAN, SensorProvider.INTEL_IGCL, PowerScope.GPU_CHIP, 4f, 2L * GIB);
         return switch (scenario) {
-            case AMD_NO_POWER, ACCESS_DENIED -> List.of(radeon);
+            case AMD_NO_POWER, ACCESS_DENIED, HELPER_UNAVAILABLE, HELPER_RETRYING, HELPER_UNTRUSTED,
+                    HELPER_CONTAINMENT_FAILED, LHM_RECOVERY_SHORT, LHM_RECOVERY_LONG, SENSORS_WARMING -> List.of(radeon);
             case IGPU_NO_FAN -> List.of(intel);
             case DUAL_GPU -> List.of(intel, reindex(nvidia, 1, 0f));
             case GPU_INACTIVE -> List.of(intel, new SimulatedGpu(reindex(nvidia, 1, 0f).adapter(), GpuKind.INACTIVE,
@@ -230,6 +244,10 @@ public final class MockSensorsAdapter implements HardwareSensorsPort {
         GpuAdapter a = gpu.adapter();
         return new SimulatedGpu(new GpuAdapter(a.id(), a.vendorId(), a.deviceId(), a.subsystemId(), a.revision(),
                 a.dxgiFlags(), index, a.description()), gpu.kind(), gpu.provider(), gpu.scope(), meanOffset, gpu.vramTotal());
+    }
+    private boolean recovering() {
+        return polls >= 3 && (scenario == MockScenario.LHM_RECOVERY_SHORT && polls == 3
+                || scenario == MockScenario.LHM_RECOVERY_LONG && polls <= 5);
     }
 
     private static GpuAdapter adapter(int luidLow, int vendor, int device, int index, String description) {

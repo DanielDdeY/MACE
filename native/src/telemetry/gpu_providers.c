@@ -10,33 +10,17 @@ bool Nvml_PollAdapter(const MaceGpuAdapterInfoV2*, MaceGpuTelemetryV2*);
 bool Igcl_Init(void);
 void Igcl_Shutdown(void);
 bool Igcl_PollAdapter(const MaceGpuAdapterInfoV2*, MaceGpuTelemetryV2*);
-#ifdef MACE_HAS_ADLX
-bool Adlx_Init(void);
-bool Adlx_PollAdapter(const MaceGpuAdapterInfoV2*, MaceGpuTelemetryV2*);
-#endif
 
 static bool nvml_ready, igcl_ready;
-#ifdef MACE_HAS_ADLX
-static bool adlx_ready;
-#endif
 
 void GpuProviders_Init(void) {
     nvml_ready = Nvml_Init();
     igcl_ready = Igcl_Init();
-#ifdef MACE_HAS_ADLX
-    adlx_ready = Adlx_Init();
-#endif
 }
 
 void GpuProviders_Shutdown(void) {
     Nvml_Shutdown();
     Igcl_Shutdown();
-#ifdef MACE_HAS_ADLX
-    /* ADLX 1.x on some AMD drivers retains three OS handles after every
-     * ADLXTerminate/reinitialize pair. Keep its one session for the DLL's
-     * process lifetime; runtime_lock prevents polling while inactive. */
-    adlx_ready = false;
-#endif
     nvml_ready = false;
     igcl_ready = false;
 }
@@ -76,9 +60,5 @@ void GpuProviders_Poll(const MaceGpuAdapterInfoV2* adapter,
         Nvml_PollAdapter(adapter, out);
     else if (adapter->vendor_id == 0x8086u && igcl_ready)
         Igcl_PollAdapter(adapter, out);
-#ifdef MACE_HAS_ADLX
-    else if (adapter->vendor_id == 0x1002u && adlx_ready)
-        Adlx_PollAdapter(adapter, out);
-#endif
     windows_memory_capacity(adapter, out);
 }

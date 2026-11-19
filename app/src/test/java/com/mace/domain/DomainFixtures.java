@@ -34,7 +34,7 @@ public final class DomainFixtures {
     }
 
     public static CpuReading cpu(MetricReading temperature) {
-        return new CpuReading(CpuVendor.INTEL, SensorProvider.INTEL_MSR, PowerScope.CPU_PACKAGE,
+        return new CpuReading(CpuVendor.INTEL, SensorProvider.LHM, PowerScope.CPU_PACKAGE,
                 temperature, MetricReading.valid(35), MetricReading.valid(20), 1L);
     }
 

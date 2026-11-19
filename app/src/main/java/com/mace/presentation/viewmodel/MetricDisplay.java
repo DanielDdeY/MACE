@@ -62,6 +62,7 @@ public record MetricDisplay(MetricState state, String text, OptionalDouble value
     public boolean isValid() {
         return state.isValid();
     }
+    public String message() { return MetricMessages.message(state); }
 
     private static MetricDisplay valid(double value, String unit, int decimals) {
         String number = String.format(Locale.ROOT, "%." + decimals + "f", value);

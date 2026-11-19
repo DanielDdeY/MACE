@@ -38,7 +38,13 @@ CP_API MaceStatus CP_PollSystemMemoryV2(MaceSystemMemoryV2* out_data,
                                        uint32_t out_capacity);
 
 // Ciclo de vida del subsistema de telemetría
+/* Inicio asíncrono: 0 si iniciado/ya activo; MACE_E_BUSY si otro ciclo de vida
+ * está en curso. No espera al helper/SDK. Tras el primer inicio la DLL queda
+ * fijada hasta salir del proceso para proteger trabajadores pendientes. */
 CP_API int  CP_InitializeTelemetry(void);
+/* Espera pública máxima 4000 ms (sin garantía de tiempo real del SO).
+ * No llamar desde JavaFX. Si queda un trabajador, se conservan sus recursos;
+ * init devuelve BUSY hasta completar el cierre; poll devuelve NOT_INITIALIZED. */
 CP_API void CP_ShutdownTelemetry(void);
 CP_API int  CP_PollTelemetry(TelemetryData* out_data);
 

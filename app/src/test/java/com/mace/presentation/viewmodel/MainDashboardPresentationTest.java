@@ -184,6 +184,28 @@ class MainDashboardPresentationTest {
                 List.of(), List.of(), Map.of(), BlackboxStats.disabled());
     }
 
+    @Test void dashboardYHudCompartenLaCopiaToleranteSinOcultarFallasExplicitas() {
+        try (Fixture fixture=new Fixture()) {
+            var valid=com.mace.domain.DomainFixtures.snapshot(com.mace.domain.DomainFixtures.cpu(61));
+            fixture.publish(snapshot(1,1,valid));
+            var cpu=valid.cpu();
+            var warming=new com.mace.domain.model.CpuReading(cpu.vendor(),cpu.provider(),cpu.powerScope(),
+                com.mace.domain.model.MetricReading.unavailable(MetricState.WARMING_UP),
+                cpu.powerWatts(),cpu.usagePercent(),cpu.monotonicNanos());
+            var raw=new HardwareSnapshot(valid.timestamp(),warming,valid.gpus(),valid.memory());
+            fixture.publish(snapshot(2,2,raw));
+            assertTrue(fixture.viewModel.cpuTemperatureDisplayProperty().get().isValid());
+            assertEquals(61,fixture.viewModel.latestSnapshotProperty().get().hardware().cpu().temperatureCelsius().value());
+            assertEquals(MetricState.WARMING_UP,raw.cpu().temperatureCelsius().state());
+            var failed=new com.mace.domain.model.CpuReading(cpu.vendor(),cpu.provider(),cpu.powerScope(),
+                com.mace.domain.model.MetricReading.unavailable(MetricState.READ_FAILED),
+                cpu.powerWatts(),cpu.usagePercent(),cpu.monotonicNanos());
+            fixture.publish(snapshot(3,3,new HardwareSnapshot(valid.timestamp(),failed,valid.gpus(),valid.memory())));
+            assertFalse(fixture.viewModel.cpuTemperatureDisplayProperty().get().isValid());
+            assertEquals(MetricState.READ_FAILED,fixture.viewModel.latestSnapshotProperty().get().hardware().cpu().temperatureCelsius().state());
+        }
+    }
+
     private static final class Fixture implements AutoCloseable {
         final ManualPublisher publisher = new ManualPublisher();
         final MockProcessAdapter processes = new MockProcessAdapter();

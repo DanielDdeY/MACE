@@ -25,6 +25,9 @@
         <mockito.version>5.12.0</mockito.version>
 
         <app.mainClass>com.mace.presentation.MaceLauncher</app.mainClass>
+        <!-- Build metadata, never selected from the runtime environment/JVM properties. -->
+        <mace.build.nativeProfile>production</mace.build.nativeProfile>
+        <mace.build.directory>target</mace.build.directory>
     </properties>
 
     <dependencyManagement>
@@ -78,6 +81,14 @@
     </dependencies>
 
     <build>
+        <directory>${mace.build.directory}</directory>
+        <resources>
+            <resource><directory>src/main/resources</directory></resource>
+            <resource>
+                <directory>src/main/profile</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
 
             <plugin>
@@ -114,6 +125,12 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>development</id>
+            <properties>
+                <mace.build.nativeProfile>development</mace.build.nativeProfile>
+            </properties>
+        </profile>
         <!--
             Vista previa sin DLL ni administrador (adaptadores simulados):
                 mvn javafx:run -Ppreview

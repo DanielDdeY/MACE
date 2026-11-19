@@ -134,7 +134,7 @@ class NativeV2IntegrationTest {
         for (GpuReading gpu : second.gpus()) {
             System.out.println("[MACE IT] " + gpu.adapter().displayName() + " " + gpu.adapterId() + " proveedor "
                     + gpu.provider() + " ámbito " + gpu.powerScope() + " temp " + gpu.temperatureCelsius()
-                    + " rpm " + gpu.fanRpm() + " vram " + gpu.videoMemoryUsedBytes());
+                    + " potencia " + gpu.powerWatts() + " rpm " + gpu.fanRpm() + " vram " + gpu.videoMemoryUsedBytes());
             assertTrue(adapters.stream().anyMatch(a -> a.id().equals(gpu.adapterId())));
         }
     }

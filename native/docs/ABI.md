@@ -1,6 +1,8 @@
+> Documento actualizado en Subfase 1D. [Original íntegro](../../docs/historico/native/pre1D-native__docs__ABI.md). Los comandos actuales no requieren SDK externos de sensores retirados.
+
 # Contrato de integración native/FFM
 
-Estado: fase 5. La DLL exporta los siete símbolos heredados, `CP_GetAbiInfo`, cuatro funciones V2 de telemetría, seis de procesos, cinco del anillo y el cierre del mapeo heredado: **24 símbolos**. `CP_GetAbiInfo` devuelve ABI **1.4** en un registro de estructura versión **2**. El Java actual solo consume la interfaz heredada.
+Estado: Fase 2, 4B. La DLL exporta los siete símbolos heredados, `CP_GetAbiInfo`, cuatro funciones V2 de telemetría, seis de procesos, cinco del anillo y el cierre del mapeo heredado: **24 símbolos**. `CP_GetAbiInfo` devuelve ABI **1.5** en un registro de estructura versión **2**. Java consume las interfaces V2 con verificación ABI y SHA-256.
 
 ## Plataforma y tipos
 
@@ -14,12 +16,56 @@ Estado: fase 5. La DLL exporta los siete símbolos heredados, `CP_GetAbiInfo`, c
 
 La nueva consulta de identificación es `MaceStatus CP_GetAbiInfo(MaceAbiInfoV2* out_info, uint32_t out_capacity, uint32_t* out_required_size)`. Se puede llamar antes de `CP_InitializeTelemetry` y no carga sensores. Requiere `out_required_size`; siempre escribe allí `64` cuando el puntero es válido. Con `out_info=NULL, out_capacity=0` devuelve `MACE_E_BUFFER_TOO_SMALL (-2)` para consultar el tamaño. Si la capacidad es inferior a 64, no escribe ningún byte de `out_info`; si el puntero es nulo pese a capacidad suficiente devuelve `MACE_E_INVALID_ARGUMENT (-1)`. En éxito escribe solo los 64 bytes definidos, inicializa los reservados a cero y devuelve `MACE_OK (0)`. Se permiten buffers mayores; sus bytes adicionales permanecen intactos.
 
-`abi_major=1, abi_minor=4` significa que la interfaz heredada está intacta y se añadieron telemetría, procesos y extensiones V2. `build_major/minor/patch=1.4.2` identifica esta DLL. `implemented_capabilities` anuncia además `MACE_CAP_PROCESS_SAMPLES`, `MACE_CAP_WINDOW_RESPONSIVENESS` y `MACE_CAP_BLACKBOX_BUFFER`; un bit indica código disponible, no acceso a todos los procesos ni sensores del equipo. Los 24 símbolos exportados se comprueban al cargar exactamente la DLL distribuida.
+`abi_major=1, abi_minor=5` añade motivos no válidos de sensores al final del conjunto anterior. `build_major/minor/patch=1.5.0` identifica esta DLL. No cambia ninguna firma/layout: CPU 56, GPU 104, inventario 296, legado 28 bytes, con los mismos offsets y reserved cero. `implemented_capabilities` sigue anunciando código implementado, no disponibilidad física. Los 24 símbolos exportados se comprueban sobre la DLL distribuida.
+
+## Estados aditivos de ABI 1.5
+
+Valores 0..8 intactos; VALID continúa siendo exclusivamente 0. Los códigos
+9..16 son SIEMPRE no válidos y llevan valor numérico 0 en F32/U32/U64.
+No son proveedores ni estados del wire; el protocolo privado permanece en 2.
+
+| Causa | Código nuevo | Aplicación |
+|---|---|---|
+| Helper declara proceso sin elevación | NOT_ELEVATED=9 | Temperatura/potencia CPU; uso Windows y GPU independientes |
+| PawnIO Missing | PAWNIO_MISSING=10 | Temperatura/potencia CPU |
+| PawnIO Stopped | PAWNIO_STOPPED=11 | Temperatura/potencia CPU; nunca implica 3010 |
+| Reinicio requerido por 3010 | REBOOT_REQUIRED=12 | Encoder/decodificación y simulación de Fase 2; origen del instalador pendiente |
+| Helper ausente o lanzamiento bloqueado | HELPER_UNAVAILABLE=13 | Métricas LHM afectadas; conserva capacidad Windows solo en el caso de ausencia ya permitido |
+| Presupuesto agotado/modo lento | HELPER_RETRYING=14 | Métricas LHM afectadas; sigue reintentando según 4A |
+| Runtime no verificable/inaccesible | HELPER_UNTRUSTED=15 | Métricas LHM afectadas; mensaje genérico, sin detalle de comprobación |
+| Fallo conocido al crear/verificar contención | HELPER_CONTAINMENT_FAILED=16 | Métricas LHM afectadas; falla cerrado |
+
+WARMING_UP conserva 5; READ_FAILED=6 conserva fallo de lectura, cero CPU
+sospechoso y caché caducada. Unknown de PawnIO no se inventa como Missing,
+Stopped o reinicio pendiente: conserva NO_PROVIDER=2. GPU ambigua/UnknownPower
+conserva UNSUPPORTED=3. Ninguna de estas causas cambia la promoción a VALID.
+
+Se agrupan ausencia/fallo de arranque bloqueado en 13: necesitan revisar la
+distribución o restricciones. EOF, transporte roto y mensajes inválidos conservan
+READ_FAILED=6 mientras 4A reintenta automáticamente; al pasar a modo lento usan
+14. Así un corte transitorio no muestra instrucciones de reparar. CreateProcess
+fallido no demuestra un fallo de job: usa 13; solo fallo conocido de configuración
+o verificación de job usa 16. Se agrupan los rechazos de confianza en 15 para no
+revelar si falló ruta, hash, manifiesto, acceso o firma. En modo lento prevalece
+14 sobre la indisponibilidad transitoria; no sobre un fallo permanente.
+
+La versión menor aumenta por extensión aditiva del enum uint32_t; la versión
+mayor y versión de estructura permanecen. Java nuevo mantiene mínimo ABI 1.4 y
+acepta DLL 1.4.2: verá los motivos genéricos antiguos. Java anterior con mínimo
+1.4 acepta 1.5 y convierte códigos desconocidos a READ_FAILED/N/D. Consumidores
+C antiguos deben comprobar `state==VALID`, sin indexar tablas sin validar ni
+asumir un enum cerrado; los que exijan exactamente minor=4 rechazarán 1.5 y
+necesitan adaptar su comprobación. El formato binario de caja negra no cambia;
+lectores anteriores muestran los estados nuevos como N/D genérico.
+
+La DLL y helper se empaquetan contra el mismo manifiesto verificado; compatibilidad
+de ABI no autoriza mezclar un runtime cuyo hash no coincida. Presupuesto/backoff,
+cooldown, recuperación de PawnIO, cierre y watchdog no cambian en 4B.
 
 | Símbolo | Firma C | Resultado actual |
-|---|---|
-| `CP_InitializeTelemetry` | `int (void)` | Devuelve `0` aunque falten proveedores opcionales. Carga CPU, NVML, IGCL, ADLX y Ryzen Master Monitoring SDK si se compilaron los adaptadores respectivos. |
-| `CP_ShutdownTelemetry` | `void (void)` | Espera las lecturas activas, reinicia las referencias de muestreo y cierra todos los mapeos de ambas generaciones. Descarga proveedores salvo la sesión ADLX, que permanece hasta el fin del proceso por una limitación comprobada del controlador AMD. |
+|---|---|---|
+| `CP_InitializeTelemetry` | `int (void)` | Inicia trabajadores sin esperar sensores; BUSY durante cierre. |
+| `CP_ShutdownTelemetry` | `void (void)` | Impide nuevos sondeos, une trabajadores y reinicia referencias. |
 | `CP_PollTelemetry` | `int (TelemetryData*)` | `-1` si el puntero es nulo; `0` en otro caso, aun si faltan sensores. |
 | `CP_EnumerateUserlandProcesses` | `int (ProcessData*, uint32_t max_count, uint32_t* out_count)` | `-1` si los argumentos son inválidos; `0` si la enumeración termina; código Win32 positivo si falla el snapshot. Puede truncar al llegar a `max_count` sin indicarlo; comparte el filtro de seguridad con V2. |
 | `CP_TerminateProcess` | `int (uint32_t pid)` | `-1` para PID 0/4; `0` si termina; `ERROR_ACCESS_DENIED` para objetivo protegido/propio y código Win32 positivo en otros errores. Revalida el objetivo en el mismo handle, pero no puede detectar que un PID cambió desde una enumeración previa. Solo se invoca por petición manual. |

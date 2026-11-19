@@ -1,6 +1,8 @@
+> Documento actualizado en Subfase 1D. [Original íntegro](../../docs/historico/native/pre1D-native__docs__PHASE4.md). Los comandos actuales no requieren SDK externos de sensores retirados.
+
 # Fase 4 — bases nativas de las extensiones
 
-La DLL 1.4.0 (ABI 1.4) añade muestras de memoria por proceso, diagnóstico detallado de ventanas y un buffer circular temporal. La aplicación Java todavía debe consumir estas interfaces. Los siete símbolos usados por la aplicación existente y sus layouts no cambian.
+La DLL 1.4.0 (ABI 1.4) añade muestras de memoria por proceso, diagnóstico detallado de ventanas y un buffer circular temporal. Java ya consume las interfaces V2. Los siete símbolos usados por la aplicación existente y sus layouts no cambian.
 
 ## Muestras y ventanas
 
@@ -23,5 +25,3 @@ Cada registro mide 160 bytes: tipo, tamaño de payload, secuencia monotónica de
 El hook heredado `CP_InitSharedTelemetryBuffer` conserva el encabezado de 16 bytes y el retorno por puntero para compatibilidad. Ahora rechaza nombres ya existentes, registra los recursos y ofrece `CP_CloseSharedTelemetryBuffer(view)`. La aplicación debe detener y esperar a todos los lectores del puntero antes de cerrarlo o llamar a `CP_ShutdownTelemetry`; la DLL no puede sincronizar usos externos directos de esa dirección. El apagado limpia las vistas pendientes. No se debe liberar el puntero con `free`, `UnmapViewOfFile` ni FFM. Las nuevas integraciones usan el token V2.
 
 ## Comprobación
-
-`process_extensions` prueba tamaños, identidad alterada, estados de memoria y respuesta estructurada. `blackbox_buffer` prueba anillo lleno, orden de secuencias, lectura por copia, buffer corto intacto, nombre duplicado, doble cierre y limpieza en shutdown. `abi_exports` comprueba los 24 símbolos y la versión 1.4. Compilación Release con ADLX y Ryzen Master Monitoring SDK externos: 8/8 pruebas CTest aprobadas en el equipo AMD de desarrollo. La disponibilidad de ventanas interactivas, proveedores Intel/NVIDIA y comportamiento de procesos de otros usuarios debe comprobarse en los equipos de los compañeros.
