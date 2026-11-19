@@ -49,4 +49,5 @@ jobs:
       # 3. Pruebas de Java pasando permisos FFM y ruta de librerías nativas
       - name: Ejecutar pruebas unitarias y de integracion con Maven
         working-directory: app
-        run: mvn -B clean test -DargLine="--enable-native-access=ALL-UNNAMED -Djava.library.path=lib"
+        shell: powershell
+        run: mvn -B -U -e clean test "-DargLine=--enable-native-access=ALL-UNNAMED -Djava.library.path=lib"
