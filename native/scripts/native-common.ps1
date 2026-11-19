@@ -53,7 +53,11 @@ function Get-MaceToolchain {
 
         foreach ($candidate in $candidates) {
             if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) { continue }
-            $versionLine = (& $candidate --version | Select-Object -First 1)
+            # Se lee toda la salida antes de tomar la primera línea: con "| Select-Object -First 1"
+            # PowerShell cortaba el pipeline, terminaba cmake.exe a medio escribir y $LASTEXITCODE
+            # quedaba en -1, descartando un CMake válido de forma intermitente.
+            $versionOutput = @(& $candidate --version)
+            $versionLine = $versionOutput | Select-Object -First 1
             if ($LASTEXITCODE -ne 0 -or $versionLine -notmatch 'cmake version (\d+\.\d+(?:\.\d+)?)') { continue }
             $cmakeVersion = [version]$Matches[1]
             if ($cmakeVersion -lt [version]'3.28') { continue }
