@@ -5,6 +5,8 @@ on:
     branches: [ main, develop , 'ci/**' ]
   pull_request:
     branches: [ main, develop ]
+  # El flujo de entrega (release-installer.yml) lo reutiliza como compuerta.
+  workflow_call:
 
 # Sigue el orden de verificacion de la rama LHM (helper -> nativo dev -> nativo
 # prod -> Java -> auditorias). No instala PawnIO, no se eleva y no publica
