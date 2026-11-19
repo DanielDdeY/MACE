@@ -1,6 +1,8 @@
+> Documento actualizado en Subfase 1D. [Original íntegro](../../docs/historico/native/pre1D-native__docs__PHASE3.md). Los comandos actuales no requieren SDK externos de sensores retirados.
+
 # Fase 3: procesos y terminación protegida
 
-Estado: implementación en `native/` de la copia aislada; ABI 1.3, DLL 1.3.0. Los siete símbolos heredados y sus tres layouts congelados no cambian. La capa Java aún debe adoptar las consultas V2 para obtener identidad y rutas sin truncar.
+Estado: implementación en `native/` de la copia aislada; ABI 1.3, DLL 1.3.0. Los siete símbolos heredados y sus tres layouts congelados no cambian. Java ya consume las consultas V2.
 
 ## Comportamiento
 
@@ -15,8 +17,7 @@ Estado: implementación en `native/` de la copia aislada; ABI 1.3, DLL 1.3.0. Lo
 `process_security` comprueba nombres y rutas sintéticas, límites de directorio y protección del proceso propio. `process_api` verifica el inventario V2, tamaños, buffer centinela, identidad, ruta y que la API antigua/V2 no puedan terminar el proceso de prueba. La prueba de terminación se activa **solo** con `-EnableTerminationTest`; crea `process_helper.exe`, demuestra que una fecha de creación alterada no lo cierra y termina únicamente ese auxiliar con la identidad correcta. No se automatiza la terminación de aplicaciones del usuario.
 
 ```powershell
-.\native\scripts\build-native.ps1 -Configuration Release -AdlxSdkDirectory 'C:\Program Files\AMD\ADLX-2.0' -RyzenSdkDirectory 'C:\Program Files\AMD\RyzenMasterMonitoringSDK'
-.\native\scripts\build-native.ps1 -Configuration Release -BuildDirectory '.\native\build\vs2026-process-tests' -AdlxSdkDirectory 'C:\Program Files\AMD\ADLX-2.0' -RyzenSdkDirectory 'C:\Program Files\AMD\RyzenMasterMonitoringSDK' -EnableTerminationTest
+.\native\scripts\build-native.ps1 -Configuration Release
 ```
 
 La primera ejecución hace seis pruebas sin terminación; la segunda añade la prueba controlada del auxiliar. Los permisos del launcher pueden permitir consultar más procesos, pero no anulan la protección de procesos críticos ni el acceso denegado por Windows. La fase 4 añadirá muestras temporales para fugas y estados detallados de ventanas; la fase 5 ampliará las pruebas de concurrencia y ciclo de vida.

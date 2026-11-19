@@ -25,7 +25,15 @@ public enum MetricState {
     /** El dispositivo está apagado o en reposo (p. ej. dGPU de portátil híbrido). */
     DEVICE_INACTIVE("Inactivo"),
     /** La telemetría nativa no está inicializada. */
-    NOT_INITIALIZED("No inicializado");
+    NOT_INITIALIZED("No inicializado"),
+    NOT_ELEVATED("Requiere administrador"),
+    PAWNIO_MISSING("PawnIO no instalado"),
+    PAWNIO_STOPPED("PawnIO detenido"),
+    REBOOT_REQUIRED("Reinicio pendiente"),
+    HELPER_UNAVAILABLE("Componente no disponible"),
+    HELPER_RETRYING("Reintentando sensores"),
+    HELPER_UNTRUSTED("Componente no verificado"),
+    HELPER_CONTAINMENT_FAILED("Inicio seguro no disponible");
 
     private final String label;
 

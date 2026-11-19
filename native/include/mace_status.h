@@ -33,19 +33,29 @@ enum {
     MACE_METRIC_WARMING_UP = 5,
     MACE_METRIC_READ_FAILED = 6,
     MACE_METRIC_DEVICE_INACTIVE = 7,
-    MACE_METRIC_NOT_INITIALIZED = 8
+    MACE_METRIC_NOT_INITIALIZED = 8,
+    /* ABI 1.5: additive absence reasons; ALWAYS invalid with numeric value zero. */
+    MACE_METRIC_NOT_ELEVATED = 9,
+    MACE_METRIC_PAWNIO_MISSING = 10,
+    MACE_METRIC_PAWNIO_STOPPED = 11,
+    MACE_METRIC_REBOOT_REQUIRED = 12,
+    MACE_METRIC_HELPER_UNAVAILABLE = 13,
+    MACE_METRIC_HELPER_RETRYING = 14,
+    MACE_METRIC_HELPER_UNTRUSTED = 15,
+    MACE_METRIC_HELPER_CONTAINMENT_FAILED = 16
 };
 
 typedef uint32_t MaceProviderId;
 enum {
     MACE_PROVIDER_NONE = 0,
     MACE_PROVIDER_WINDOWS = 1,
-    MACE_PROVIDER_INTEL_MSR = 2,
-    MACE_PROVIDER_AMD_RYZEN_SDK = 3,
-    MACE_PROVIDER_AMD_UPROF = 4,
+    MACE_PROVIDER_INTEL_MSR = 2, /* Reserved/obsolete ABI ID; no live provider. */
+    MACE_PROVIDER_AMD_RYZEN_SDK = 3, /* Reserved/obsolete ABI ID; no live provider. */
+    MACE_PROVIDER_AMD_UPROF = 4, /* Reserved ABI ID; no implementation shipped. */
     MACE_PROVIDER_NVIDIA_NVML = 5,
-    MACE_PROVIDER_AMD_ADLX = 6,
-    MACE_PROVIDER_INTEL_IGCL = 7
+    MACE_PROVIDER_AMD_ADLX = 6, /* Reserved/obsolete ABI ID; no live provider. */
+    MACE_PROVIDER_INTEL_IGCL = 7,
+    MACE_PROVIDER_LHM = 8
 };
 
 typedef uint32_t MacePowerScope;

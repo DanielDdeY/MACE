@@ -5,6 +5,18 @@ function Get-MaceNativeRoot {
     return [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 }
 
+function Get-MaceHelperManifest {
+    param([string]$HelperDirectory)
+    $helperRoot=Join-Path (Split-Path -Parent (Get-MaceNativeRoot)) 'helper'
+    if (-not $HelperDirectory) {
+        $latest=Join-Path $helperRoot 'artifacts\latest.txt'
+        if (-not (Test-Path -LiteralPath $latest)) { throw 'Publica y firma primero el helper con helper/Build-Helper.ps1.' }
+        $HelperDirectory=(Get-Content -LiteralPath $latest -Raw).Trim()
+    }
+    & (Join-Path $helperRoot 'Verify-Artifacts.ps1') -Directory $HelperDirectory | Out-Host
+    return (Resolve-Path -LiteralPath (Join-Path $HelperDirectory 'helper-runtime.manifest')).Path
+}
+
 function Repair-MacePathEnvironment {
     # Algunos lanzadores inyectan PATH y Path simultáneamente. CMake no encuentra
     # cl.exe en ese entorno; la corrección afecta solo a este proceso de PowerShell.
@@ -53,16 +65,19 @@ function Get-MaceToolchain {
 
         foreach ($candidate in $candidates) {
             if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) { continue }
-            # Se lee toda la salida antes de tomar la primera línea: con "| Select-Object -First 1"
-            # PowerShell cortaba el pipeline, terminaba cmake.exe a medio escribir y $LASTEXITCODE
-            # quedaba en -1, descartando un CMake válido de forma intermitente.
+            # Drain stdout before selecting a line: Windows PowerShell 5.1 can
+            # otherwise stop the native process early and report exit code -1.
             $versionOutput = @(& $candidate --version)
+            $versionExit = $LASTEXITCODE
             $versionLine = $versionOutput | Select-Object -First 1
-            if ($LASTEXITCODE -ne 0 -or $versionLine -notmatch 'cmake version (\d+\.\d+(?:\.\d+)?)') { continue }
+            if ($versionExit -ne 0 -or $versionLine -notmatch 'cmake version (\d+\.\d+(?:\.\d+)?)') { continue }
             $cmakeVersion = [version]$Matches[1]
             if ($cmakeVersion -lt [version]'3.28') { continue }
+            $ctest = Join-Path (Split-Path -Parent $candidate) 'ctest.exe'
+            if (-not (Test-Path -LiteralPath $ctest -PathType Leaf)) { continue }
             return [pscustomobject]@{
                 CMake = $candidate
+                CTest = $ctest
                 CMakeVersion = $cmakeVersion.ToString()
                 Generator = $generator
                 Preset = $preset

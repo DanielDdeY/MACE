@@ -8,13 +8,12 @@
 #include "hardware/gpu_inventory.h"
 #include "telemetry/gpu_providers.h"
 #include "telemetry/cpu_sensors.h"
+#include "telemetry/legacy_telemetry.h"
+#include "telemetry/lhm_receiver.h"
 #include "process/process_internal.h"
 #include "internal/mace_runtime.h"
 #include "extensions/hang_detector.h"
 #include "extensions/shared_buffer.h"
-#ifdef MACE_HAS_RYZEN_SDK
-#include "telemetry/amd_ryzen_provider.h"
-#endif
 
 static uint64_t monotonic_ns(void) { return GetTickCount64() * UINT64_C(1000000); }
 
@@ -52,23 +51,11 @@ static MaceStatus poll_cpu_locked(MaceCpuTelemetryV2* out) {
     sample.provider_id = MACE_PROVIDER_WINDOWS;
     sample.temperature_c.state = MACE_METRIC_NO_PROVIDER;
     sample.power_w.state = MACE_METRIC_NO_PROVIDER;
-    float temp = 0, power = 0, usage = 0;
-    CpuSensors_Poll(&temp, &power, &usage);
+    float usage = 0;
+    CpuSensors_Poll(&usage);
     sample.usage_percent.value = usage;
     sample.usage_percent.state = CpuSensors_UsageReady() ? MACE_METRIC_VALID : MACE_METRIC_WARMING_UP;
-    if (sample.cpu_vendor == MACE_CPU_VENDOR_INTEL && CpuSensors_HardwareAvailable()) {
-        sample.provider_id = MACE_PROVIDER_INTEL_MSR;
-        sample.power_scope = MACE_POWER_SCOPE_CPU_PACKAGE;
-        sample.temperature_c.state = temp > 0 ? MACE_METRIC_VALID : MACE_METRIC_READ_FAILED;
-        sample.temperature_c.value = temp;
-        sample.power_w.state = CpuSensors_PowerReady() ? MACE_METRIC_VALID :
-            (CpuSensors_PowerSupported() ? MACE_METRIC_WARMING_UP : MACE_METRIC_READ_FAILED);
-        sample.power_w.value = power;
-    }
-#ifdef MACE_HAS_RYZEN_SDK
-    if (sample.cpu_vendor == MACE_CPU_VENDOR_AMD)
-        AmdRyzenProvider_Poll(&sample);
-#endif
+    LhmReceiver_ApplyCpu(&sample);
     memcpy(out, &sample, sizeof(sample));
     return MACE_OK;
 }
@@ -94,7 +81,12 @@ static MaceStatus poll_gpu_locked(const MaceAdapterLuidV2* luid,
     sample.version = MACE_V2_CONTRACT_VERSION;
     sample.timestamp_monotonic_ns = monotonic_ns();
     sample.luid = *luid;
-    GpuProviders_Poll(&adapter, &sample);
+    LegacyTelemetry_Gpu(&adapter, &sample);
+    bool primary=(sample.provider_id==MACE_PROVIDER_NVIDIA_NVML || sample.provider_id==MACE_PROVIDER_INTEL_IGCL) &&
+        (sample.temperature_c.state==MACE_METRIC_VALID || sample.power_w.state==MACE_METRIC_VALID ||
+         sample.usage_percent.state==MACE_METRIC_VALID || sample.fan_rpm.state==MACE_METRIC_VALID ||
+         sample.fan_percent.state==MACE_METRIC_VALID || sample.video_memory_used_bytes.state==MACE_METRIC_VALID);
+    if (!primary) LhmReceiver_ApplyGpu(&adapter,&sample);
     memcpy(out, &sample, sizeof(sample));
     return MACE_OK;
 }

@@ -11,8 +11,7 @@ name: Instalador de Windows
 #
 # DLL nativa: si la Release ya trae el paquete verificado de Dev 1 (mace-native-*.zip con
 # bin/mace_native.dll y build-info.json) se empaqueta exactamente esa DLL. Si no lo trae, se
-# compila aqui con native/scripts/package-native.ps1 (sin los SDK de AMD ADLX y Ryzen Master,
-# que no estan en el servidor) y el ZIP resultante se adjunta a la Release. En ambos casos
+# compila aqui con native/scripts/package-native.ps1 y el ZIP resultante se adjunta a la Release. En ambos casos
 # packaging/verify-native-dll.ps1 comprueba su SHA-256 y su ABI antes de jpackage.
 
 on:
@@ -135,7 +134,7 @@ jobs:
           } else {
             $notes = "Descarga **MACE-Setup.exe** e instalalo. Windows 10 y 11 de 64 bits."
             if ($env:NATIVE_ZIP_BUILT) {
-              $notes += "`n`nLa DLL nativa se compilo en GitHub Actions sin los SDK de AMD ADLX y Ryzen Master: algunas lecturas AMD pueden figurar como 'sin proveedor'."
+              $notes += "`n`nLa DLL nativa se compilo en GitHub Actions a partir del codigo fuente de esta version."
             }
             gh release create $env:TAG -R $env:GITHUB_REPOSITORY --verify-tag `
               --title "MACE $env:MACE_APP_VERSION" --notes $notes @files

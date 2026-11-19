@@ -3,6 +3,7 @@ package com.mace.infrastructure.mock;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.util.Locale;
+import com.mace.domain.model.MetricState;
 
 /**
  * Perfiles reproducibles del modo simulado. Se eligen con {@code -Dmace.mock.scenario=<NOMBRE>}
@@ -15,7 +16,7 @@ import java.util.Locale;
 public enum MockScenario {
     NORMAL("Intel + NVIDIA, todas las métricas válidas"),
     CPU_NO_TEMPERATURE("CPU con uso válido y sin proveedor de temperatura ni potencia"),
-    AMD_NO_POWER("Ryzen con temperatura (Ryzen Master SDK) y sin proveedor de potencia; Radeon por ADLX"),
+    AMD_NO_POWER("CPU AMD con temperatura LHM y potencia no disponible; Radeon por LHM"),
     ACCESS_DENIED("Ryzen sin elevación: temperatura de CPU con acceso denegado"),
     IGPU_NO_FAN("GPU integrada Intel con temperatura y sin ventilador propio"),
     DUAL_GPU("iGPU Intel + dGPU NVIDIA con datos distintos"),
@@ -25,7 +26,33 @@ public enum MockScenario {
     THERMAL_WARNING("Temperaturas por encima de 75 °C (advertencia)"),
     THERMAL_CRITICAL("Temperaturas por encima de 85 °C (crítico)"),
     NO_GPU("Equipo sin GPU física detectada"),
-    BLACKBOX_GAP("Anillo de caja negra mínimo: el archivo marca huecos de secuencia");
+    BLACKBOX_GAP("Anillo de caja negra mínimo: el archivo marca huecos de secuencia"),
+    CPU_NOT_ELEVATED("CPU sin elevación; GPU independiente"),
+    PAWNIO_MISSING("PawnIO ausente"),
+    PAWNIO_STOPPED("PawnIO detenido, sin reinicio pendiente"),
+    CPU_REBOOT_REQUIRED("Reinicio pendiente simulado: resultado 3010"),
+    HELPER_UNAVAILABLE("Componente de sensores no disponible"),
+    HELPER_RETRYING("Componente en reintentos lentos"),
+    HELPER_UNTRUSTED("Componente no verificado"),
+    HELPER_CONTAINMENT_FAILED("Inicio seguro del componente no disponible"),
+    LHM_RECOVERY_SHORT("Radeon: un sondeo calentando durante recuperación"),
+    LHM_RECOVERY_LONG("Radeon: tres sondeos calentando durante recuperación"),
+    SENSORS_WARMING("Sensores calentando de forma continua para inspección visual");
+
+    public MetricState sensorState() {
+        return switch (this) {
+            case CPU_NOT_ELEVATED -> MetricState.NOT_ELEVATED;
+            case PAWNIO_MISSING -> MetricState.PAWNIO_MISSING;
+            case PAWNIO_STOPPED -> MetricState.PAWNIO_STOPPED;
+            case CPU_REBOOT_REQUIRED -> MetricState.REBOOT_REQUIRED;
+            case HELPER_UNAVAILABLE -> MetricState.HELPER_UNAVAILABLE;
+            case HELPER_RETRYING -> MetricState.HELPER_RETRYING;
+            case HELPER_UNTRUSTED -> MetricState.HELPER_UNTRUSTED;
+            case HELPER_CONTAINMENT_FAILED -> MetricState.HELPER_CONTAINMENT_FAILED;
+            case SENSORS_WARMING -> MetricState.WARMING_UP;
+            default -> null;
+        };
+    }
 
     public static final String PROPERTY = "mace.mock.scenario";
     public static final String SEED_PROPERTY = "mace.mock.seed";

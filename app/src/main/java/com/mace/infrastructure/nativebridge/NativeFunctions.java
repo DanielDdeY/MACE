@@ -34,7 +34,7 @@ import static java.lang.foreign.ValueLayout.JAVA_LONG;
  * <p>Ciclo de vida (según {@code native/docs/PHASE5.md}): {@link #close()} espera a que
  * terminen las llamadas en curso, impide nuevas y llama una sola vez a
  * {@code CP_ShutdownTelemetry}. La DLL <strong>permanece cargada</strong> hasta que termina el
- * proceso (el proveedor ADLX conserva una sesión por proceso); por eso se enlaza con
+ * proceso para mantener la propiedad de los símbolos FFM; se enlaza con
  * {@link Arena#global()}. Los tokens de caja negra deben cerrarse antes que esta instancia.</p>
  *
  * <p>Los {@link MethodHandle} son inmutables y seguros para uso concurrente; la memoria fuera
@@ -151,7 +151,7 @@ public final class NativeFunctions implements NativeApi, AutoCloseable {
         return load(path);
     }
 
-    /** Carga la DLL ubicada en {@code libraryPath} usando el hash esperado configurado, si existe. */
+    /** Carga explícita: producción exige los pins del launcher; desarrollo admite hash opcional. */
     public static NativeFunctions load(Path libraryPath) {
         return load(libraryPath, NativeLibraryIntegrity.expectedSha256());
     }
@@ -159,10 +159,29 @@ public final class NativeFunctions implements NativeApi, AutoCloseable {
     /**
      * Carga la DLL ubicada en {@code libraryPath}.
      *
-     * @param expectedSha256 hash obligatorio; vacío para aceptar cualquier DLL con ABI compatible
+     * @param expectedSha256 debe coincidir con el pin de producción; vacío solo en desarrollo
      */
     @SuppressWarnings("restricted") // SymbolLookup.libraryLookup es un método restringido de FFM
     public static NativeFunctions load(Path libraryPath, Optional<String> expectedSha256) {
+        if (!NativeLoadProfile.isDevelopment()) {
+            try {
+                var pinned = NativeLoadProfile.productionParameters();
+                if (libraryPath == null || !libraryPath.isAbsolute()
+                        || !pinned.path().equals(libraryPath.normalize())
+                        || expectedSha256 == null || expectedSha256.isEmpty()
+                        || !pinned.sha256().equalsIgnoreCase(expectedSha256.get())) {
+                    throw NativeLoadProfile.productionFailure();
+                }
+                return loadVerified(pinned.path(), Optional.of(pinned.sha256()));
+            } catch (RuntimeException | LinkageError error) {
+                throw NativeLoadProfile.productionFailure();
+            }
+        }
+        return loadVerified(libraryPath, expectedSha256);
+    }
+
+    @SuppressWarnings("restricted")
+    private static NativeFunctions loadVerified(Path libraryPath, Optional<String> expectedSha256) {
         Objects.requireNonNull(libraryPath, "libraryPath no puede ser null");
         Objects.requireNonNull(expectedSha256, "expectedSha256 no puede ser null");
         Path absolute = libraryPath.toAbsolutePath().normalize();
@@ -183,7 +202,8 @@ public final class NativeFunctions implements NativeApi, AutoCloseable {
 
     /** @return {@code true} si {@link NativeLibraryLocator} encuentra la DLL en disco. */
     public static boolean isAvailable() {
-        return NativeLibraryLocator.locate().isPresent();
+        try { return NativeLibraryLocator.locate().isPresent(); }
+        catch (NativeLibraryException unavailable) { return false; }
     }
 
     /** Ruta absoluta de la DLL cargada. */
@@ -249,18 +269,19 @@ public final class NativeFunctions implements NativeApi, AutoCloseable {
     /**
      * Inicializa la telemetría una sola vez aunque varios adaptadores compartan esta instancia.
      *
-     * @return código devuelto por la DLL en la primera inicialización, o 0 si ya estaba lista
+     * @return 0 tras inicialización correcta; BUSY si hay otro ciclo de vida en curso.
+     * Solo el éxito se conserva; BUSY permite reintento y no adquiere el cierre del runtime.
      */
     @Override
     public int ensureTelemetryInitialized() {
-        lifecycle.writeLock().lock();
+        if (!lifecycle.writeLock().tryLock()) return NativeStatus.BUSY;
         try {
             ensureOpen();
             if (telemetryInitialized) {
                 return 0;
             }
             int result = (int) initializeTelemetryHandle.invokeExact();
-            telemetryInitialized = true;
+            telemetryInitialized = result == NativeStatus.OK;
             return result;
         } catch (IllegalStateException e) {
             throw e;

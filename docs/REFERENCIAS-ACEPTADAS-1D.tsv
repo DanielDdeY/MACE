@@ -1,0 +1,182 @@
+archivo	linea	columna	coincidencia	motivo
+app/src/main/java/com/mace/domain/model/SensorProvider.java	10	5	INTEL_MSR	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
+app/src/main/java/com/mace/domain/model/SensorProvider.java	11	5	AMD_RYZEN_SDK	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
+app/src/main/java/com/mace/domain/model/SensorProvider.java	14	9	ADLX	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
+app/src/test/java/com/mace/infrastructure/nativebridge/NativeCodesTest.java	8	94	INTEL_MSR	Compatibilidad numerica/decodificacion ABI historica, sin acceso hardware
+app/src/test/java/com/mace/infrastructure/nativebridge/NativeCodesTest.java	9	28	AMD_RYZEN_SDK	Compatibilidad numerica/decodificacion ABI historica, sin acceso hardware
+app/src/test/java/com/mace/infrastructure/nativebridge/NativeCodesTest.java	10	32	ADLX	Compatibilidad numerica/decodificacion ABI historica, sin acceso hardware
+app/src/test/java/com/mace/infrastructure/nativebridge/V2RecordsTest.java	33	73	INTEL_MSR	Compatibilidad numerica/decodificacion ABI historica, sin acceso hardware
+app/src/test/java/com/mace/infrastructure/nativebridge/V2RecordsTest.java	48	65	ADLX	Compatibilidad numerica/decodificacion ABI historica, sin acceso hardware
+docs/historico/native/pre1D-app__lib__README.txt	10	80	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-app__lib__README.txt	25	62	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-app__lib__README.txt	46	36	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-app__lib__README.txt	47	72	WinRing0	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__ABI.md	23	119	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__ABI.md	23	126	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__ABI.md	24	196	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__AMD_CPU_TEMPERATURE.md	3	27	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__AMD_CPU_TEMPERATURE.md	10	59	RyzenSdk	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__AMD_CPU_TEMPERATURE.md	13	253	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__AMD_CPU_TEMPERATURE.md	15	61	AMD_RYZEN_SDK	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__AMD_CPU_TEMPERATURE.md	21	15	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HANDOFF.md	11	191	Adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HANDOFF.md	11	235	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HANDOFF.md	11	316	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HANDOFF.md	11	490	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HANDOFF.md	13	38	RyzenSdk	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HANDOFF.md	13	120	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HANDOFF.md	15	171	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HANDOFF.md	15	517	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HARDWARE_COMPATIBILITY.md	11	157	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HARDWARE_COMPATIBILITY.md	16	346	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HARDWARE_COMPATIBILITY.md	21	292	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HARDWARE_COMPATIBILITY.md	22	133	WinRing0	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HARDWARE_COMPATIBILITY.md	23	48	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HARDWARE_COMPATIBILITY.md	26	37	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HARDWARE_COMPATIBILITY.md	28	346	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HARDWARE_COMPATIBILITY.md	28	448	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HARDWARE_COMPATIBILITY.md	28	482	adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HARDWARE_COMPATIBILITY.md	28	487	adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HARDWARE_COMPATIBILITY.md	28	507	adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__HARDWARE_COMPATIBILITY.md	28	547	adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	5	151	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	9	230	WinRing0	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	9	342	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	10	102	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	11	7	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	11	172	adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	19	103	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	21	34	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	23	5	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	23	16	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	27	8	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	27	313	Adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	27	336	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	27	415	Adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	29	4	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	33	15	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	33	61	adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	33	66	adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	33	86	adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	33	126	adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE2.md	33	486	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE3.md	20	59	Adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE3.md	20	98	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE3.md	20	109	RyzenSdk	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE3.md	21	113	Adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE3.md	21	152	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE3.md	21	163	RyzenSdk	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE4.md	29	341	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE4.md	29	348	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE5.md	13	25	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE5.md	15	48	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE5.md	15	140	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE5.md	15	234	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE5.md	15	257	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE5.md	15	304	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE5.md	15	379	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE5.md	15	503	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE5.md	15	769	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE5.md	15	962	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__PHASE5.md	21	315	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__TEAM_DIAGNOSTIC_GUIDE.md	9	244	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__TEAM_DIAGNOSTIC_GUIDE.md	32	99	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__TEAM_DIAGNOSTIC_GUIDE.md	33	159	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__TEAM_DIAGNOSTIC_GUIDE.md	35	488	WinRing0	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__TEAM_DIAGNOSTIC_GUIDE.md	35	672	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__TEAM_DIAGNOSTIC_GUIDE.md	54	7	Adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__TEAM_DIAGNOSTIC_GUIDE.md	54	46	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__TEAM_DIAGNOSTIC_GUIDE.md	55	7	RyzenSdk	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__TESTING.md	13	226	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__TESTING.md	13	268	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__TESTING.md	15	42	MACE_RYZEN_SDK_DIR	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__TESTING.md	15	80	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__docs__TESTING.md	15	160	RyzenSdk	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	17	61	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	17	102	Adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	17	128	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	17	207	adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	17	270	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	19	50	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	19	103	RyzenSdk	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	19	307	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	24	59	Adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	24	98	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	24	109	RyzenSdk	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	25	38	Adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	25	77	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	25	88	RyzenSdk	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	28	455	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-native__README.md	28	462	Ryzen Master	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-REVIEW_NOTES.md	33	236	WinRing0	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/native/pre1D-REVIEW_NOTES.md	33	430	WinRing0	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/1D-3-test_gpu_provider_dispatch.c.txt	11	41	adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/1D-3-test_gpu_provider_dispatch.c.txt	37	6	Adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/1D-3-test_gpu_provider_dispatch.c.txt	38	6	Adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/1D-3-test_gpu_provider_dispatch.c.txt	39	6	Adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/1D-3-test_gpu_provider_dispatch.c.txt	42	7	adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/1D-3-test_gpu_provider_dispatch.c.txt	43	42	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/1D-3-test_gpu_provider_dispatch.c.txt	53	53	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/1D-3-test_gpu_provider_dispatch.c.txt	66	32	adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/pre1D-MockSensorsAdapter.java.txt	155	79	AMD_RYZEN_SDK	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/pre1D-MockSensorsAdapter.java.txt	157	80	AMD_RYZEN_SDK	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/pre1D-MockSensorsAdapter.java.txt	160	71	INTEL_MSR	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/pre1D-MockSensorsAdapter.java.txt	213	60	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/pre1D-MockSensorsAdapterTest.java.txt	73	34	Adlx	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/pre1D-MockSensorsAdapterTest.java.txt	77	37	AMD_RYZEN_SDK	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/pre1D-MockSensorsAdapterTest.java.txt	80	41	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/pruebas-retiradas/README.md	12	61	ADLX	Archivo historico conservado, excluido de compilacion y producto
+docs/historico/scripts/README.md	5	8	ryzen-sdk	Archivo historico conservado, excluido de compilacion y producto
+helper/COBERTURA-AMD-POTENCIA.md	82	389	Adlx	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	200	154	ADLX	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	200	404	adlx	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	200	409	adlx	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	200	429	adlx	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	200	469	adlx	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	200	550	adlx	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	200	555	adlx	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	200	575	adlx	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	200	615	adlx	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	212	39	ADLX	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	239	3	WinRing0	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	239	14	Rdmsr	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	240	3	Ryzen Master	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	240	33	AmdRyzenProvider	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	241	3	ADLX	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	241	10	Adlx	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/COBERTURA-AMD-POTENCIA.md	246	424	ADLX	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1B.md	85	73	ADLX	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1B.md	173	75	WinRing0	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	64	32	ryzen-sdk	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	64	87	ryzen-sdk	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	71	29	amd_ryzen_provider	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	72	29	amd_ryzen_provider	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	89	62	ADLX	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	92	29	adlx	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	93	79	ADLX	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	260	42	ADLX	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	261	39	ADLX	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	262	34	ADLX	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	263	34	ADLX	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	264	41	ADLX	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	265	54	ADLX	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	298	33	WinRing0	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-FINAL.md	299	13	WinRing0	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-PASO1.md	13	32	WinRing0	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-PASO1.md	13	43	Rdmsr	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-PASO1.md	37	12	amd_ryzen_provider	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-PASO1.md	38	30	ryzen-sdk	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-PASO1.md	48	11	adlx	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-PASO2.md	91	65	WinRing0	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-PASO2.md	92	45	WinRing0	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+helper/RESULTADOS-1D-PASO2.md	98	74	WinRing0	Informe fechado y conservado de migracion/evidencia; no selecciona proveedores
+native/include/mace_status.h	52	19	INTEL_MSR	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
+native/include/mace_status.h	53	19	AMD_RYZEN_SDK	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
+native/include/mace_status.h	56	23	ADLX	ID ABI reservado/obsoleto; sin implementacion activa ni despacho
+native/test_main.c	31	28	INTEL_MSR	Etiqueta diagnostica de ID ABI reservado; no invoca proveedores retirados
+native/test_main.c	32	28	AMD_RYZEN_SDK	Etiqueta diagnostica de ID ABI reservado; no invoca proveedores retirados
+native/test_main.c	35	32	ADLX	Etiqueta diagnostica de ID ABI reservado; no invoca proveedores retirados
+native/test_main.c	35	63	ADLX	Etiqueta diagnostica de ID ABI reservado; no invoca proveedores retirados
+packaging/compatibility-references.json	8	14	WinRing0	Excepcion de metadatos NDD aprobada por usuario en Paso 2; enum/interfaz sin driver, SHA-256 fijado
+packaging/compatibility-references.json	11	16	WinRing0	Excepcion de metadatos NDD aprobada por usuario en Paso 2; enum/interfaz sin driver, SHA-256 fijado
+packaging/compatibility-references.json	12	17	WinRing0	Excepcion de metadatos NDD aprobada por usuario en Paso 2; enum/interfaz sin driver, SHA-256 fijado

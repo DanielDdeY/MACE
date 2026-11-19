@@ -29,6 +29,7 @@ class V2RecordsTest {
 
     @Test
     void cpuIdaYVuelta() {
+        // ID reservado histórico: solo prueba serialización ABI, sin proveedor de hardware.
         CpuReading cpu = new CpuReading(CpuVendor.INTEL, SensorProvider.INTEL_MSR, PowerScope.CPU_PACKAGE,
                 MetricReading.valid(64.5), MetricReading.unavailable(MetricState.WARMING_UP), MetricReading.valid(12.25), 77L);
 
@@ -43,6 +44,7 @@ class V2RecordsTest {
 
     @Test
     void gpuIdaYVueltaConLuidNegativo() {
+        // ID reservado histórico: solo prueba serialización ABI, sin proveedor de hardware.
         GpuReading gpu = new GpuReading(GPU, SensorProvider.AMD_ADLX, PowerScope.GPU_CHIP,
                 MetricReading.valid(70), MetricReading.valid(110.5), MetricReading.unavailable(MetricState.READ_FAILED),
                 LongMetricReading.valid(1800), LongMetricReading.valid(40),

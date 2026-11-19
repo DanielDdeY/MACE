@@ -33,15 +33,6 @@ Se necesita Windows x64, Visual Studio 2022 o 2026 con MSVC y Windows SDK, CMake
 
 `package-native.ps1` compila `mace_native.dll` y el diagnóstico manual `test_mace.exe`, los agrupa en `native/dist/` y registra sus hashes. El empaquetador Windows toma el paquete nativo más reciente, comprueba su hash y ABI frente a Java, y crea ambos lanzadores. Puede fijar el paquete exacto con `MACE_NATIVE_LIB` apuntando a `bin\mace_native.dll`. Si modifica `app/`, ejecute de nuevo `package-windows.bat app-image` para actualizar los ejecutables.
 
-Los proveedores Radeon ADLX y temperatura AMD Ryzen se compilan solo si se dispone de sus SDK oficiales fuera del repositorio. Para incluir ambos:
-
-```powershell
-.\native\scripts\package-native.ps1 `
-  -AdlxSdkDirectory 'C:\Program Files\AMD\ADLX-2.0' `
-  -RyzenSdkDirectory 'C:\Program Files\AMD\RyzenMasterMonitoringSDK'
-.\packaging\package-windows.bat app-image
-```
-
-Sin esos SDK la compilación sigue siendo válida, pero las lecturas AMD correspondientes pueden figurar como «sin proveedor». Para consultar la temperatura Ryzen en ejecución también puede requerirse la instalación del SDK/controlador en el equipo y elevación. Los sensores Intel y NVIDIA dependen del controlador y del hardware disponible. Consulte [compatibilidad nativa](native/docs/HARDWARE_COMPATIBILITY.md).
+La temperatura y la potencia de la CPU (Intel y AMD) y las lecturas de GPU Radeon se obtienen mediante el helper LibreHardwareMonitor (`helper/`), que se compila con el SDK de .NET indicado en `helper/global.json`. En ejecución, esas lecturas requieren el controlador PawnIO instalado y abrir MACE como administrador; sin ellos la interfaz muestra el motivo (por ejemplo, «Ejecuta MACE como administrador») en lugar de inventar valores. Las GPU NVIDIA usan NVML y las GPU Intel IGCL, con LibreHardwareMonitor como respaldo. El uso de CPU y la RAM provienen de Windows. Consulte [compatibilidad nativa](native/docs/HARDWARE_COMPATIBILITY.md).
 
 Para revisar el hardware sin abrir Java, ejecute `test_mace.exe` junto a la DLL del mismo paquete nativo; `native/test_main.c` es la única prueba manual nativa mantenida. Las pruebas automatizadas Java se conservan en `app/src/test/` y se ejecutan con `mvn -f app/pom.xml test`. La [guía de diagnóstico](native/docs/TEAM_DIAGNOSTIC_GUIDE.md) describe las opciones y estados de los sensores.
