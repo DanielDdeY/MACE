@@ -14,10 +14,17 @@ import javafx.scene.shape.*;
  */
 public final class NavIcon {
 
-    private static final double SIZE = 18;
     private static final double STROKE_WIDTH = 1.6;
 
     private NavIcon() {
+    }
+
+    public static Node home() {
+        Rectangle topLeft = square(2, 2, 6);
+        Rectangle topRight = square(10, 2, 6);
+        Rectangle bottomLeft = square(2, 10, 6);
+        Rectangle bottomRight = square(10, 10, 6);
+        return icon(topLeft, topRight, bottomLeft, bottomRight);
     }
 
     public static Node cpu() {
@@ -46,6 +53,17 @@ public final class NavIcon {
         return icon(body, fan, port);
     }
 
+    public static Node ram() {
+        Rectangle module = new Rectangle(1, 5, 16, 8);
+        module.setArcWidth(2);
+        module.setArcHeight(2);
+        style(module);
+        Line chip1 = line(5, 7, 5, 11);
+        Line chip2 = line(9, 7, 9, 11);
+        Line chip3 = line(13, 7, 13, 11);
+        return icon(module, chip1, chip2, chip3);
+    }
+
     public static Node historial() {
         Polyline trend = new Polyline(2, 14, 6, 8, 9, 11, 12, 5, 16, 9);
         style(trend);
@@ -53,6 +71,36 @@ public final class NavIcon {
         Line baseline = line(2, 16, 16, 16);
 
         return icon(trend, baseline);
+    }
+
+    public static Node alerts() {
+        Polygon triangle = new Polygon(9, 2, 17, 16, 1, 16);
+        style(triangle);
+        Line mark = line(9, 6, 9, 11);
+        Circle dot = dot(9, 14);
+        return icon(triangle, mark, dot);
+    }
+
+    public static Node blackbox() {
+        Rectangle caseOutline = new Rectangle(2, 4, 14, 11);
+        caseOutline.setArcWidth(2);
+        caseOutline.setArcHeight(2);
+        style(caseOutline);
+        Line lid = line(5, 2, 13, 2);
+        Circle indicator = dot(9, 9.5);
+        return icon(caseOutline, lid, indicator);
+    }
+
+    public static Node hud() {
+        Line topLeft = line(2, 6, 2, 3);
+        Line top = line(2, 3, 6, 3);
+        Line topRight = line(12, 3, 16, 3);
+        Line rightTop = line(16, 3, 16, 6);
+        Line bottomLeft = line(2, 12, 2, 15);
+        Line bottom = line(2, 15, 6, 15);
+        Line bottomRight = line(12, 15, 16, 15);
+        Line rightBottom = line(16, 12, 16, 15);
+        return icon(topLeft, top, topRight, rightTop, bottomLeft, bottom, bottomRight, rightBottom);
     }
 
     public static Node procesos() {
@@ -69,11 +117,13 @@ public final class NavIcon {
 
     // ---- helpers ----
 
+    /*
+     * El Group debe quedar "managed": el skin de los botones (LabeledSkinBase) ignora
+     * un graphic con setManaged(false) y ni siquiera lo agrega a la escena, por lo
+     * que el icono no se veia. Su tamano sale de las formas (caja de ~18x18).
+     */
     private static Node icon(Shape... shapes) {
-        Group group = new Group(shapes);
-        group.setManaged(false);
-        group.resize(SIZE, SIZE);
-        return group;
+        return new Group(shapes);
     }
 
     private static Rectangle square(double x, double y, double side) {
