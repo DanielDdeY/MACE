@@ -26,6 +26,9 @@
       --trace: #4c8df6;
       --nd: #e0b45c;
       --focus: #f2a900;
+      --ok: #3fbf7f;
+      --info-bg: #e3edfb;
+      --info-ink: #173b6e;
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -40,6 +43,8 @@
         --caution-ink: #f3d08a;
         --panel: #0a121c;
         --panel-grid: #1c2938;
+        --info-bg: #13243a;
+        --info-ink: #b9d3f7;
       }
     }
 
@@ -65,7 +70,7 @@
     /* Encabezado */
     .hero { padding: 3.5rem 0 3rem; }
     .hero-grid { display: grid; gap: 2.5rem; align-items: end; }
-    @media (min-width: 60rem) { .hero-grid { grid-template-columns: 1fr 1.15fr; } }
+    @media (min-width: 60rem) { .hero-grid { grid-template-columns: 1.1fr 1fr; } }
     .wordmark {
       margin: 0;
       font-size: clamp(4.5rem, 14vw, 8.5rem);
@@ -163,24 +168,94 @@
     pre { background: var(--paper-raised); border: 1px solid var(--rule); border-radius: 0.4rem; padding: 0.8rem 1rem; overflow-x: auto; }
 
     footer { padding: 2rem 0 3rem; border-top: 1px solid var(--rule); color: var(--ink-soft); font-size: 0.95rem; }
+    .footer-grid { display: flex; flex-wrap: wrap; gap: 0.75rem 2rem; justify-content: space-between; align-items: baseline; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin: 0; padding: 0; list-style: none; }
+
+    /* Barra superior */
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      background: color-mix(in srgb, var(--paper) 88%, transparent);
+      backdrop-filter: saturate(1.4) blur(8px);
+      -webkit-backdrop-filter: saturate(1.4) blur(8px);
+      border-bottom: 1px solid var(--rule);
+    }
+    .topbar .wrap { display: flex; align-items: center; gap: 1.5rem; min-height: 3.5rem; }
+    .brand { font-weight: 800; font-stretch: 125%; font-size: 1.2rem; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+    .nav { display: none; gap: 1.25rem; margin: 0; padding: 0; list-style: none; }
+    .nav a { color: var(--ink-soft); text-decoration: none; font-size: 0.95rem; }
+    .nav a:hover { color: var(--ink); }
+    @media (min-width: 52rem) { .nav { display: flex; } }
+    .topbar .button { margin-left: auto; padding: 0.5rem 0.95rem; font-size: 0.95rem; }
+
+    /* Etiqueta de novedad y botón secundario */
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      margin: 0 0 1.25rem; padding: 0.3rem 0.75rem 0.3rem 0.4rem;
+      border: 1px solid var(--rule); border-radius: 999px;
+      background: var(--paper-raised); color: var(--ink-soft);
+      font-size: 0.85rem; text-decoration: none;
+    }
+    .badge b { background: var(--signal); color: var(--signal-ink); border-radius: 999px; padding: 0.05rem 0.55rem; font-size: 0.78rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+    .button.secondary { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--rule);
+                        padding: 0.95rem 1.1rem; font-size: 1rem; }
+    .button.secondary:hover { box-shadow: inset 0 0 0 1px var(--ink-soft); }
+    .button:not(.secondary):hover { filter: brightness(1.08); }
+    .readouts dd.ok { color: var(--ok); }
+    .instrument-head { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.8rem; color: var(--panel-soft); margin-bottom: 0.5rem; }
+    .live { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .live::before { content: ""; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--ok); }
+
+    /* Tarjetas de novedades */
+    .cards { display: grid; gap: 1rem; margin-top: 1.5rem; }
+    @media (min-width: 40rem) { .cards { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 64rem) { .cards { grid-template-columns: repeat(4, 1fr); } }
+    .card { background: var(--paper-raised); border: 1px solid var(--rule); border-radius: 0.6rem; padding: 1.25rem; }
+    .card .icon { width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; display: grid; place-items: center;
+                  background: color-mix(in srgb, var(--signal) 14%, transparent); color: var(--signal); margin-bottom: 0.9rem; }
+    .card .icon svg { width: 1.35rem; height: 1.35rem; }
+    .card p { margin: 0; color: var(--ink-soft); font-size: 0.97rem; }
+
+    .note.info { background: var(--info-bg); color: var(--info-ink); }
   </style>
 </head>
 <body>
+  <nav class="topbar" aria-label="Principal">
+    <div class="wrap">
+      <a class="brand" href="#">MACE</a>
+      <ul class="nav">
+        <li><a href="#novedades">Novedades</a></li>
+        <li><a href="#instalar">Instalar</a></li>
+        <li><a href="#que-mide">Qué mide</a></li>
+        <li><a href="#requisitos">Requisitos</a></li>
+      </ul>
+      <a class="button" id="download-top" href="https://github.com/DanielDdeY/MACE/releases">Descargar</a>
+    </div>
+  </nav>
+
   <header class="hero">
     <div class="wrap hero-grid">
       <div>
+        <a class="badge" href="#novedades"><b>Nuevo</b> Versión 1.1: temperatura real de CPU y GPU</a>
         <h1 class="wordmark">MACE</h1>
         <p class="lede">Monitor de hardware y procesos para Windows</p>
         <p class="measure">Lee la CPU, cada tarjeta gráfica, la memoria y los programas abiertos de tu PC. Si un sensor no está disponible, lo dice en lugar de inventar un número, y nunca cierra un programa sin que tú lo confirmes.</p>
-        <a class="button" id="download" href="https://github.com/DanielDdeY/MACE/releases">
-          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16"/></svg>
-          <span id="download-label">Descargar para Windows</span>
-        </a>
+        <div class="actions">
+          <a class="button" id="download" href="https://github.com/DanielDdeY/MACE/releases">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16"/></svg>
+            <span id="download-label">Descargar para Windows</span>
+          </a>
+          <a class="button secondary" href="https://github.com/DanielDdeY/MACE">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 7-5 5 5 5M16 7l5 5-5 5"/></svg>
+            Código fuente
+          </a>
+        </div>
         <p class="release-line" id="release-line" aria-live="polite">Windows 10 y 11 de 64 bits.</p>
       </div>
 
-      <figure class="instrument" aria-label="Ejemplo de lecturas reales de MACE">
-        <svg class="trace" viewBox="0 0 580 190" role="img" aria-label="Uso de CPU durante 30 segundos, entre 3 y 24 por ciento">
+      <figure class="instrument" aria-label="Lecturas reales de MACE en un equipo AMD">
+        <div class="instrument-head"><span class="live">Datos reales · DLL 1.5.0</span><span>Ryzen + Radeon RX 5500 XT</span></div>
+        <svg class="trace" viewBox="0 0 580 190" role="img" aria-label="Gráfico ilustrativo de una lectura a lo largo de 30 segundos">
           <g class="grid">
             <line x1="0" y1="10" x2="580" y2="10"/><line x1="0" y1="55" x2="580" y2="55"/>
             <line x1="0" y1="100" x2="580" y2="100"/><line x1="0" y1="145" x2="580" y2="145"/>
@@ -189,16 +264,45 @@
           <polyline class="line" points="0,88 20,159 40,155 60,163 80,161 100,159 120,151 140,130 160,147 180,138 200,155 220,136 240,138 260,142 280,163 300,147 320,159 340,163 360,157 380,140 400,130 420,155 440,168 460,155 480,138 500,163 520,168 540,170 560,155 580,152"/>
         </svg>
         <dl class="readouts">
-          <div><dt>Uso de CPU</dt><dd>5,4 %</dd></div>
-          <div><dt>RAM en uso</dt><dd>74 %</dd></div>
-          <div><dt>Temperatura de CPU</dt><dd class="nd">N/D<small>sin proveedor de sensor</small></dd></div>
+          <div><dt>Temperatura de CPU</dt><dd class="ok">65,0 °C</dd></div>
+          <div><dt>Temperatura de GPU</dt><dd class="ok">34,0 °C</dd></div>
+          <div><dt>RAM en uso</dt><dd>8,1 GiB<small>51 % del total</small></dd></div>
         </dl>
-        <figcaption>Lecturas reales de un Intel Core Ultra 7 265 sin permisos de administrador.</figcaption>
+        <figcaption>Lecturas reales de MACE 1.1 abierto como administrador, con PawnIO instalado. El gráfico es ilustrativo.</figcaption>
       </figure>
     </div>
   </header>
 
   <main>
+    <section id="novedades">
+      <div class="wrap">
+        <h2>Novedades de la versión 1.1</h2>
+        <p class="measure">La lectura de sensores se apoya ahora en LibreHardwareMonitor, una biblioteca especializada, en lugar de integraciones propias por fabricante.</p>
+        <div class="cards">
+          <div class="card">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0Z"/></svg></div>
+            <h3>Temperatura real</h3>
+            <p>CPU Intel y AMD, y GPU Radeon, leídas mediante LibreHardwareMonitor. Verificada en equipos Intel y AMD.</p>
+          </div>
+          <div class="card">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><rect x="12" y="7" width="6" height="4" rx="1"/></svg></div>
+            <h3>Micro-HUD</h3>
+            <p>Una ventana pequeña, siempre visible, con las métricas que elijas encima de tus juegos o programas.</p>
+          </div>
+          <div class="card">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/></svg></div>
+            <h3>Controlador opcional</h3>
+            <p>PawnIO solo hace falta para la temperatura y la potencia de la CPU. Sin él, todo lo demás funciona.</p>
+          </div>
+          <div class="card">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+            <h3>Publicación verificada</h3>
+            <p>Cada versión se compila y prueba automáticamente en GitHub Actions antes de publicarse, con su SHA-256.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="instalar">
       <div class="wrap">
         <h2>Instalar en tu PC</h2>
@@ -219,6 +323,10 @@
         <div class="note">
           <strong>Si Windows dice «Windows protegió tu PC»</strong>
           El instalador no está firmado con un certificado comercial. Pulsa «Más información» y luego «Ejecutar de todas formas». Puedes comprobar que el archivo es el original con su SHA-256, más abajo.
+        </div>
+        <div class="note info">
+          <strong>Opcional: temperatura y potencia de la CPU</strong>
+          Requieren el controlador PawnIO. Su instalador oficial, sin modificar, viene en la carpeta de MACE: <code>app\prerequisites\PawnIO_setup.exe</code>. MACE nunca lo instala por su cuenta; si no lo instalas, verás el motivo en lugar de la temperatura.
         </div>
         <p class="measure">¿Solo quieres ver la interfaz? Abre <strong>MACE-Preview</strong> desde el menú Inicio: muestra datos simulados y no pide permisos de administrador.</p>
       </div>
@@ -244,9 +352,9 @@
           </table>
         </div>
         <figure class="shot">
-          <img src="img/mace-panel.png" width="1116" height="739" loading="lazy"
-               alt="Panel principal de MACE: CPU Intel, una GPU detectada, 22,8 GiB de RAM en uso y 99 procesos; las temperaturas aparecen como N/D, sin proveedor.">
-          <figcaption>Panel principal en un equipo Intel. Las temperaturas aparecen como N/D porque ese equipo no tiene un proveedor de sensores instalado.</figcaption>
+          <img src="img/mace-panel.png" width="1371" height="869" loading="lazy"
+               alt="Panel principal de MACE 1.1 en un equipo AMD: temperatura de CPU 65,0 °C, temperatura de la GPU Radeon RX 5500 XT 34,0 °C, 8,1 GiB de RAM en uso y 85 procesos.">
+          <figcaption>Panel principal de MACE 1.1 en un equipo AMD con Radeon RX 5500 XT, abierto como administrador y con PawnIO instalado.</figcaption>
         </figure>
       </div>
     </section>
@@ -296,8 +404,13 @@
   </main>
 
   <footer>
-    <div class="wrap">
-      MACE es un proyecto académico de la UTP. El código está en <a href="https://github.com/DanielDdeY/MACE">GitHub</a>.
+    <div class="wrap footer-grid">
+      <span>MACE es un proyecto académico de la UTP.</span>
+      <ul class="footer-links">
+        <li><a href="https://github.com/DanielDdeY/MACE">Código fuente</a></li>
+        <li><a href="https://github.com/DanielDdeY/MACE/releases">Versiones</a></li>
+        <li><a href="https://github.com/DanielDdeY/MACE/issues">Reportar un problema</a></li>
+      </ul>
     </div>
   </footer>
 
@@ -318,6 +431,7 @@
         download.setAttribute('aria-disabled', 'true');
         download.removeAttribute('href');
         label.textContent = 'Próximamente';
+        document.getElementById('download-top').removeAttribute('href');
         line.textContent = message;
       }
 
@@ -336,6 +450,7 @@
           return;
         }
         download.href = setup.browser_download_url;
+        document.getElementById('download-top').href = setup.browser_download_url;
         var date = new Date(release.published_at).toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' });
         line.textContent = 'Versión ' + release.tag_name.replace(/^v/i, '') + ', ' + megabytes(setup.size)
             + ', publicada el ' + date + '. Windows 10 y 11 de 64 bits.';
