@@ -55,11 +55,11 @@ public class NativeContractProbe {
             int buildMinor = record.get(ValueLayout.JAVA_INT, 52);
             int buildPatch = record.get(ValueLayout.JAVA_INT, 56);
 
-            if (size != 64 || recordVersion != 2 || abiMajor != 1 || abiMinor != 4 ||
+            if (size != 64 || recordVersion != 2 || abiMajor != 1 || abiMinor != 5 ||
                     processSize != 1584 || telemetrySize != 28 || blackboxSize != 16 ||
                     wcharSize != 2 || pointerSize != 8 ||
                     (capabilities & requiredCapabilities) != requiredCapabilities ||
-                    buildMajor != 1 || buildMinor != 4 || buildPatch != 2) {
+                    buildMajor != 1 || buildMinor != 5 || buildPatch != 0) {
                 throw new AssertionError("La DLL no coincide con el contrato FFM esperado");
             }
             System.out.printf("FFM OK: ABI %d.%d, DLL %d.%d.%d, layouts %d/%d/%d, %s%n",
