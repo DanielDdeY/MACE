@@ -6,6 +6,17 @@
 
 Monitor de hardware y gestor manual de procesos para Windows 10/11 x64. La capa nativa en C/C++ detecta CPU, GPU integradas y dedicadas, RAM y procesos; Java 22 y JavaFX presentan las lecturas, alertas, historial y caja negra persistente. MACE nunca finaliza procesos automáticamente. El Micro-HUD muestra las métricas principales en una ventana compacta superpuesta. El consumo eléctrico total del equipo todavía no se muestra.
 
+## Características
+
+Uso de CPU, RAM y GPU. 
+Temperatura y potencia de CPU, y temperatura, potencia y ventilador de algunas GPU.
+Sin instalación manual de controladores ni SDK por parte del usuario: el instalador de MACE incluye lo necesario. 
+
+## Requisitos
+
+Windows 10 o 11, x64.
+Permisos de administrador: MACE los solicita al abrirse para leer sensores de CPU.
+
 ## Ejecutables
 
 El empaquetado `app-image` genera dos accesos en `packaging/dist/MACE/`:
@@ -75,3 +86,11 @@ Se necesita Windows x64, Visual Studio 2022 o 2026 con MSVC y Windows SDK, CMake
 La temperatura y la potencia de la CPU (Intel y AMD) y las lecturas de GPU Radeon se obtienen mediante el helper LibreHardwareMonitor (`helper/`), que se compila con el SDK de .NET indicado en `helper/global.json`. En ejecución, esas lecturas requieren el controlador PawnIO instalado y abrir MACE como administrador; sin ellos la interfaz muestra el motivo (por ejemplo, «Ejecuta MACE como administrador») en lugar de inventar valores. Las GPU NVIDIA usan NVML y las GPU Intel IGCL, con LibreHardwareMonitor como respaldo. El uso de CPU y la RAM provienen de Windows. Consulte [compatibilidad nativa](native/docs/HARDWARE_COMPATIBILITY.md).
 
 Para revisar el hardware sin abrir Java, ejecute `test_mace.exe` junto a la DLL del mismo paquete nativo; `native/test_main.c` es la única prueba manual nativa mantenida. Las pruebas automatizadas Java se conservan en `app/src/test/` y se ejecutan con `mvn -f app/pom.xml test`. La [guía de diagnóstico](native/docs/TEAM_DIAGNOSTIC_GUIDE.md) describe las opciones y estados de los sensores.
+
+## Componentes de terceros
+
+MACE incluye o utiliza componentes de terceros con sus propias licencias, entre ellos LibreHardwareMonitor (MPL-2.0) y el controlador PawnIO. La lista completa está en THIRD-PARTY-NOTICES.txt.
+
+## Licencia
+
+MACE se distribuye bajo la licencia MIT. Los componentes de terceros conservan sus licencias originales.
