@@ -6,6 +6,14 @@ Se releen [FASE3-DISENO.md](FASE3-DISENO.md) y `prompt_mace_fase3.md` proporcion
 por el usuario. Este análisis técnico y de condiciones publicadas **no es asesoría
 legal** ni una aprobación de redistribución.
 
+**Actualización de prioridad, 2026-11-23:** el cuerpo fechado de 3.1b se conserva
+como evidencia. Sus selecciones pendientes quedan superadas por las decisiones
+de `3.1c.md` que el usuario acaba de priorizar y por sus confirmaciones: MIT,
+derivados cerrados aceptados, titular **DanielDdeY**, Inno Setup, SignPath
+Foundation, D4 opción (a) y migración JDK separada. La sección 7 y el
+[informe de continuidad](FASE3-3.1C-DECISIONES-Y-CONTINUIDAD.md) registran el
+estado vigente. No se trata de aprobaciones que hubieran ocurrido el 18/11.
+
 La aprobación condicionada del usuario es la autoridad para D1–D9. Las
 recomendaciones de esta adenda siguen siendo propuestas. No se acepta ninguna
 EULA, adquiere certificado, solicita servicio de firma ni envía binarios a terceros.
@@ -432,3 +440,47 @@ TXT excluidos. Congelados DLL 1.5.0, ABI 1.5, protocolo 2, helper 1.1.1,
 estados 9–16 y política 4A. No se toca la imagen, el JDK instalado ni launchers.
 
 **DETENERSE al terminar 3.1b. No avanzar a 3.2 sin aprobación.**
+
+## 7. Decisiones posteriores confirmadas el 2026-11-23
+
+Esta nota actualiza el estado; no reescribe las consultas ni las evidencias
+anteriores. Las decisiones de 3.1c y el mensaje actual del usuario prevalecen.
+
+- **D1:** Inno Setup elegido para diseño. WiX/MSI + Burn pasa a alternativa
+  histórica; C2 de elegibilidad ante SignPath sigue abierto. No instalar ni
+  cambiar herramienta por iniciativa del agente.
+- **D2/D3:** instalar MACE antes de PawnIO, sin exigir ya un MSI, conservando
+  consentimiento, versión inicial 2.2.0.0, preservación de otras versiones,
+  límite de espera 180 s, resultado indeterminado sin kill/3010/segundo intento.
+- **D4:** opción (a) aprobada, sin BootIdentifier, con sus límites. No se crea
+  ni lee la señal; concretar ruta/campos/consumo en el diff posterior.
+- **D5:** diseño del aviso Java aprobado; implementación aún exige diff y
+  aprobación aparte. D6 mantiene lo independiente de MSI; adaptar identidad,
+  reparación/actualización/rollback al instalador Inno en sus pasos.
+- **D7:** MIT elegida; C1 resuelto por confirmación expresa sobre derivados
+  cerrados. Titular declarado: **DanielDdeY**. Crear LICENSE solo en Paso B
+  después de aprobar A; no reasignar derechos de terceros ni afirmar revisión
+  legal completa. Migración JDK aprobada como trabajo separado: proveedor,
+  build y combinación JavaFX por concretar, sin tocar la imagen de referencia.
+- **D8:** SignPath Foundation elegido, gratuito y sin certificados de pago;
+  solicitud por preparar, no presentada, admisión NO VERIFICADA. El usuario
+  presentará la solicitud; el agente no envía artefactos, crea cuentas ni hace push.
+- **D9:** VM y permisos/restauración de equipos físicos siguen NO VERIFICADOS.
+  La información de hardware recibida es Intel, un equipo con integrada y otro
+  con NVIDIA; no acredita pruebas de sensores/HVCI.
+
+El usuario autoriza datos necesarios para copyright y política de firma. Usar
+el alias suministrado y los datos públicos de roles/contacto confirmados; no
+extraer identidad/correos del historial para rellenar campos. No se requieren
+nombre legal, domicilio ni documento de identidad para preparar estos textos.
+**DanielDdeY** asume autoría, revisión y aprobación; contacto público por GitHub
+Issues. El usuario confirma 2FA en GitHub y Gmail; para la futura cuenta SignPath
+sigue NO VERIFICADA. El correo alternativo aportado se reserva al formulario si
+lo exige; no se reproduce en el repositorio ni se envía ahora. Se conserva el
+saneado de datos locales y la exclusión de los tres TXT; se mantiene el permiso
+previo de terminar solo procesos desechables propios de las pruebas.
+
+**Punto actual:** 3.1c, registro de decisiones anterior al inventario A. Esta
+actualización no entrega A–E ni implementa 3.2–3.9. El flujo y requisitos para
+pasar de preparación a firma real constan en el informe enlazado. Detenerse
+tras la entrega documental actual.

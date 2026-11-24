@@ -5,6 +5,12 @@ Fecha: 2026-11-18, America/Lima. Rama `LHM_implementado`. Partida confirmada:
 el cierre solicitado, sujeto a aprobación del 5.3; **no aprueba verificaciones
 pendientes, fusión ni distribución**. No implementa Fase 3.
 
+**Nota posterior, 2026-11-23:** se añade al final un registro de las nuevas
+decisiones de licencia/firma y permisos, solicitado por el usuario. No modifica
+resultados, deudas ni alcance de las pruebas históricas de este cierre. Para
+el estado operativo actual, véase
+[Fase 3, decisiones y continuidad](FASE3-3.1C-DECISIONES-Y-CONTINUIDAD.md).
+
 Se leyeron el plan 5.2, el inventario de escrituras, los dos informes de 5.1,
 los informes previos y los **18 result.txt** presentes en
 `native/build/fase2-paso5.2/`. Los originales siguen ignorados y no se versionan.
@@ -303,3 +309,29 @@ operativos propuestos. No cambia producto/imagen, ABI/protocolo/helper, polític
 ni ejecuta PawnIO, cambia HVCI, fuerza servicio o fusiona a principal.
 
 **Fin del 5.3. Esperar aprobación del usuario; no avanzar a Fase 3.**
+
+## Nota posterior de decisiones — 2026-11-23
+
+Por instrucción actual del usuario se registran las decisiones prioritarias
+de 3.1c: MIT para código propio, aceptación de derivados cerrados, titular
+declarado **DanielDdeY** y permiso para los datos públicos necesarios de
+copyright/política; SignPath Foundation elegido sin certificados de pago;
+Inno Setup elegido, D4 opción (a) y migración de JDK como cambio separado.
+Los pendientes de elección de la sección anterior describen el 18/11 y no
+reabren esas decisiones. No se añade LICENSE ni se declara MIT a terceros.
+
+La solicitud SignPath no se ha presentado por el agente; admisión y firma de
+publicación siguen NO VERIFICADAS. La matriz de pruebas, riesgos de escrituras,
+deudas físicas y estado sin firma de la imagen histórica permanecen intactos.
+Los datos públicos autorizados no habilitan publicar logs locales o inferir
+correos del historial. DanielDdeY asume autoría, revisión y aprobación; contacto
+público GitHub Issues. 2FA de GitHub/Gmail confirmada por el usuario; la de la
+futura cuenta SignPath NO VERIFICADA. El correo alternativo queda reservado al
+formulario si es necesario, sin publicarlo ni enviarlo. Se conserva autorización
+previa para cierres de procesos propios del arnés, sin terminar aplicaciones o
+procesos ajenos.
+
+El punto de trabajo pasa a la consolidación documental previa al **Paso A de
+3.1c**, no a instalar o firmar. No se fusiona a principal ni se hace push. El
+[registro de Fase 3](FASE3-3.1C-DECISIONES-Y-CONTINUIDAD.md) contiene las
+condiciones, conflictos pendientes y etapas necesarias antes de una firma real.

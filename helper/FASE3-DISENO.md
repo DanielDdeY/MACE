@@ -12,8 +12,19 @@ Referencias de alcance: [preparación 3.0](FASE3-PASO0.md),
 Se relee prompt_mace_fase3.md; reemplaza su Fase 3 anterior. Ningún comando de
 instalación de este diseño se ha ejecutado en el host.
 
-**Estado posterior, 3.1b (2026-11-18):** diseño aprobado con condiciones;
-estados D1–D9 actualizados en la sección 11. La
+**Estado vigente, 2026-11-23:** el usuario prioriza las decisiones de `3.1c.md`
+y sus confirmaciones posteriores sobre las propuestas anteriores. MIT elegida,
+derivados cerrados aceptados y titular declarado **DanielDdeY**; SignPath
+Foundation e Inno Setup elegidos, con elegibilidad de firma pendiente.
+D4 opción (a) y migración JDK como trabajo separado aprobadas. Se mantiene
+aprobación previa de cada diff de producto. Estados actuales en sección 11 y
+[registro de decisiones y continuidad](FASE3-3.1C-DECISIONES-Y-CONTINUIDAD.md).
+Estamos en **3.1c, consolidación previa al Paso A**; no se ha entregado el
+inventario A, creado LICENSE ni presentado solicitud a SignPath. Los análisis
+WiX/MSI y decisiones pendientes del cuerpo original son evidencia histórica,
+no selección vigente. No se modifican binarios ni la imagen congelada.
+
+**Registro anterior, 3.1b (2026-11-18):** diseño aprobado con condiciones. La
 [adenda 3.1b](FASE3-DISENO-ADENDA.md) contiene las aclaraciones y prevalece
 sobre las propuestas del cuerpo original: **3.2 guía de VM, 3.3 instalador,
 3.4 señal/consumo 3010**, después 3.5–3.9. No se ha aprobado D1, la dependencia
@@ -558,24 +569,30 @@ Windows externo; firma/redistribución/Mono pendiente; runtime Java NFTC/antiguo
 datos no atómicos ante halt; deuda de frescura UI/EndTask de Fase 2. No se
 eliminan mediante una tabla de diseño ni una simulación.
 
-| ID | Estado comunicado por el usuario en 3.1b y límite de autorización |
+| ID | Estado vigente confirmado el 2026-11-23; decisiones de 3.1c prioritarias |
 |---|---|
-| D1 | **NO APROBADA TODAVÍA**: WiX 7.0.1 directo MSI + Burn. Resumen EULA/OSMF y alternativas en la adenda; no descargar, instalar ni aceptar EULA |
-| D2 | **APROBADA**: MSI MACE primero, PawnIO después; consentimiento explícito UI/silencioso; lista compatible inicial exacta 2.2.0.0; conservar otras versiones sin actualización automática |
+| D1 | **ELEGIDO Inno Setup**. Reemplaza la propuesta WiX/MSI + Burn; su encaje con SignPath sigue pendiente (C2). No se cambia a otra herramienta ni se instala tooling por esta actualización documental |
+| D2 | **APROBADA**: completar instalación de MACE primero, PawnIO después; consentimiento explícito UI/silencioso; lista inicial exacta 2.2.0.0; conservar otras versiones sin actualización automática. La referencia anterior a MSI se adapta a la elección de Inno, sin prometer una transacción global del driver |
 | D3 | **APROBADA**: espera máxima 180 s sin matar el instalador de PawnIO; resultado indeterminado, sin señal 3010 ni segundo intento. Limitación y recuperación manual en la adenda |
-| D4 | **APROBADOS** un valor de 32 B, propietario, ACL y REG_OPTION_VOLATILE. **NO APROBADA** dependencia de BootIdentifier; alternativas y ajuste de ruta/campos pendientes de decisión en la adenda |
-| D5 | **APROBADA EN PRINCIPIO**: aviso Java separado con MetricState.REBOOT_REQUIRED, sin cambiar V2/DLL/helper/protocolo/política 4A. Diff mínimo aparte y aprobación antes de aplicarlo en 3.4 |
-| D6 | **APROBADA**: Program Files x64 fijo, datos/PawnIO conservados, cierre manual sin kill, bloqueo downgrade, familia MSI propuesta y retención de logs indicada. Revisar parte MSI si D1 elige EXE puro |
-| D7 | **PENDIENTE**: el campo de licencia no fue completado. Solo análisis de compatibilidad; no se elige licencia por el usuario. Cambio de JDK exige aprobación aparte |
-| D8 | **APROBADO** mantener builds de prueba explícitamente sin firma y con aviso. Firma pendiente; preferencia previa sin pago mensual, campo de confirmación actual sin completar. No solicitar servicios, enviar archivos ni adquirir certificados sin permiso posterior |
+| D4 | **APROBADA opción (a)**: clave volátil, ACL/propietario y validación estricta, sin BootIdentifier, conservando un valor de 32 B y el límite documentado sobre claves persistentes falsas privilegiadas. Concretar/revisar ruta, campos y consumo antes de su diff; no leer/escribir ahora la señal |
+| D5 | **APROBADO el diseño** de aviso Java separado con MetricState.REBOOT_REQUIRED, sin cambiar V2/DLL/helper/protocolo/política 4A. El diff mínimo de implementación se presenta aparte y espera aprobación en 3.4 |
+| D6 | **APROBADA en lo independiente de MSI**: Program Files x64 fijo, datos/PawnIO conservados, cierre manual sin kill, bloqueo downgrade y retención de logs indicada. Familia MSI/rollback/reparación MSI dejan de ser requisitos operativos; definir equivalentes de Inno en 3.3/3.5, sin asumirlos implementados |
+| D7 | **MIT ELEGIDA** para código propio. Confirmado que permite derivados cerrados; titular declarado y alias público autorizado: **DanielDdeY**. Crear LICENSE en Paso B tras aprobación de A; no relicenciar terceros. Migración JDK aprobada como cambio separado; distribución/build/JavaFX por concretar |
+| D8 | **SignPath Foundation ELEGIDO**, programa gratuito; no certificados de pago. Solicitud por preparar/no presentada, aceptación NO VERIFICADA; builds de prueba sin firma propia y con aviso. Solicitud y publicación las hace el usuario, sin envíos, cuentas ni push por el agente |
 | D9 | VM Hyper-V/otro físico, permiso y respaldo con restauración probada: **NO VERIFICADOS**, campos sin completar. Criterio provisional: instalación en VM limpia con instantánea; físico prestado solo sensores con permiso, respaldo probado y aprobación específica |
 
-Las reglas ya decididas no se reabren. La adenda registra la numeración vigente
-dictada en el mensaje de 3.1b, que difiere del prompt local. D1 sigue pendiente
-para implementar 3.3; D4 y la aprobación del diff D5 condicionan 3.4. La guía
-de VM de 3.2 requiere antes aprobación de este subpaso, sin presuponer VM
-disponible. Ninguna aprobación documental acepta una EULA ni autoriza instalar
-en el host, modificar el producto o publicar sin revisión legal del paquete.
+Las elecciones anteriores no se vuelven a pedir. Elegir SignPath no equivale
+a ser admitido, elegir MIT no aplica retrospectivamente una licencia a terceros
+ni crea todavía LICENSE, y elegir Inno no resuelve su elegibilidad. La secuencia
+de 3.1b conserva 3.2 guía de VM, 3.3 instalador y 3.4 señal; la equivalencia con
+el prompt original está en el registro actual. Antes de avanzar se consolida
+3.1c y después se entrega **solo A**. Se mantiene autorización para cierres de
+procesos desechables propios del arnés; no para procesos ajenos. El usuario
+asigna a **DanielDdeY** autoría, revisión y aprobación de firma; contacto público
+por GitHub Issues. Confirma 2FA en GitHub/Gmail; MFA de la futura cuenta SignPath
+NO VERIFICADA. El alias/roles públicos autorizados son excepción limitada al
+saneado; el correo alternativo solo se usará si el formulario lo exige, sin
+publicarlo ni enviarlo ahora. Nada autoriza instalar, firmar o publicar ahora.
 
 ## 12. Evidencias de este paso, cambio y parada
 
