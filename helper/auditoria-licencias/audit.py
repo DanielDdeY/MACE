@@ -33,7 +33,7 @@ SPDX = 'https://raw.githubusercontent.com/spdx/license-list-data/main/json/licen
 EXCEPTIONS = 'https://raw.githubusercontent.com/spdx/license-list-data/main/json/exceptions.json'
 OSI = 'https://opensource.org/licenses'
 HOSTS = {'raw.githubusercontent.com', 'github.com', 'spdx.org', 'opensource.org',
-         'www.opensource.org', 'jrsoftware.org', 'www.jrsoftware.org',
+         'www.opensource.org', 'api.opensource.org', 'jrsoftware.org', 'www.jrsoftware.org',
          'nsis.sourceforge.io', 'www.oracle.com', 'adoptium.net', 'signpath.org',
          'learn.microsoft.com', 'go.microsoft.com', 'www.nuget.org', 'pawnio.eu'}
 
@@ -160,7 +160,15 @@ def primary_local():
                     props=z.read(n).decode(errors='replace')
                     m=re.search(r'^version=(.+)$',props,re.M)
                     if m: versions['pom.properties']=m.group(1).strip()
+            cache_jar=None
+            m=re.fullmatch(r'javafx-(base|controls|fxml|graphics)-22\.0\.2(-win)?\.jar',p.name)
+            if m:
+                cache_jar=Path.home()/'.m2/repository/org/openjfx'/('javafx-'+m.group(1))/'22.0.2'/p.name
+            elif p.name=='atlantafx-base-2.0.1.jar':
+                cache_jar=Path.home()/'.m2/repository/io/github/mkpaz/atlantafx-base/2.0.1'/p.name
+            match_cache=(digest(p)==digest(cache_jar)) if cache_jar and cache_jar.exists() else None
             jars.append(dict(archivo=rel(p), entradas=len(entries),versiones_embebidas=versions,
+                             coincide_cache_maven=match_cache,
                              legales=len([n for n in entries if re.search(r'(?i)(^|/)(LICENSE|NOTICE|COPYING|legal)(/|\.|$)', n)]),
                              firmas=len([n for n in entries if re.search(r'(?i)^META-INF/[^/]+\.(SF|RSA|DSA)$', n)])))
             for n in entries:
@@ -200,7 +208,7 @@ def get_official(report_text, refresh, out):
             return json.loads(read(snapshot))
         return dict(spdx=[], excepciones=[], osi_ids=[], urls=[], muestras={})
     urls = sorted(set(re.findall(r'\]\((https?://[^)]+)\)', report_text)) | {
-        SPDX, EXCEPTIONS, OSI,
+        SPDX, EXCEPTIONS, OSI, 'https://api.opensource.org/licenses/',
         'https://raw.githubusercontent.com/jrsoftware/issrc/main/license.txt',
         'https://www.nuget.org/packages/Mono.Posix.NETStandard/1.0.0',
         'https://go.microsoft.com/fwlink/?linkid=869050',
@@ -214,7 +222,8 @@ def get_official(report_text, refresh, out):
         responses = list(pool.map(fetch, urls))
     for url, (content, record) in zip(urls, responses):
         host = urllib.parse.urlsplit(url).hostname
-        record['autoridad'] = 'LICENCIAS' if host in ('spdx.org','opensource.org','raw.githubusercontent.com') and ('spdx' in url or 'opensource.org' in url) else 'TITULAR_O_PROYECTO'
+        record['autoridad'] = ('REGISTRO_DE_PAQUETES' if host=='www.nuget.org' else
+            ('LICENCIAS' if host in ('spdx.org','opensource.org','api.opensource.org','raw.githubusercontent.com') and ('spdx' in url or 'opensource.org' in url) else 'TITULAR_O_PROYECTO'))
         records.append(record)
         if content:
             texts[url] = content
@@ -462,6 +471,9 @@ def version_checks(out, rows, primary):
     names={r['componente']:r for r in rows}
     for name,key in [('LibreHardwareMonitorLib','librehardwaremonitorlib'),('RAMSPDToolkit-NDD','ramspdtoolkit-ndd'),
                      ('HidSharp','hidsharp'),('BlackSharp.Core','blacksharp.core'),('DiskInfoToolkit','diskinfotoolkit'),
+                     ('Microsoft.NETCore.App.Runtime.win-x64','microsoft.netcore.app.runtime.win-x64'),
+                     ('Mono.Posix.NETStandard.dll','mono.posix.netstandard'),
+                     ('MonoPosixHelper.dll y libMonoPosixHelper.dll','mono.posix.netstandard'),
                      ('System.CodeDom','system.codedom'),('System.IO.Ports','system.io.ports'),('System.Management','system.management')]:
         actual=primary['paquetes'][key]['metadatos'].get('version',['NO VERIFICADO'])[0]
         r=names[name]
@@ -492,6 +504,12 @@ def version_checks(out, rows, primary):
         ok=all(x.get('FileVersion','').startswith(field) for x in selected) and bool(selected)
         checks.append(dict(componente=name,informe=names[name]['version'],observado=f'{len(selected)} PE; {field}',
                            resultado='PASS' if ok else 'FAIL',fuente='VERSIONINFO leido directamente del ZIP'))
+    vc_files=['msvcp140.dll','vcruntime140.dll','vcruntime140_1.dll']
+    actuals=[primary['pe'].get(n,{}).get('FileVersion','NO VERIFICADO') for n in vc_files]
+    name='Microsoft VC runtime en runtime/bin'
+    checks.append(dict(componente=name,informe=names[name]['version'],observado=';'.join(actuals),
+                       resultado='PASS' if all(x=='14.36.32532.0' for x in actuals) else 'FAIL',
+                       fuente='VERSIONINFO de tres DLL, no del nombre del archivo'))
     actual=re.search(r'JAVA_VERSION="([^"]+)"',read(IMAGE/'runtime/release')).group(1)
     r=names['Runtime jlink Oracle Java']; checks.append(dict(componente=r['componente'],informe=r['version'],observado=actual,
                                       resultado='PASS' if actual in r['version'] else 'FAIL',fuente='runtime/release'))

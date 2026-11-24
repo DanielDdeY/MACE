@@ -4155,7 +4155,7 @@
       "http": 200,
       "fecha": "2026-11-23",
       "consultado_utc": "2026-11-24T04:28:27.727221+00:00",
-      "autoridad": "TITULAR_O_PROYECTO"
+      "autoridad": "REGISTRO_DE_PAQUETES"
     },
     {
       "url": "https://www.oracle.com/downloads/licenses/no-fee-license.html",
@@ -4165,6 +4165,15 @@
       "fecha": "2026-11-23",
       "consultado_utc": "2026-11-24T04:28:26.666807+00:00",
       "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://api.opensource.org/licenses/",
+      "final": "https://opensource.org/api/license/licenses/",
+      "estado": "NO VERIFICADO",
+      "http": 500,
+      "fecha": "2026-11-23",
+      "autoridad": "LICENCIAS",
+      "motivo": "Lectura web inicial no utilizable; no se usa como evidencia de la lista OSI"
     }
   ],
   "muestras": {

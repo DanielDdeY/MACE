@@ -11,6 +11,15 @@ declarado **DanielDdeY**. No se crea LICENSE, política de firma, workflow ni
 instalador. Los pasos B–E y 3.2–3.9 siguen pendientes. Este análisis técnico
 no es asesoría legal; los bloqueos de derechos requieren revisión cualificada.
 
+**Corrección tras auditoría, 2026-11-23:** se conserva la historia en Git
+(`d922d99`). Se corrigen el recuento de JAR (10, no 11), el estado del enlace
+de Mono y siete carencias de presentación/acreditación. Registro antes/después
+en [auditoría](FASE3-LICENCIA-AUDITORIA.md); lectura breve en
+[resumen](FASE3-LICENCIA-RESUMEN.md). No se cambian producto ni licencias elegidas.
+Las tablas ahora separan las once columnas y las 103 filas (34 principales,
+23 avisos Java y 46 avisos .NET): **no son 103 dependencias independientes**.
+La fuente documentada no acredita por sí sola todos los bytes ni su elegibilidad.
+
 ## 1. Alcance, método y conclusión
 
 Se releen `3.1c.md`, `prompt_mace_fase3.md`, [diseño](FASE3-DISENO.md),
@@ -34,7 +43,7 @@ La imagen tiene **370 archivos, 147.787.297 bytes**:
 | `app/lhm/` | 203 | 85.548.222 | 202 archivos de ejecución y helper-runtime.manifest; dependencias y runtime .NET abajo |
 | `runtime/` | 141 | 46.737.166 | Runtime Java, legales de sus 11 módulos y CRT de Microsoft |
 | `app/third-party/` | 7 | 328.790 | Textos de licencia/avisos identificados abajo |
-| Resto | 19 | 15.173.119 | Dos launchers, 11 JAR, DLL propia, dos cfg, XML de jpackage, manifiesto global, avisos y setup PawnIO |
+| Resto | 19 | 15.173.119 | Dos launchers, 10 JAR, DLL propia, dos cfg, XML de jpackage, manifiesto global, avisos y setup PawnIO |
 | **Total** | **370** | **147.787.297** | El contenido nativo dentro de JAR y DLL requiere además las subtablas |
 
 No existe aún un instalador definitivo MACE. «Viaja» significa presente en la
@@ -59,8 +68,9 @@ con el programa, además de tener derechos de redistribución.
   aprobada por SPDX/OSI. No se inventan identificadores de excepciones.
 - «OSI sí» califica la licencia identificada, no el paquete completo ni su
   admisión por SignPath. «NV» significa **NO VERIFICADO**, nunca «aprobado».
-- Doble licencia: «no declarada» describe lo encontrado en la evidencia
-  consultada; no prueba ausencia universal de otros contratos comerciales.
+- Doble licencia: la comprobación individual no permite acreditar ausencia
+  de otros contratos comerciales; queda **NO VERIFICADO** por fila. El driver
+  anuncia alternativas, sin acreditar aquí un contrato comercial concreto.
   Dos licencias libres alternativas no equivalen a doble licencia comercial.
 - Firmas: `NS` = Authenticode NotSigned; `V(editor)` = Valid en esta inspección;
   `J0` = sin entradas de firma JAR detectadas. Una firma no concede licencias.
@@ -74,7 +84,7 @@ Evidencias locales, relativas al checkout o a cachés simbólicas sin datos loca
 | ID | Evidencia |
 |---|---|
 | E1 | `packaging/dist/MACE/`, `packaging/dist/MACE-SHA256SUMS.txt`; metadatos de archivos y firmas leídos, sin ejecutar |
-| E2 | `app/pom.xml`; POM restaurados de OpenJFX 22.0.2 y AtlantaFX 2.0.1 en `<cacheMaven>`; entradas ZIP de los 11 JAR reales |
+| E2 | `app/pom.xml`; POM restaurados de OpenJFX 22.0.2 y AtlantaFX 2.0.1 en `<cacheMaven>`; entradas ZIP de los 10 JAR reales |
 | E3 | `helper/Mace.Lhm.Helper/packages.lock.json`, `obj/project.assets.json`; `app/lhm/Mace.Lhm.Helper.deps.json` en la imagen |
 | E4 | nuspec y archivos de licencia/avisos de cada versión exacta en `<cacheNuGet>`; sus revisiones declaradas, cuando existen |
 | E5 | `packaging/THIRD-PARTY-NOTICES.txt` y los siete archivos `packaging/third-party/`; no se reescriben todavía |
@@ -91,24 +101,24 @@ en un nuspec no se rellena atribuyéndole el repositorio de otra versión.
 
 ### 2.1 Artefactos propios y componentes seleccionados por el helper
 
-| Componente | Versión exacta | SPDX / OSI | Doble comercial | Evidencia | Viaja | Origen / firma actual | SignPath / acción |
-|---|---|---|---|---|---|---|---|
-| Aplicación Java MACE | JAR 1.0.0-SNAPSHOT | MIT elegida, aún sin LICENSE / sí al formalizar | No elegida | E1/E2, decisión usuario | Sí | Propio, J0 | P; B formaliza licencia; no asumir que firmar PE firma el JAR |
-| MACE.exe y MACE-Preview.exe | Producto 1.0.0 | Código MACE MIT pendiente; stub jpackage y CRT con términos propios | Véase runtime | E1/E6 | Sí | Generados por jpackage, NS ambos | P/B; revisar stub/runtime y C10, no tratar todo byte generado como autoría propia |
-| mace_native.dll | Archivo 1.5.0.0, ABI 1.5 | MIT elegida + cabecera IGCL + CRT estático / conjunto NV | NV para conjunto | E1/E7 | Sí | C propio con componentes indicados, NS | P/B; C6/C10, mantener NVML/IGCL y 4A |
-| Mace.Lhm.Helper.exe y DLL propia | 1.1.1; archivo 1.1.1.0 | MIT elegida; apphost .NET MIT y avisos / sí para esas licencias | No elegida | E1/E3/E4 | Sí | Propio generado con .NET, PE propios NS | P; resolver conjunto antes de firma, no firmar dependencias como propias |
-| Mace.Lhm.Protocol.dll | 1.0.0.0; wire privado 2 | MIT elegida / sí al formalizar | No elegida | E1/E3/E8 | Sí | Propio, NS | P; no confundir versión de ensamblado con wire/helper; C10 |
-| LibreHardwareMonitorLib | 0.9.6 | MPL-2.0; recursos con términos separados / sí para MPL | No declarada | E3/E4/E8 | Sí | Tercero, NS | T/B; fuentes/avisos MPL y módulos PawnIO abajo |
-| BlackSharp.Core | 1.0.7 | MPL-2.0 / sí | No declarada | E3/E4/E5 | Sí | Tercero, NS | T; conservar avisos y fuentes correspondientes |
-| DiskInfoToolkit | 1.1.2 | MPL-2.0 / sí | No declarada | E3/E4/E5 | Sí | Tercero, NS | T; mismas obligaciones MPL |
-| RAMSPDToolkit-NDD | 1.4.2 | MPL-2.0 / sí | No declarada | E3/E4/E9 | Sí | Tercero, NS | T; excepción de compatibilidad limitada al archivo/pin y offsets 105819/127562, sin driver activo |
-| HidSharp | 2.6.4 | Apache-2.0 / sí | No declarada; otros acuerdos NV | E4; HidSharp-LICENSE.txt real | Sí | Tercero, NS | T; corregir posteriormente inventario que solo dice LICENSE.txt, conservar texto/avisos aplicables |
-| Mono.Posix.NETStandard.dll | Paquete 1.0.0, assembly 1.0.0.0 | NOASSERTION / NV | NV | E3/E4/E8, C4 | Sí | Tercero, V(Xamarin Inc.) | B; firma y nombre no acreditan licencia exacta |
-| MonoPosixHelper.dll y libMonoPosixHelper.dll | Paquete 1.0.0; FileVersion no declarada | NOASSERTION / NV | NV | E3/E4; tres binarios coinciden con caché | Sí | Terceros, V(Xamarin Inc.) ambos | B; C4 incluye los tres, no solo DLL administrada |
-| Microsoft.NETCore.App.Runtime.win-x64 | 10.0.12 | MIT + avisos de componentes / sí MIT, resto por aviso | No declarada para MIT | E3/E4/E5, §2.4 | Sí, autocontenido | Tercero; coreclr V(.NET); no afirmar firma de cada archivo por ese ejemplo | T/B; conservar LICENSE/THIRD-PARTY-NOTICES, acreditar subcomponentes y correspondencia |
-| System.CodeDom | 10.0.2 | MIT + avisos / sí MIT | No declarada | E3/E4/E5 | Sí | Tercero, V(.NET) | T; conservar avisos |
-| System.IO.Ports | 10.0.3 | MIT + avisos / sí MIT | No declarada | E3/E4/E5 | Sí | Tercero, V(.NET) | T; distinguir grafo de otros RID, que no se copia |
-| System.Management | 10.0.2 | MIT + avisos / sí MIT | No declarada | E3/E4/E5 | Sí | Tercero, V(.NET) | T; conservar avisos |
+| Componente | Version exacta | Licencia SPDX | Aprobada OSI | Doble licencia comercial | Fuente de evidencia | Viaja en instalador | Quien lo compila | Quien lo firma hoy | Elegibilidad SignPath | Accion necesaria |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Aplicación Java MACE | JAR 1.0.0-SNAPSHOT | MIT decidida; formalizacion pendiente B. MIT elegida, aún sin LICENSE | sí para MIT; formalización de MACE pendiente; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | Sí | MACE/Maven; Java | Propio, J0 | P | B formaliza licencia; no asumir que firmar PE firma el JAR |
+| MACE.exe y MACE-Preview.exe | Producto 1.0.0 | MIT decidida; formalizacion pendiente B. Código MACE MIT pendiente; stub jpackage y CRT con términos propios | NO VERIFICADO; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | Sí | jpackage; stub ajeno | Generados por jpackage, NS ambos | P/B | revisar stub/runtime y C10, no tratar todo byte generado como autoría propia |
+| mace_native.dll | Archivo 1.5.0.0, ABI 1.5 | MIT decidida; formalizacion pendiente B. MIT elegida + cabecera IGCL + CRT estático | conjunto NV; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | Sí | MACE/MSVC; CRT ajeno | C propio con componentes indicados, NS | P/B | C6/C10, mantener NVML/IGCL y 4A |
+| Mace.Lhm.Helper.exe y DLL propia | 1.1.1; archivo 1.1.1.0 | MIT decidida; formalizacion pendiente B. MIT elegida; apphost .NET MIT y avisos | sí para esas licencias; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | Sí | .NET publish; apphost ajeno | Propio generado con .NET, PE propios NS | P | resolver conjunto antes de firma, no firmar dependencias como propias |
+| Mace.Lhm.Protocol.dll | 1.0.0.0; wire privado 2 | MIT decidida; formalizacion pendiente B. MIT elegida | sí para MIT; formalización de MACE pendiente; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | Sí | MACE/.NET SDK | Propio, NS | P | no confundir versión de ensamblado con wire/helper; C10 |
+| LibreHardwareMonitorLib | 0.9.6 | MPL-2.0; recursos con términos separados | sí para MPL | NO VERIFICADO; no se acredita ausencia de acuerdos | METADATO_PAQUETE: `<cacheNuGet>/librehardwaremonitorlib/0.9.6/librehardwaremonitorlib.nuspec` | Sí | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero, NS | T/B | fuentes/avisos MPL y módulos PawnIO abajo |
+| BlackSharp.Core | 1.0.7 | MPL-2.0 | sí | NO VERIFICADO; no se acredita ausencia de acuerdos | METADATO_PAQUETE: `<cacheNuGet>/blacksharp.core/1.0.7/blacksharp.core.nuspec` | Sí | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero, NS | T | conservar avisos y fuentes correspondientes |
+| DiskInfoToolkit | 1.1.2 | MPL-2.0 | sí | NO VERIFICADO; no se acredita ausencia de acuerdos | METADATO_PAQUETE: `<cacheNuGet>/diskinfotoolkit/1.1.2/diskinfotoolkit.nuspec` | Sí | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero, NS | T | mismas obligaciones MPL |
+| RAMSPDToolkit-NDD | 1.4.2 | MPL-2.0 | sí | NO VERIFICADO; no se acredita ausencia de acuerdos | METADATO_PAQUETE: `<cacheNuGet>/ramspdtoolkit-ndd/1.4.2/ramspdtoolkit-ndd.nuspec` | Sí | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero, NS | T | excepción de compatibilidad limitada al archivo/pin y offsets 105819/127562, sin driver activo |
+| HidSharp | 2.6.4 | Apache-2.0 | sí | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `<cacheNuGet>/hidsharp/2.6.4/LICENSE.txt` | Sí | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero, NS | T | corregir posteriormente inventario que solo dice LICENSE.txt, conservar texto/avisos aplicables |
+| Mono.Posix.NETStandard.dll | Paquete 1.0.0, assembly 1.0.0.0 | NO VERIFICADO para el artefacto; atribucion previa: NOASSERTION | NV; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | Sí | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero, V(Xamarin Inc.) | B | firma y nombre no acreditan licencia exacta |
+| MonoPosixHelper.dll y libMonoPosixHelper.dll | Paquete 1.0.0; FileVersion no declarada | NO VERIFICADO para el artefacto; atribucion previa: NOASSERTION | NV; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | Sí | Distribucion ajena; compilador exacto NO VERIFICADO | Terceros, V(Xamarin Inc.) ambos | B | C4 incluye los tres, no solo DLL administrada |
+| Microsoft.NETCore.App.Runtime.win-x64 | 10.0.12 | MIT + avisos de componentes | sí MIT, resto por aviso | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `<cacheNuGet>/microsoft.netcore.app.runtime.win-x64/10.0.12/LICENSE.TXT` | Sí, autocontenido | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero; coreclr V(.NET); no afirmar firma de cada archivo por ese ejemplo | T/B | conservar LICENSE/THIRD-PARTY-NOTICES, acreditar subcomponentes y correspondencia |
+| System.CodeDom | 10.0.2 | MIT + avisos | sí MIT | NO VERIFICADO; no se acredita ausencia de acuerdos | METADATO_PAQUETE: `<cacheNuGet>/system.codedom/10.0.2/system.codedom.nuspec` | Sí | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero, V(.NET) | T | conservar avisos |
+| System.IO.Ports | 10.0.3 | MIT + avisos | sí MIT | NO VERIFICADO; no se acredita ausencia de acuerdos | METADATO_PAQUETE: `<cacheNuGet>/system.io.ports/10.0.3/system.io.ports.nuspec` | Sí | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero, V(.NET) | T | distinguir grafo de otros RID, que no se copia |
+| System.Management | 10.0.2 | MIT + avisos | sí MIT | NO VERIFICADO; no se acredita ausencia de acuerdos | METADATO_PAQUETE: `<cacheNuGet>/system.management/10.0.2/system.management.nuspec` | Sí | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero, V(.NET) | T | conservar avisos |
 
 El runtime .NET aporta el resto de DLL de System/Microsoft y sus motores
 nativos (hostfxr, hostpolicy, coreclr, JIT, etc.) como **una distribución
@@ -123,16 +133,16 @@ para la biblioteca LHM. No es la versión del ejecutable helper; esta es
 
 ### 2.2 Java, JavaFX y bibliotecas nativas contenidas
 
-| Componente | Versión exacta | SPDX / OSI | Doble comercial | Evidencia | Viaja | Origen / firma actual | SignPath / acción |
-|---|---|---|---|---|---|---|---|
-| Runtime jlink Oracle Java | 22.0.2; build detallada no presente en release reducido | LicenseRef-Oracle-NFTC + términos separados / no para NFTC | Oracle ofrece otros contratos; no inferir cuál se aceptó | E1/E6; [NFTC](https://www.oracle.com/downloads/licenses/no-fee-license.html) | Sí, 11 módulos | Tercero; firma de todos sus PE NV | B; migración separada aprobada, proveedor/build por concretar |
-| OpenJFX base, controls, fxml, graphics | 22.0.2; ocho JAR, normal y win por módulo | GPL-2.0-only WITH Classpath-exception-2.0 para código OpenJFX; nativos ajenos aparte / sí GPL base | No declarada en POM; servicios comerciales no prueban relicencia de estos bytes | E1/E2; [proyecto oficial](https://github.com/openjdk/jfx/) | Sí | Tercero, J0 en los ocho JAR | T/B; añadir textos/avisos exactos y acreditar fuente/build correspondiente |
-| Nativos OpenJFX dentro de graphics-win | 22.0.2; siete DLL | Licencia OpenJFX más subcomponentes nativos: identificación completa NV | NV para subcomponentes | E2, ZIP y PE | Sí, dentro del JAR | Terceros, NS los siete | T/B; decora_sse, glass, javafx_font, javafx_iio, prism_common, prism_d3d, prism_sw; no refirmar |
-| AtlantaFX base | 2.0.1 | MIT / sí | No declarada | E2; [LICENSE v2.0.1](https://raw.githubusercontent.com/mkpaz/atlantafx/v2.0.1/LICENSE) | Sí | Tercero, J0 | T; incluir licencia/atribución en B/3.7 |
-| Microsoft VC runtime dentro de JavaFX | 14.36.32532.0, cinco DLL | LicenseRef-MSVC-Redistributable / no acreditada como OSI | Condiciones Microsoft, no licencia libre alternativa acreditada | E2, PE; [redistribución oficial](https://learn.microsoft.com/cpp/windows/redistributing-visual-cpp-files) | Sí, dentro del JAR | V(Microsoft Windows Software Compatibility Publisher) | B; consultar excepción de bibliotecas de sistema y derechos aplicables; no refirmar |
-| Microsoft UCRT/API sets dentro de JavaFX | 10.0.17763.132; 42 DLL | LicenseRef-Microsoft-UCRT / no acreditada como OSI | Condiciones Microsoft | E2, PE, fuente anterior | Sí, dentro del JAR | V(Microsoft Corporation) | B; no atribuir licencia GPL a estos binarios por estar en el mismo JAR |
-| Microsoft VC runtime en runtime/bin | 14.36.32532.0; tres DLL | LicenseRef-MSVC-Redistributable / no acreditada como OSI | Condiciones Microsoft | E1, PE y fuente anterior | Sí | Tres V; atribución Microsoft, no firma propia | B; msvcp140, vcruntime140, vcruntime140_1; revisar también al migrar JDK |
-| Subcomponentes declarados por Java | Véase §2.5, 23 avisos distintos | Licencias por aviso; no todo es NFTC ni GPL | No declarada salvo lo indicado | E6 | Avisos sí; correspondencia binaria individual NV | Terceros embebidos, sin PE separable en muchos casos | T/B; conservar legales y revisar los no acreditados |
+| Componente | Version exacta | Licencia SPDX | Aprobada OSI | Doble licencia comercial | Fuente de evidencia | Viaja en instalador | Quien lo compila | Quien lo firma hoy | Elegibilidad SignPath | Accion necesaria |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Runtime jlink Oracle Java | 22.0.2; build detallada no presente en release reducido | LicenseRef-Oracle-NFTC + términos separados | no para NFTC | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.base/LICENSE` | Sí, 11 módulos | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero; firma de todos sus PE NV | B | migración separada aprobada, proveedor/build por concretar |
+| OpenJFX base, controls, fxml, graphics | 22.0.2; ocho JAR, normal y win por módulo | GPL-2.0-only WITH Classpath-exception-2.0 para código OpenJFX; nativos ajenos aparte | sí GPL base | NO VERIFICADO; no se acredita ausencia de acuerdos | METADATO_PAQUETE: `<cacheMaven>/org/openjfx/javafx/22.0.2/javafx-22.0.2.pom` | Sí | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero, J0 en los ocho JAR | T/B | añadir textos/avisos exactos y acreditar fuente/build correspondiente |
+| Nativos OpenJFX dentro de graphics-win | 22.0.2; siete DLL | NO VERIFICADO para el artefacto; atribucion previa: Licencia OpenJFX más subcomponentes nativos: identificación completa NV | NO VERIFICADO; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | Sí, dentro del JAR | Distribucion ajena; compilador exacto NO VERIFICADO | Terceros, NS los siete | T/B | decora_sse, glass, javafx_font, javafx_iio, prism_common, prism_d3d, prism_sw; no refirmar |
+| AtlantaFX base | 2.0.1 | MIT | sí | NO VERIFICADO; no se acredita ausencia de acuerdos | URL_OFICIAL: [fuente oficial](https://raw.githubusercontent.com/mkpaz/atlantafx/v2.0.1/LICENSE) | Sí | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero, J0 | T | incluir licencia/atribución en B/3.7 |
+| Microsoft VC runtime dentro de JavaFX | 14.36.32532.0, cinco DLL | NO VERIFICADO para el artefacto; atribucion previa: LicenseRef-MSVC-Redistributable | no acreditada como OSI; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | Sí, dentro del JAR | Distribucion ajena; compilador exacto NO VERIFICADO | V(Microsoft Windows Software Compatibility Publisher) | B | consultar excepción de bibliotecas de sistema y derechos aplicables; no refirmar |
+| Microsoft UCRT/API sets dentro de JavaFX | 10.0.17763.132; 42 DLL | NO VERIFICADO para el artefacto; atribucion previa: LicenseRef-Microsoft-UCRT | no acreditada como OSI; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | Sí, dentro del JAR | Distribucion ajena; compilador exacto NO VERIFICADO | V(Microsoft Corporation) | B | no atribuir licencia GPL a estos binarios por estar en el mismo JAR |
+| Microsoft VC runtime en runtime/bin | 14.36.32532.0; tres DLL | NO VERIFICADO para el artefacto; atribucion previa: LicenseRef-MSVC-Redistributable | no acreditada como OSI; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | Sí | Distribucion ajena; compilador exacto NO VERIFICADO | Tres V; atribución Microsoft, no firma propia | B | msvcp140, vcruntime140, vcruntime140_1; revisar también al migrar JDK |
+| Subcomponentes declarados por Java | Véase §2.5, 23 avisos distintos | Licencias por aviso; no todo es NFTC ni GPL | NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/` | Avisos sí; correspondencia binaria individual NV | Distribucion ajena; compilador exacto NO VERIFICADO | Terceros embebidos, sin PE separable en muchos casos | T/B | conservar legales y revisar los no acreditados |
 
 Las **54 DLL** de graphics-win son siete OpenJFX, cinco VC (msvcp140,
 msvcp140_1, msvcp140_2, vcruntime140, vcruntime140_1) y 42 UCRT/API sets
@@ -140,7 +150,7 @@ msvcp140_1, msvcp140_2, vcruntime140, vcruntime140_1) y 42 UCRT/API sets
 firmas de las 54 copias. No se ha probado qué subconjunto extrae/carga JavaFX
 durante una sesión concreta; todos viajan y deben inventariarse.
 
-Los 11 JAR inspeccionados no contienen entradas estándar LICENSE/NOTICE/COPYING/legal
+Los 10 JAR inspeccionados no contienen entradas estándar LICENSE/NOTICE/COPYING/legal
 ni firmas META-INF SF/RSA/DSA. Esa búsqueda de nombres no demuestra ausencia de
 cualquier mención de copyright. El payload actual tampoco incluye textos
 separados de AtlantaFX/OpenJFX entre sus siete avisos. Es un pendiente de B/3.7,
@@ -154,18 +164,18 @@ JavaFX/FFM, regresión, manifiestos y pins pertenece al cambio separado.
 
 ### 2.3 PawnIO, interfaces y componentes de construcción
 
-| Componente | Versión exacta | SPDX / OSI | Doble comercial | Evidencia | Viaja | Origen / firma actual | SignPath / acción |
-|---|---|---|---|---|---|---|---|
-| PawnIO_setup.exe | 2.2.0.0 | NOASSERTION para el instalador completo / NV | NV para setup | E1/E9; [release oficial](https://github.com/namazso/PawnIO.Setup/releases/tag/2.2.0) | Sí, intacto | Tercero, V(namazso.eu), pin coincidente | B; permiso de copia no acredita licencia OSI de cada parte; excluir de toda firma propia |
-| Driver PawnIO incluido por setup | La correspondencia interna exacta con fuentes de 2.2.0 NV | GPL-2.0-or-later en fuente actual + excepción propia IOCTL/LGPL; expresión completa NOASSERTION / GPL sí, excepción/conjunto NV | [Upstream ofrece licencia alternativa](https://raw.githubusercontent.com/namazso/PawnIO/master/README.md); contrato comercial concreto NV | E9, fuente oficial | Sí, dentro del setup; no extraído | Tercero; firma interna no inspeccionada, no inferirla de firma del setup | B; acreditar fuente/versión/excepción/oferta y consultar doble licencia |
-| Módulos PawnIO embebidos en LHM | 12 recursos binarios, incluidos en LHM 0.9.6; commits de compilación NV | LGPL-2.1-or-later en fuente IntelMSR actual; NOASSERTION para atribución exacta del conjunto / NV conjunto | No declarada para la fuente consultada; NV conjunto | E8; [fuente oficial](https://raw.githubusercontent.com/namazso/PawnIO.Modules/main/IntelMSR.p) | Sí, recursos de DLL LHM | Terceros, no PE Authenticode individuales | B; obtener fuentes y licencias correspondientes a los doce binarios |
-| Cabecera Intel IGCL | Texto de licencia 10.07.21; versión/tag de cabecera no acreditados | LicenseRef-Intel-IGCL / no: restricción de plataforma | Otros contratos NV | E7 | Cabecera no como archivo; se usa al compilar y su aviso sí viaja | Tercero versionado, texto sin firma | B; consultar alcance del programa, preservar aviso y proveedor; no borrarla/reimplementarla aquí |
-| Runtime IGCL del controlador Intel | Versión depende del equipo, NV | NOASSERTION del binario concreto / NV | Propietario, términos del driver por verificar | E7, carga dinámica | No se copia | Tercero del sistema, firma NV | B/F; consultar si califica como biblioteca de sistema, no darlo por aceptado |
-| NVML del controlador NVIDIA | Versión depende del equipo, NV | NOASSERTION del binario concreto / NV | Propietario, términos del driver por verificar | E7, carga dinámica | No se copia; API declarada en código C propio | Tercero del sistema, firma NV | B/F; mantener proveedor primario; declarar dependencia externa a SignPath |
-| APIs y DLL de Windows | Versión depende de Windows, NV | LicenseRef-Microsoft-Windows / no es licencia OSI | Términos Windows | E7, enlaces kernel32/psapi/user32/DXGI y demás APIs Windows | No se copian las DLL del sistema | Microsoft, firma local de cada una NV | F; posible excepción de bibliotecas de sistema, no equivale a permiso para copiar cualquier DLL |
-| CRT MSVC enlazado estáticamente | Build exacta de bibliotecas usadas en imagen NV | LicenseRef-MSVC-Redistributable / no acreditada OSI | Condiciones toolchain | E7, MultiThreaded en CMake | Sí, código enlazado en DLL propia | Tercero dentro del artefacto propio NS | B; no omitirlo porque no existe msvcrt separado; revisar redistribución y excepción |
-| Inno Setup, motor, loader y desinstalador futuros | Ninguna versión instalada/seleccionada para MACE acreditada | InnoSetup / **no** según SPDX | Compra comercial no convierte su licencia en OSI | [SPDX](https://spdx.org/licenses/InnoSetup.json), [loader oficial](https://jrsoftware.org/inno-setup/documentation/topic_setup_usesetupldr.htm) | Futuros componentes del instalador, aún inexistente | Tercero; firma de futuro resultado NV | B/F; C2 antes de publicar/solicitar; no se instala |
-| NSIS como alternativa, no elegida | Versión/build concreta NV | Zlib en motor/compresión zlib; otros módulos tienen licencias propias / Zlib sí | No declarada para núcleo | [Licencias oficiales](https://nsis.sourceforge.io/License) | No | Tercero, no instalado, firma NV | F; solo opción con decisión del usuario y revisión de plugins |
+| Componente | Version exacta | Licencia SPDX | Aprobada OSI | Doble licencia comercial | Fuente de evidencia | Viaja en instalador | Quien lo compila | Quien lo firma hoy | Elegibilidad SignPath | Accion necesaria |
+|---|---|---|---|---|---|---|---|---|---|---|
+| PawnIO_setup.exe | 2.2.0.0 | NO VERIFICADO para el artefacto; atribucion previa: NOASSERTION para el instalador completo | NV; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | Sí, intacto | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero, V(namazso.eu), pin coincidente | B | permiso de copia no acredita licencia OSI de cada parte; excluir de toda firma propia |
+| Driver PawnIO incluido por setup | La correspondencia interna exacta con fuentes de 2.2.0 NV | GPL-2.0-or-later en fuente actual + excepción propia IOCTL/LGPL; expresión completa NOASSERTION | GPL sí, excepción/conjunto NV | Licencias alternativas anunciadas; modalidad comercial NO VERIFICADO | URL_OFICIAL: [fuente oficial](https://raw.githubusercontent.com/namazso/PawnIO/master/README.md) | Sí, dentro del setup; no extraído | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero; firma interna no inspeccionada, no inferirla de firma del setup | B | acreditar fuente/versión/excepción/oferta y consultar doble licencia |
+| Módulos PawnIO embebidos en LHM | 12 recursos binarios, incluidos en LHM 0.9.6; commits de compilación NV | LGPL-2.1-or-later en fuente IntelMSR actual; NOASSERTION para atribución exacta del conjunto | NV conjunto | NO VERIFICADO; no se acredita ausencia de acuerdos | URL_OFICIAL: [fuente oficial](https://raw.githubusercontent.com/namazso/PawnIO.Modules/main/IntelMSR.p) | Sí, recursos de DLL LHM | Distribucion ajena; compilador exacto NO VERIFICADO | Terceros, no PE Authenticode individuales | B | obtener fuentes y licencias correspondientes a los doce binarios |
+| Cabecera Intel IGCL | Texto de licencia 10.07.21; versión/tag de cabecera no acreditados | LicenseRef-Intel-IGCL | no: restricción de plataforma | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `native/vendor_headers/intel_igcl/LICENSE` | Cabecera no como archivo; se usa al compilar y su aviso sí viaja | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero versionado, texto sin firma | B | consultar alcance del programa, preservar aviso y proveedor; no borrarla/reimplementarla aquí |
+| Runtime IGCL del controlador Intel | Versión depende del equipo, NV | NO VERIFICADO para el artefacto; atribucion previa: NOASSERTION del binario concreto | NV; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | No se copia | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero del sistema, firma NV | B/F | consultar si califica como biblioteca de sistema, no darlo por aceptado |
+| NVML del controlador NVIDIA | Versión depende del equipo, NV | NO VERIFICADO para el artefacto; atribucion previa: NOASSERTION del binario concreto | NV; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | No se copia; API declarada en código C propio | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero del sistema, firma NV | B/F | mantener proveedor primario; declarar dependencia externa a SignPath |
+| APIs y DLL de Windows | Versión depende de Windows, NV | NO VERIFICADO para el artefacto; atribucion previa: LicenseRef-Microsoft-Windows | no es licencia OSI; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | No se copian las DLL del sistema | Distribucion ajena; compilador exacto NO VERIFICADO | Microsoft, firma local de cada una NV | F | posible excepción de bibliotecas de sistema, no equivale a permiso para copiar cualquier DLL |
+| CRT MSVC enlazado estáticamente | Build exacta de bibliotecas usadas en imagen NV | NO VERIFICADO para el artefacto; atribucion previa: LicenseRef-MSVC-Redistributable | no acreditada OSI; aplicacion al artefacto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | SIN_EVIDENCIA de licencia acreditada; metadatos tecnicos no bastan | Sí, código enlazado en DLL propia | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero dentro del artefacto propio NS | B | no omitirlo porque no existe msvcrt separado; revisar redistribución y excepción |
+| Inno Setup, motor, loader y desinstalador futuros | Ninguna versión instalada/seleccionada para MACE acreditada | InnoSetup | **no** según SPDX | NO VERIFICADO; no se acredita ausencia de acuerdos | URL_OFICIAL: [fuente oficial](https://raw.githubusercontent.com/jrsoftware/issrc/main/license.txt) | Futuros componentes del instalador, aún inexistente | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero; firma de futuro resultado NV | B/F | C2 antes de publicar/solicitar; no se instala |
+| NSIS como alternativa, no elegida | Versión/build concreta NV | Zlib en motor/compresión zlib; otros módulos tienen licencias propias | Zlib sí | NO VERIFICADO; no se acredita ausencia de acuerdos | URL_OFICIAL: [fuente oficial](https://nsis.sourceforge.io/License) | No | Distribucion ajena; compilador exacto NO VERIFICADO | Tercero, no instalado, firma NV | F | solo opción con decisión del usuario y revisión de plugins |
 
 Los doce recursos comprobados en E8 son: `AMDFamily0F.bin`, `AMDFamily10.bin`,
 `AMDFamily17.bin`, `IntelMSR.bin`, `IsaBridgeEC.bin`, `LpcACPIEC.bin`,
@@ -218,7 +228,7 @@ no una afirmación de incompatibilidad ni elegibilidad ya confirmada.
 acuerdo del equipo. MIT permite usos/redistribución con sus condiciones;
 [texto oficial OSI](https://opensource.org/license/mit).
 **Opciones consideradas:** MIT conserva la elección; MPL-2.0 obligaría a
-mantener abiertos archivos cubiertos y GPL-3.0 impondría copyleft más amplio.
+mantener abiertos archivos cubiertos y GPL-3.0-only impondría copyleft más amplio.
 Se describen como comparación histórica, no una nueva elección solicitada.
 **Recomendación:** formalizar MIT solo en B para código propio, conservando
 atribuciones ajenas. **Riesgo residual:** no hay auditoría independiente de
@@ -281,9 +291,13 @@ sus binarios internos; la configuración debe excluirlos recursivamente.
 
 El nupkg real 1.0.0 tiene **26 entradas**, ninguna LICENSE/NOTICE/COPYING.
 El nuspec exige aceptación de licencia y remite a los fwlink 869050/869051;
-no declara SPDX, repositorio, commit ni tag. No se pudo acreditar el destino
-útil y su correspondencia con esa versión. La licencia MIT de otro paquete
-llamado Mono no es evidencia suficiente. Los tres binarios empaquetados
+no declara SPDX, repositorio, commit ni tag. **Corrección:** el enlace 869050
+se pudo abrir durante esta auditoría y redirige a la licencia del repositorio
+Mono en `main`. Ya no se afirma que su destino no sea accesible. Esa licencia
+actual no acredita aquí la correspondencia histórica de los tres binarios
+1.0.0 con fuentes/tag y términos exactos. El bloqueo queda delimitado a esa
+correspondencia, no a la inexistencia de un enlace de licencia.
+Los tres binarios empaquetados
 coinciden byte a byte con los activos win-x64 restaurados, conservando su
 firma Xamarin; eso acredita procedencia de caché, no permiso de distribución.
 
@@ -373,6 +387,12 @@ y Preferences. Las llamadas `Send` de Program.cs envían muestras por named
 pipe local, no prueban envío a Internet. SensorSampler habilita CPU/GPU;
 PciAssociation lee Enum/PCI. No se encontró un cliente de telemetría de red
 en esas fuentes. No es una captura de tráfico ni auditoría de todo tercero.
+
+La búsqueda es reproducible con `auditoria-licencias/comprobar.ps1`:
+`privacidad-estatica.csv` registra archivo/línea/categoría sin copiar valores
+locales. Dio cero referencias a las APIs HTTP/socket del patrón utilizado.
+Esto **no** equivale a una prueba exhaustiva de ausencia de red: APIs cargadas
+dinámicamente, dependencias y comportamientos del sistema siguen NV.
 
 Escrituras propias y riesgos ya detallados en
 [inventario de escrituras](FASE2-INVENTARIO-ESCRITURAS.md): caja negra local
@@ -503,6 +523,19 @@ No se ejecuta instalación, registro 3010, servicios ni pruebas físicas.
 
 ## 6. Verificación de esta entrega y punto de parada
 
+**Alcance temporal:** la tabla siguiente conserva comprobaciones del Paso A
+original. La auditoría posterior está separada en FASE3-LICENCIA-AUDITORIA.md:
+45 comparaciones de versión sin discrepancia, 58 filas con versión sin
+acreditar, 370/370 archivos intactos y asignados, helper 202/202 y publicado
+205/205. Son lecturas, no pruebas de ejecución, carga de sensores o nueva
+validación criptográfica de todos los componentes.
+
+La asignación individual y las 103 filas se reproducen con
+`helper/auditoria-licencias/comprobar.ps1`; sus CSV quedan bajo
+`native/build/auditoria-licencias/`, ignorados. Los tres excluidos del
+publicado son createdump.exe y los PDB propios de helper/protocolo; sus
+componentes están identificados aunque no viajen en la imagen.
+
 Solo documentación: inventario nuevo y notas de estado/enlace en los tres
 documentos de diseño/continuidad. Producto, imagen, fuentes, lock, pom/csproj,
 avisos de terceros, pins, binarios y contratos congelados permanecen intactos.
@@ -539,43 +572,48 @@ deudas aceptadas para distribución.
 
 ## Anexo I — componentes declarados por los avisos Java empaquetados
 
-Identificación limitada al texto real; «NV» requiere cotejo SPDX/OSI antes de
-afirmar elegibilidad. Para todos: tercero, sin nueva firma propia, comercial
-no declarada salvo indicación, inclusión binaria exacta NV; aviso sí empaquetado.
+Identificación limitada al texto real; «NV» requiere cotejo antes de afirmar
+elegibilidad. Para todos: tercero, sin nueva firma propia, doble licencia
+comercial **NO VERIFICADA**, inclusión binaria exacta NV; aviso sí empaquetado.
 
-| Componente | Versión declarada | Aviso E6 | SPDX identificado / OSI | Acción |
-|---|---|---|---|---|
-| Cryptix AES | 3.2.0 | aes.md | BSD-2-Clause / sí, texto de dos condiciones | Conservar atribución Cryptix |
-| ASM | 9.3 | asm.md | BSD-3-Clause / sí | Conservar aviso |
-| BCEL | 6.7.0 | bcel.md | Apache-2.0 / sí | Conservar licencia y NOTICE |
-| c-libutl | 20160225 | c-libutl.md | BSD-2-Clause / sí | Conservar aviso |
-| CLDR | 44 | cldr.md | Unicode-3.0 / OSI NV | Revisar encaje del componente y preservar texto |
-| Eastman Kodak, color/imaging | No declarada | colorimaging.md | NOASSERTION; solo aviso de copyright / NV | Acreditar términos que cubren esas porciones |
-| W3C DOM Level 3 Core | 1.0 | dom.md | W3C (texto de 2002) / sí | Conservar aviso y reglas de modificaciones |
-| FreeType | 2.13.2 | freetype.md | FTL en texto empaquetado / OSI NV | Revisar alternativa/partes aplicables, conservar texto |
-| GIFLIB | 5.2.1 | giflib.md | MIT / sí | Conservar aviso |
-| HarfBuzz | 8.2.2 | harfbuzz.md | NOASSERTION para conjunto; declara Old MIT y otras partes / NV | Cotejar variantes y COPYING por subdirectorio |
-| ICU4J | 74.1 | icu.md | Unicode-3.0 / OSI NV | Conservar texto y revisar encaje |
-| Java CUP | 0.11b | jcup.md | NOASSERTION; texto permisivo tipo SML/NJ / NV | Cotejar identificador exacto, no adivinarlo |
-| IJG JPEG | 6b | jpeg.md | IJG / OSI NV | Conservar texto y revisar encaje |
-| LCMS | 2.16 | lcms.md | MIT / sí | Conservar aviso |
-| libpng | 1.6.40 | libpng.md | libpng-2.0 / **no según SPDX** | Consultar tratamiento del subcomponente |
-| Mesa 3D | 21.0.3 | mesa3d.md | MIT en aviso / sí para ese texto | Conservar aviso, cotejar partes |
-| Mozilla Public Suffix List | No declarada | public_suffix.md | MPL-2.0 / sí | Fuente/fecha exactas NV; preservar aviso |
-| SipHash | 1.0-68c8a7c | siphash.md | CC0-1.0 OR MIT; CC0 no OSI, MIT sí | Identificar opción ejercida; no es doble licencia comercial |
-| Unicode Character Database | 15.1.0 | unicode.md | Unicode-3.0 / OSI NV | Conservar texto y revisar encaje |
-| wepoll | 1.5.8 | wepoll.md | BSD-2-Clause / sí | Conservar aviso |
-| Xalan | 2.7.3 | xalan.md | Apache-2.0 / sí | Conservar licencia y NOTICE |
-| Xerces | 2.12.2 | xerces.md | Apache-2.0 / sí | Conservar licencia y NOTICE |
-| zlib | 1.3.1 | zlib.md | Zlib / sí | Conservar aviso |
+| Componente | Version exacta | Licencia SPDX | Aprobada OSI | Doble licencia comercial | Fuente de evidencia | Viaja en instalador | Quien lo compila | Quien lo firma hoy | Elegibilidad SignPath | Accion necesaria |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Cryptix AES | 3.2.0 | BSD-2-Clause | BSD-2-Clause: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.base/aes.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar atribución Cryptix |
+| ASM | 9.3 | BSD-3-Clause | BSD-3-Clause: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.base/asm.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar aviso |
+| BCEL | 6.7.0 | Apache-2.0 | Apache-2.0: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.xml/bcel.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar licencia y NOTICE |
+| c-libutl | 20160225 | BSD-2-Clause | BSD-2-Clause: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.base/c-libutl.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar aviso |
+| CLDR | 44 | Unicode-3.0 | Unicode-3.0: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.base/cldr.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Revisar encaje del componente y preservar texto |
+| Eastman Kodak, color/imaging | No declarada | NOASSERTION; solo aviso de copyright | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.desktop/colorimaging.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Acreditar términos que cubren esas porciones |
+| W3C DOM Level 3 Core | 1.0 | W3C (texto de 2002) | W3C: SPDX True, OSI NO_LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.xml/dom.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar aviso y reglas de modificaciones |
+| FreeType | 2.13.2 | FTL en texto empaquetado | FTL: SPDX False, OSI NO_LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.desktop/freetype.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Revisar alternativa/partes aplicables, conservar texto |
+| GIFLIB | 5.2.1 | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.desktop/giflib.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar aviso |
+| HarfBuzz | 8.2.2 | NOASSERTION para conjunto; declara Old MIT y otras partes | MIT: SPDX True, OSI LISTADO; conjunto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.desktop/harfbuzz.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Cotejar variantes y COPYING por subdirectorio |
+| ICU4J | 74.1 | Unicode-3.0 | Unicode-3.0: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.base/icu.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar texto y revisar encaje |
+| Java CUP | 0.11b | NOASSERTION; texto permisivo tipo SML/NJ | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.xml/jcup.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Cotejar identificador exacto, no adivinarlo |
+| IJG JPEG | 6b | IJG | IJG: SPDX False, OSI NO_LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.desktop/jpeg.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar texto y revisar encaje |
+| LCMS | 2.16 | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.desktop/lcms.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar aviso |
+| libpng | 1.6.40 | libpng-2.0 | libpng-2.0: SPDX False, OSI NO_LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.desktop/libpng.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Consultar tratamiento del subcomponente |
+| Mesa 3D | 21.0.3 | MIT en aviso | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.desktop/mesa3d.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar aviso, cotejar partes |
+| Mozilla Public Suffix List | No declarada | MPL-2.0 | MPL-2.0: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.base/public_suffix.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Fuente/fecha exactas NV; preservar aviso |
+| SipHash | 1.0-68c8a7c | CC0-1.0 OR MIT; CC0 no OSI, MIT sí | CC0-1.0: SPDX False, OSI NO_LISTADO; MIT: SPDX True, OSI LISTADO; conjunto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.base/siphash.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Identificar opción ejercida; no es doble licencia comercial |
+| Unicode Character Database | 15.1.0 | Unicode-3.0 | Unicode-3.0: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.base/unicode.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar texto y revisar encaje |
+| wepoll | 1.5.8 | BSD-2-Clause | BSD-2-Clause: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.base/wepoll.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar aviso |
+| Xalan | 2.7.3 | Apache-2.0 | Apache-2.0: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.xml/xalan.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar licencia y NOTICE |
+| Xerces | 2.12.2 | Apache-2.0 | Apache-2.0: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.xml/xerces.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar licencia y NOTICE |
+| zlib | 1.3.1 | Zlib | Zlib: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/dist/MACE/runtime/legal/java.base/zlib.md` | Aviso si; correspondencia binaria NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | No PE individual; no firma propia | T/B, no admitido | Conservar aviso |
 
 SPDX distingue **tener identificador** de estar aprobada por OSI:
 [libpng-2.0](https://spdx.org/licenses/libpng-2.0.json) y
 [CC0-1.0](https://spdx.org/licenses/CC0-1.0.json) muestran `isOsiApproved=false`.
 Son datos adicionales para C5/C6 y el dossier, no una conclusión de que el
 runtime completo deba rechazarse sin evaluar las reglas y excepciones del
-programa. La clasificación OSI de los demás identificadores menos comunes
-se deja expresamente NV cuando no se logró comprobarla.
+programa. La auditoría coteja también los identificadores menos comunes: Unicode-3.0
+consta en ambas listas; FTL, IJG, BSD-4-Clause, CC0 e InnoSetup no aparecen
+con esos IDs en la lista OSI consultada y SPDX marca falso. Para W3C, SPDX
+marca verdadero pero la lista OSI actual no contiene ese ID exacto: su
+correspondencia histórica se deja **NO VERIFICADA**, sin afirmar revocación.
+Los LicenseRef son referencias propias, no entradas oficiales ni pruebas
+de incompatibilidad. Datos/fechas en `auditoria-licencias/fuentes-oficiales.json`.
 
 ## Anexo II — componentes declarados por los avisos .NET empaquetados
 
@@ -585,59 +623,59 @@ versiones y subapartados deben acreditarse contra la distribución concreta.
 «No declarada» no se sustituye por la versión 10.0.12 del runtime.
 
 Para todas las filas: terceros, aviso sí en imagen, carga/binario individual
-NV, firma individual no aplicable o NV, doble licencia comercial no declarada
-en esos avisos, **sin firma propia**; acción común conservar texto y cotejar
+NV, firma individual no aplicable o NV, doble licencia comercial **NO VERIFICADA**,
+**sin firma propia**; acción común conservar texto y cotejar
 fuente/alcance antes de una declaración global de elegibilidad. Las expresiones
 simples califican solo el texto identificado, no todas las porciones posibles.
 
-| Encabezado del aviso | Versión identificada en aviso | SPDX identificado / OSI | Pendiente particular |
-|---|---|---|---|
-| ASP.NET | No declarada | Apache-2.0 / sí | Correspondencia Windows |
-| Slicing-by-8 | No declarada | NOASSERTION, remisión BSD / NV | Cotejar texto/revisión |
-| Unicode data | No declarada | NOASSERTION, texto Unicode / NV | Cotejar revisión de licencia |
-| zlib-ng | Revisión enlazada en aviso; versión semántica no declarada | Zlib / sí | Fijar fuente correspondiente |
-| opentelemetry-dotnet | Revisión enlazada; versión semántica no declarada | Apache-2.0 / sí | No prueba que MACE exporte telemetría de red |
-| LinuxTracepoints | No declarada | MIT / sí | Inclusión Windows NV |
-| Mono | No declarada | MIT / sí | No atribuir esta licencia a Mono.Posix 1.0.0 |
-| International Organization for Standardization | No declarada | NOASSERTION, permiso SGML específico / NV | Acreditar identificación/encaje |
-| Intel | No declarada | BSD-3-Clause en texto / sí | No confundir con licencia IGCL |
-| Xamarin and Novell | No declarada | MIT / sí | No acredita otro paquete Xamarin por nombre |
-| Bit Twiddling Hacks | No declarada | NOASSERTION, dedicación de fragmentos a dominio público / NV | No asignar CC0 sin texto que lo sustente |
-| Brotli | No declarada | MIT / sí | Cotejar correspondencia |
-| Json.NET | No declarada | MIT / sí | No afirmar que Newtonsoft.Json.dll viaje por ese aviso |
-| vectorized base64 encoding / decoding | No declarada | NOASSERTION, texto BSD / NV | Cotejar variantes/partes |
-| vectorized hex parsing | No declarada | NOASSERTION, texto BSD / NV | Cotejar variante |
-| RFC 3492 | RFC 3492 | NOASSERTION, licencia Internet Society / NV | Identificar permiso y código derivado |
-| Algorithm from RFC 4122 | RFC 4122 | NOASSERTION, permiso específico / NV | Identificar variante |
-| The LLVM Compiler Infrastructure | No declarada | NOASSERTION para conjunto / NV | Cotejar licencia LLVM y posibles excepciones |
-| Bob Jenkins | No declarada | NOASSERTION, permiso propio / NV | Cotejar identificador |
-| Greg Parker | No declarada | NOASSERTION, dominio público / NV | Cotejar términos |
-| libunwind based code | No declarada | MIT en texto / sí | Fuente/partes |
-| Printing Floating-Point Numbers (Dragon4) | No declarada | NOASSERTION, texto tipo Zlib / NV | Cotejar variante |
-| Printing Floating-point Numbers (Grisu3) | No declarada | BSD-3-Clause / sí | Fuente/partes |
-| xxHash | No declarada | BSD-2-Clause / sí | No inferir versión del año de copyright |
-| Berkeley SoftFloat | Release 3e | BSD-3-Clause / sí | Fuente/partes |
-| xoshiro RNGs | No declarada | CC0-1.0 / no según SPDX | Consulta de tratamiento del programa |
-| The C++ REST SDK | No declarada | MIT / sí | Inclusión efectiva |
-| MessagePack-CSharp | No declarada | MIT / sí | Inclusión efectiva |
-| lz4net | No declarada | NOASSERTION, texto BSD / NV | Cotejar variante |
-| Nerdbank.Streams | No declarada | MIT / sí | Inclusión efectiva |
-| RapidJSON | No declarada | MIT con posibles porciones separadas / sí MIT, conjunto NV | Revisar aviso completo |
-| DirectX Math Library | No declarada | MIT / sí | No es licencia de todo DirectX |
-| ldap4net | No declarada | MIT / sí | Inclusión efectiva |
-| vectorized sorting code | No declarada | MIT / sí | Fuente/partes |
-| musl | No declarada | MIT para conjunto con porciones separadas / conjunto NV | Revisar excepciones del aviso |
-| Faster Unsigned Division by Constants | No declarada | NOASSERTION, dedicación a dominio público / NV | Cotejar expresión exacta |
-| mimalloc | No declarada | MIT / sí | Fuente/partes |
-| Apple header files | No declarada | BSD-4-Clause en texto / OSI NV | Revisar alcance y cláusula publicitaria |
-| JavaScript queues | No declarada | CC0-1.0 / no según SPDX | Consulta de tratamiento del programa |
-| FastFloat algorithm | No declarada | MIT / sí | No inferir versión |
-| MsQuic | No declarada | MIT / sí | No prueba que MACE establezca conexiones QUIC |
-| m-ou-se/floatconv | No declarada | NOASSERTION, texto BSD / NV | Cotejar variante |
-| code from The Practice of Programming | No declarada | NOASSERTION, permiso Lucent / NV | Conservar cita exigida, cotejar identificador |
-| amd/aocl-libm-ose | No declarada | BSD-3-Clause en texto / sí | Cotejar porciones/revisión |
-| fmtlib/fmt | No declarada | MIT con nota de excepciones / conjunto NV | Revisar excepción y código efectivo |
-| Avx512Vbmi base64 encoding / decoding | No declarada | NOASSERTION, texto BSD / NV | Cotejar variante |
+| Componente | Version exacta | Licencia SPDX | Aprobada OSI | Doble licencia comercial | Fuente de evidencia | Viaja en instalador | Quien lo compila | Quien lo firma hoy | Elegibilidad SignPath | Accion necesaria |
+|---|---|---|---|---|---|---|---|---|---|---|
+| ASP.NET | No declarada | Apache-2.0 | Apache-2.0: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Correspondencia Windows |
+| Slicing-by-8 | No declarada | NOASSERTION, remisión BSD | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Cotejar texto/revisión |
+| Unicode data | No declarada | NOASSERTION, texto Unicode | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Cotejar revisión de licencia |
+| zlib-ng | Revisión enlazada en aviso; versión semántica no declarada | Zlib | Zlib: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Fijar fuente correspondiente |
+| opentelemetry-dotnet | Revisión enlazada; versión semántica no declarada | Apache-2.0 | Apache-2.0: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | No prueba que MACE exporte telemetría de red |
+| LinuxTracepoints | No declarada | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Inclusión Windows NV |
+| Mono | No declarada | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | No atribuir esta licencia a Mono.Posix 1.0.0 |
+| International Organization for Standardization | No declarada | NOASSERTION, permiso SGML específico | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Acreditar identificación/encaje |
+| Intel | No declarada | BSD-3-Clause en texto | BSD-3-Clause: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | No confundir con licencia IGCL |
+| Xamarin and Novell | No declarada | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | No acredita otro paquete Xamarin por nombre |
+| Bit Twiddling Hacks | No declarada | NOASSERTION, dedicación de fragmentos a dominio público | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | No asignar CC0 sin texto que lo sustente |
+| Brotli | No declarada | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Cotejar correspondencia |
+| Json.NET | No declarada | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | No afirmar que Newtonsoft.Json.dll viaje por ese aviso |
+| vectorized base64 encoding / decoding | No declarada | NOASSERTION, texto BSD | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Cotejar variantes/partes |
+| vectorized hex parsing | No declarada | NOASSERTION, texto BSD | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Cotejar variante |
+| RFC 3492 | RFC 3492 | NOASSERTION, licencia Internet Society | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Identificar permiso y código derivado |
+| Algorithm from RFC 4122 | RFC 4122 | NOASSERTION, permiso específico | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Identificar variante |
+| The LLVM Compiler Infrastructure | No declarada | NOASSERTION para conjunto | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Cotejar licencia LLVM y posibles excepciones |
+| Bob Jenkins | No declarada | NOASSERTION, permiso propio | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Cotejar identificador |
+| Greg Parker | No declarada | NOASSERTION, dominio público | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Cotejar términos |
+| libunwind based code | No declarada | MIT en texto | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Fuente/partes |
+| Printing Floating-Point Numbers (Dragon4) | No declarada | NOASSERTION, texto tipo Zlib | Zlib: SPDX True, OSI LISTADO; conjunto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Cotejar variante |
+| Printing Floating-point Numbers (Grisu3) | No declarada | BSD-3-Clause | BSD-3-Clause: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Fuente/partes |
+| xxHash | No declarada | BSD-2-Clause | BSD-2-Clause: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | No inferir versión del año de copyright |
+| Berkeley SoftFloat | Release 3e | BSD-3-Clause | BSD-3-Clause: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Fuente/partes |
+| xoshiro RNGs | No declarada | CC0-1.0 | CC0-1.0: SPDX False, OSI NO_LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Consulta de tratamiento del programa |
+| The C++ REST SDK | No declarada | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Inclusión efectiva |
+| MessagePack-CSharp | No declarada | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Inclusión efectiva |
+| lz4net | No declarada | NOASSERTION, texto BSD | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Cotejar variante |
+| Nerdbank.Streams | No declarada | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Inclusión efectiva |
+| RapidJSON | No declarada | MIT con posibles porciones separadas | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Revisar aviso completo |
+| DirectX Math Library | No declarada | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | No es licencia de todo DirectX |
+| ldap4net | No declarada | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Inclusión efectiva |
+| vectorized sorting code | No declarada | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Fuente/partes |
+| musl | No declarada | MIT para conjunto con porciones separadas | MIT: SPDX True, OSI LISTADO; conjunto NO VERIFICADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Revisar excepciones del aviso |
+| Faster Unsigned Division by Constants | No declarada | NOASSERTION, dedicación a dominio público | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Cotejar expresión exacta |
+| mimalloc | No declarada | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Fuente/partes |
+| Apple header files | No declarada | BSD-4-Clause en texto | BSD-4-Clause: SPDX False, OSI NO_LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Revisar alcance y cláusula publicitaria |
+| JavaScript queues | No declarada | CC0-1.0 | CC0-1.0: SPDX False, OSI NO_LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Consulta de tratamiento del programa |
+| FastFloat algorithm | No declarada | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | No inferir versión |
+| MsQuic | No declarada | MIT | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | No prueba que MACE establezca conexiones QUIC |
+| m-ou-se/floatconv | No declarada | NOASSERTION, texto BSD | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Cotejar variante |
+| code from The Practice of Programming | No declarada | NOASSERTION, permiso Lucent | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Conservar cita exigida, cotejar identificador |
+| amd/aocl-libm-ose | No declarada | BSD-3-Clause en texto | BSD-3-Clause: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Cotejar porciones/revisión |
+| fmtlib/fmt | No declarada | MIT con nota de excepciones | MIT: SPDX True, OSI LISTADO | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Revisar excepción y código efectivo |
+| Avx512Vbmi base64 encoding / decoding | No declarada | NOASSERTION, texto BSD | NV | NO VERIFICADO; no se acredita ausencia de acuerdos | ARCHIVO_LOCAL: `packaging/third-party/Microsoft.NETCore.App.Runtime.win-x64-THIRD-PARTY-NOTICES.TXT` | Aviso si; presencia binaria individual NO VERIFICADO | Tercero; compilador exacto NO VERIFICADO | NO VERIFICADO; no firma propia | T/B, no admitido | Cotejar variante |
 
 **Consulta adicional al programa:** cómo evalúa subcomponentes de runtimes
 con licencias permisivas/dedicaciones no marcadas OSI por SPDX, como
