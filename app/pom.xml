@@ -24,7 +24,10 @@
         <junit.version>5.10.2</junit.version>
         <mockito.version>5.12.0</mockito.version>
 
-        <app.mainClass>com.mace.presentation.MaceApplication</app.mainClass>
+        <app.mainClass>com.mace.presentation.MaceLauncher</app.mainClass>
+        <!-- Build metadata, never selected from the runtime environment/JVM properties. -->
+        <mace.build.nativeProfile>production</mace.build.nativeProfile>
+        <mace.build.directory>target</mace.build.directory>
     </properties>
 
     <dependencyManagement>
@@ -78,6 +81,14 @@
     </dependencies>
 
     <build>
+        <directory>${mace.build.directory}</directory>
+        <resources>
+            <resource><directory>src/main/resources</directory></resource>
+            <resource>
+                <directory>src/main/profile</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
 
             <plugin>
@@ -112,5 +123,45 @@
 
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>development</id>
+            <properties>
+                <mace.build.nativeProfile>development</mace.build.nativeProfile>
+            </properties>
+        </profile>
+        <!--
+            Vista previa sin DLL ni administrador (adaptadores simulados):
+                mvn javafx:run -Ppreview
+                mvn javafx:run -Ppreview -Dmace.mock.scenario=DUAL_GPU -Dmace.mock.seed=7
+            Escenarios: ver com.mace.infrastructure.mock.MockScenario.
+        -->
+        <profile>
+            <id>preview</id>
+            <properties>
+                <mace.mock.scenario>NORMAL</mace.mock.scenario>
+                <mace.mock.seed>42</mace.mock.seed>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openjfx</groupId>
+                        <artifactId>javafx-maven-plugin</artifactId>
+                        <version>0.0.8</version>
+                        <configuration>
+                            <mainClass>${app.mainClass}</mainClass>
+                            <options>
+                                <option>--enable-native-access=ALL-UNNAMED</option>
+                                <option>-Dmace.infra.mode=mock</option>
+                                <option>-Dmace.mock.scenario=${mace.mock.scenario}</option>
+                                <option>-Dmace.mock.seed=${mace.mock.seed}</option>
+                            </options>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
