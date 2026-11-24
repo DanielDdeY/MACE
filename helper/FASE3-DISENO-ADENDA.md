@@ -480,7 +480,8 @@ lo exige; no se reproduce en el repositorio ni se envía ahora. Se conserva el
 saneado de datos locales y la exclusión de los tres TXT; se mantiene el permiso
 previo de terminar solo procesos desechables propios de las pruebas.
 
-**Punto actual:** 3.1c, registro de decisiones anterior al inventario A. Esta
-actualización no entrega A–E ni implementa 3.2–3.9. El flujo y requisitos para
-pasar de preparación a firma real constan en el informe enlazado. Detenerse
-tras la entrega documental actual.
+**Punto actual, actualización del Paso A (2026-11-23):** se entrega
+[inventario y conflictos A](FASE3-LICENCIA-INVENTARIO.md) para revisión.
+Este inventario registra bloqueos y NO VERIFICADO; no implementa B–E ni
+3.2–3.9. El flujo y requisitos para pasar de preparación a firma real constan
+en el informe de continuidad. Detenerse tras A y esperar aprobación.

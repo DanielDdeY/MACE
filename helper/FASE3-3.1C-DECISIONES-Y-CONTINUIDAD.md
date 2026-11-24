@@ -10,6 +10,13 @@ Se conservan y no se incorporan al commit de esta actualización.
 Esta entrega registra las confirmaciones y el itinerario solicitado. No es el
 inventario exhaustivo A, una solicitud de firma ni una implementación de B–E.
 
+**Actualización posterior, 2026-11-23:** con autorización del usuario se entrega
+el [Paso A: inventario y conflictos](FASE3-LICENCIA-INVENTARIO.md) para revisión.
+Se conservan abajo el alcance y comprobaciones de este registro previo; sus
+referencias a «A pendiente» quedan actualizadas por esta nota y la tabla de
+estado. A identifica bloqueos legales/técnicos; no los resuelve por aprobación
+implícita. Detenerse antes de B y 3.2.
+
 ## 1. Fuentes y prioridad de instrucciones
 
 Se releen los adjuntos `prompt_mace_fase3.md` y `3.1c.md`, el
@@ -88,7 +95,7 @@ personal con ese alias. Véanse las [condiciones del programa](https://signpath.
 | 3.1 | Diseño entregado, `73b0548`; sus decisiones se actualizan aquí |
 | 3.1b | Adenda entregada, `cd96559`; las elecciones actuales superan sus pendientes de elección |
 | 3.1c, preparación | **Esta entrega:** registro de decisiones, conflictos y continuidad |
-| 3.1c A | **PENDIENTE**: inventario exhaustivo, C1–C9 más C10 propuesto, preguntas a SignPath; entregar y detenerse |
+| 3.1c A | **ENTREGADO PARA REVISIÓN**: inventario técnico, licencias acreditadas y NO VERIFICADO, C1–C10 y preguntas a SignPath; esperar aprobación |
 | 3.1c B | Pendiente de aprobación de A. C1 ya está confirmado; crear LICENSE MIT, preparar metadatos, avisos y contribuciones con sus gates de producto |
 | 3.1c C | Pendiente de su aprobación y de los borradores; política/README verificados, roles y privacidad, sin afirmar firma/admisión |
 | 3.1c D | Pendiente: diseño CI multietapa, sin crear ni ejecutar el workflow de firma |
@@ -194,13 +201,13 @@ una revisión técnica e informativa.
 | Este informe | Crear registro de confirmaciones, estado, requisitos y conflictos |
 | `prompt_mace_fase3.md` y `3.1c.md` de Downloads | Releídos y conservados como entradas; no se editan fuera del checkout. Este registro fija la prioridad y equivalencias vigentes |
 | `LICENSE`, `CODE_SIGNING_POLICY.borrador.md`, `README.borrador.md` | No existen en las ubicaciones revisadas del repo ni junto a los adjuntos con esos nombres. No se inventan borradores ni se crea LICENSE antes de aprobar A |
-| `helper/FASE3-LICENCIA-INVENTARIO.md` / `helper/FASE3-CI-DISENO.md` | No existen todavía; son entregables A/D, no se crean como si estuvieran completos |
+| `helper/FASE3-LICENCIA-INVENTARIO.md` / `helper/FASE3-CI-DISENO.md` | Inventario A entregado para revisión; diseño D todavía pendiente. A no acredita los extremos marcados NO VERIFICADO |
 | `pom.xml`, `.csproj`, `packaging/THIRD-PARTY-NOTICES.txt` | Existentes, sin cambios: son entradas de artefactos/payload, no simple registro de decisiones. Diff/actualización en B y revisión de artefacto final en 3.7 |
 | README raíz / CONTRIBUTING / plantillas | No reescribir README en lugar del borrador ausente; CONTRIBUTING y los borradores no están. Su preparación corresponde a B/C tras sus aprobaciones |
 
 Para B se conserva la condición literal de 3.1c: «Solo tras mi aprobación del
-Paso A y la confirmación de C1». **C1 ya está confirmado; A aún no está entregado
-ni aprobado.** La autorización actual es registrar decisiones e informar,
+Paso A y la confirmación de C1». **C1 ya está confirmado; A está entregado para
+revisión, no aprobado.** La autorización actual cubre inventario e informe,
 no avanzar automáticamente hasta añadir una licencia o un workflow de firma.
 
 ## 8. Verificación, NO VERIFICADO y siguiente acción
@@ -237,7 +244,7 @@ derivados cerrados, alias, roles, contacto preferido o el correo alternativo.
 Las decisiones sobre conflictos de elegibilidad se pedirán sobre evidencia
 del inventario, no como aceptación anticipada de un servicio.
 
-**Siguiente entrega propuesta:** Paso A de 3.1c, inventario y conflictos, y
-detenerse para revisión. Esta consolidación no lo sustituye ni avanza al 3.2.
+**Siguiente acción actualizada:** revisar el Paso A de 3.1c ya entregado y
+esperar aprobación. Esta consolidación histórica no lo sustituye ni avanza al 3.2.
 Un commit documental propio; solo los cuatro archivos indicados, sin los
 dos documentos previos sin seguimiento ni los tres TXT locales excluidos.

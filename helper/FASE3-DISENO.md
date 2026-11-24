@@ -19,8 +19,9 @@ Foundation e Inno Setup elegidos, con elegibilidad de firma pendiente.
 D4 opción (a) y migración JDK como trabajo separado aprobadas. Se mantiene
 aprobación previa de cada diff de producto. Estados actuales en sección 11 y
 [registro de decisiones y continuidad](FASE3-3.1C-DECISIONES-Y-CONTINUIDAD.md).
-Estamos en **3.1c, consolidación previa al Paso A**; no se ha entregado el
-inventario A, creado LICENSE ni presentado solicitud a SignPath. Los análisis
+Estamos en **3.1c, Paso A entregado para revisión**:
+[inventario y conflictos](FASE3-LICENCIA-INVENTARIO.md). No se ha creado LICENSE
+ni presentado solicitud a SignPath. Los análisis
 WiX/MSI y decisiones pendientes del cuerpo original son evidencia histórica,
 no selección vigente. No se modifican binarios ni la imagen congelada.
 
@@ -585,8 +586,8 @@ Las elecciones anteriores no se vuelven a pedir. Elegir SignPath no equivale
 a ser admitido, elegir MIT no aplica retrospectivamente una licencia a terceros
 ni crea todavía LICENSE, y elegir Inno no resuelve su elegibilidad. La secuencia
 de 3.1b conserva 3.2 guía de VM, 3.3 instalador y 3.4 señal; la equivalencia con
-el prompt original está en el registro actual. Antes de avanzar se consolida
-3.1c y después se entrega **solo A**. Se mantiene autorización para cierres de
+el prompt original está en el registro actual. El **Paso A está entregado para
+revisión**; detenerse antes de B y 3.2. Se mantiene autorización para cierres de
 procesos desechables propios del arnés; no para procesos ajenos. El usuario
 asigna a **DanielDdeY** autoría, revisión y aprobación de firma; contacto público
 por GitHub Issues. Confirma 2FA en GitHub/Gmail; MFA de la futura cuenta SignPath
