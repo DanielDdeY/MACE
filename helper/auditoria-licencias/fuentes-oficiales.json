@@ -1,0 +1,4200 @@
+{
+  "fecha": "2026-11-23",
+  "spdx_version": "ddf7382",
+  "spdx": [
+    {
+      "id": "0BSD",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "3D-Slicer-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "AAL",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Abstyles",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "AdaCore-doc",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Adobe-2006",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Adobe-Display-PostScript",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Adobe-Glyph",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Adobe-Utopia",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ADSL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Advanced-Cryptics-Dictionary",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "AFL-1.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "AFL-1.2",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "AFL-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "AFL-2.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "AFL-3.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Afmparse",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "AGPL-1.0",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "AGPL-1.0-only",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "AGPL-1.0-or-later",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "AGPL-3.0",
+      "osi": true,
+      "deprecated": true
+    },
+    {
+      "id": "AGPL-3.0-only",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "AGPL-3.0-or-later",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Aladdin",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ALGLIB-Documentation",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "AMD-newlib",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "AMDPLPA",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "AML",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "AML-glslang",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "AMPAS",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ANTLR-PD",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ANTLR-PD-fallback",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "any-OSI",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "any-OSI-perl-modules",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Apache-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Apache-1.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Apache-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "APAFML",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "APL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "App-s2p",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "APSL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "APSL-1.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "APSL-1.2",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "APSL-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Arphic-1999",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Artistic-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Artistic-1.0-cl8",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Artistic-1.0-Perl",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Artistic-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Artistic-dist",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Aspell-RU",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ASWF-Digital-Assets-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ASWF-Digital-Assets-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "atc-game",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Baekmuk",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Bahyph",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BaKoMa",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Barr",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "bcrypt-Solar-Designer",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Beerware",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Bitstream-Charter",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Bitstream-Vera",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BitTorrent-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BitTorrent-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "blessing",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BlueOak-1.0.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Boehm-GC",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Boehm-GC-without-fee",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BOLA-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Borceux",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Brian-Gladman-2-Clause",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Brian-Gladman-3-Clause",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Brian-Gladman-3-Clause-no-conversion",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-1-Clause",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-2-Clause",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-2-Clause-Darwin",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-2-Clause-first-lines",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-2-Clause-FreeBSD",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "BSD-2-Clause-NetBSD",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "BSD-2-Clause-Patent",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-2-Clause-pkgconf-disclaimer",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-2-Clause-pos-unchanged",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-2-Clause-Views",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-acpica",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-Attribution",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-Clear",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-flex",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-HP",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-LBNL",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-Modification",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-No-Military-License",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-No-Nuclear-License",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-No-Nuclear-License-2014",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-No-Nuclear-Warranty",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-Open-MPI",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-OpenWebUI",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-Sun",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-3-Clause-Tso",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-4-Clause",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-4-Clause-Shortened",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-4-Clause-UC",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-4.3RENO",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-4.3TAHOE",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-Advertising-Acknowledgement",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-ask-to-endorse",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-Attribution-HPND-disclaimer",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-Inferno-Nettverk",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-Mark-Modifications",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-Protection",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-Source-alt-GPL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-Source-beginning-file",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-Source-Code",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-Source-Code-no-disclaimer",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-Systemics",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSD-Systemics-W3Works",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BSL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Buddy",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Bugroff",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "BUSL-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "bzip2-1.0.5",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "bzip2-1.0.6",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "C-UDA-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CAL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "CAL-1.0-Combined-Work-Exception",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Caldera",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Caldera-no-preamble",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CAPEC-tou",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Catharon",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CATOSL-1.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-2.5",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-2.5-AU",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-3.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-3.0-AT",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-3.0-AU",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-3.0-DE",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-3.0-IGO",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-3.0-NL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-3.0-US",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-4.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-2.5",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-3.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-3.0-DE",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-3.0-IGO",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-4.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-ND-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-ND-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-ND-2.5",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-ND-3.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-ND-3.0-DE",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-ND-3.0-IGO",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-ND-4.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-SA-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-SA-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-SA-2.0-DE",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-SA-2.0-FR",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-SA-2.0-UK",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-SA-2.5",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-SA-3.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-SA-3.0-DE",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-SA-3.0-IGO",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-NC-SA-4.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-ND-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-ND-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-ND-2.5",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-ND-3.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-ND-3.0-DE",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-ND-4.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-SA-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-SA-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-SA-2.0-UK",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-SA-2.1-JP",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-SA-2.5",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-SA-3.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-SA-3.0-AT",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-SA-3.0-DE",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-SA-3.0-IGO",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-BY-SA-4.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-PDDC",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-PDM-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC-SA-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CC0-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CDDL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "CDDL-1.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "CDL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CDLA-Permissive-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CDLA-Permissive-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CDLA-Sharing-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CECILL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CECILL-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CECILL-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CECILL-2.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "CECILL-B",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CECILL-C",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CERN-OHL-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CERN-OHL-1.2",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CERN-OHL-P-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "CERN-OHL-S-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "CERN-OHL-W-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "CFITSIO",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "check-cvs",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "checkmk",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ClArtistic",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Clips",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CMU-Mach",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CMU-Mach-nodoc",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CNRI-Jython",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CNRI-Python",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "CNRI-Python-GPL-Compatible",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "COIL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Community-Spec-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Condor-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "copyleft-next-0.3.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "copyleft-next-0.3.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Cornell-Lossless-JPEG",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CPAL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "CPL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "CPOL-1.02",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Cronyx",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Crossword",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CryptoSwift",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CrystalStacker",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "CUA-OPL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Cube",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "curl",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "cve-tou",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "D-FSL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "DEC-3-Clause",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "diffmark",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "DL-DE-BY-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "DL-DE-ZERO-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "DOC",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "DocBook-DTD",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "DocBook-Schema",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "DocBook-Stylesheet",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "DocBook-XML",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Dotseqn",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "DRL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "DRL-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "DSDP",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "dtoa",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "dvipdfm",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ECL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "ECL-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "eCos-2.0",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "EFL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "EFL-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "eGenix",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Elastic-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Entessa",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "EPICS",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "EPL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "EPL-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "ErlPL-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ESA-PL-permissive-2.4",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ESA-PL-strong-copyleft-2.4",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ESA-PL-weak-copyleft-2.4",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "etalab-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "EUDatagrid",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "EUPL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "EUPL-1.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "EUPL-1.2",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Eurosym",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Fair",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "FBM",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "FDK-AAC",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "FDK-MPEG-H",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Ferguson-Twofish",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Frameworx-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "FreeBSD-DOC",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "FreeImage",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "FSFAP",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "FSFAP-no-warranty-disclaimer",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "FSFUL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "FSFULLR",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "FSFULLRSD",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "FSFULLRWD",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "FSL-1.1-ALv2",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "FSL-1.1-MIT",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "FTL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Furuseth",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "fwlw",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Game-Programming-Gems",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GCR-docs",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GD",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "generic-xts",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.1",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "GFDL-1.1-invariants-only",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.1-invariants-or-later",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.1-no-invariants-only",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.1-no-invariants-or-later",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.1-only",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.1-or-later",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.2",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "GFDL-1.2-invariants-only",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.2-invariants-or-later",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.2-no-invariants-only",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.2-no-invariants-or-later",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.2-only",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.2-or-later",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.3",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "GFDL-1.3-invariants-only",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.3-invariants-or-later",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.3-no-invariants-only",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.3-no-invariants-or-later",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.3-only",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GFDL-1.3-or-later",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Giftware",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GL2PS",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Glide",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Glulxe",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GLWTPL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "gnuplot",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GPL-1.0",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "GPL-1.0+",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "GPL-1.0-only",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GPL-1.0-or-later",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "GPL-2.0",
+      "osi": true,
+      "deprecated": true
+    },
+    {
+      "id": "GPL-2.0+",
+      "osi": true,
+      "deprecated": true
+    },
+    {
+      "id": "GPL-2.0-only",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "GPL-2.0-or-later",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "GPL-2.0-with-autoconf-exception",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "GPL-2.0-with-bison-exception",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "GPL-2.0-with-classpath-exception",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "GPL-2.0-with-font-exception",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "GPL-2.0-with-GCC-exception",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "GPL-3.0",
+      "osi": true,
+      "deprecated": true
+    },
+    {
+      "id": "GPL-3.0+",
+      "osi": true,
+      "deprecated": true
+    },
+    {
+      "id": "GPL-3.0-only",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "GPL-3.0-or-later",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "GPL-3.0-with-autoconf-exception",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "GPL-3.0-with-GCC-exception",
+      "osi": true,
+      "deprecated": true
+    },
+    {
+      "id": "Graphics-Gems",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "gSOAP-1.3b",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "gtkbook",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Gutmann",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HaskellReport",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HDF5",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "hdparm",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HIDAPI",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Hippocratic-2.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Hippocratic-3.0-core",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HP-1986",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HP-1989",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-DEC",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-doc",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-doc-sell",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-export-US",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-export-US-acknowledgement",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-export-US-modify",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-export2-US",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-Fenneberg-Livingston",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-INRIA-IMAG",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-Intel",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-Kevlin-Henney",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-Markus-Kuhn",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-merchantability-variant",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-MIT-disclaimer",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-Netrek",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-Pbmplus",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-sell-MIT-disclaimer-xserver",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-sell-regexpr",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-sell-variant",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-sell-variant-critical-systems",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-sell-variant-MIT-disclaimer",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-sell-variant-MIT-disclaimer-rev",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-SMC",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-UC",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-UC-export-US",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HPND-X11",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "HTMLTIDY",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "hyphen-bulgarian",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "IBM-pibs",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ICU",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "IEC-Code-Components-EULA",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "IJG",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "IJG-short",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ImageMagick",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "iMatix",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Imlib2",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Info-ZIP",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Informatica",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Inner-Net-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "InnoSetup",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Intel",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Intel-ACPI",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Interbase-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "IPA",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "IPL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "ISC",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "ISC-Veillard",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ISO-permission",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Jam",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "JasPer-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "jove",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "JPL-image",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "JPNIC",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "JSON",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Kastrup",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Kazlib",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Knuth-CTAN",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "LAL-1.2",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "LAL-1.3",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Latex2e",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Latex2e-translated-notice",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Leptonica",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "LGPL-2.0",
+      "osi": true,
+      "deprecated": true
+    },
+    {
+      "id": "LGPL-2.0+",
+      "osi": true,
+      "deprecated": true
+    },
+    {
+      "id": "LGPL-2.0-only",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "LGPL-2.0-or-later",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "LGPL-2.1",
+      "osi": true,
+      "deprecated": true
+    },
+    {
+      "id": "LGPL-2.1+",
+      "osi": true,
+      "deprecated": true
+    },
+    {
+      "id": "LGPL-2.1-only",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "LGPL-2.1-or-later",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "LGPL-3.0",
+      "osi": true,
+      "deprecated": true
+    },
+    {
+      "id": "LGPL-3.0+",
+      "osi": true,
+      "deprecated": true
+    },
+    {
+      "id": "LGPL-3.0-only",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "LGPL-3.0-or-later",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "LGPLLR",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Libpng",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "libpng-1.6.35",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "libpng-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "libselinux-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "libtiff",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "libutil-David-Nugent",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "LiLiQ-P-1.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "LiLiQ-R-1.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "LiLiQ-Rplus-1.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Linux-man-pages-1-para",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Linux-man-pages-copyleft",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Linux-man-pages-copyleft-2-para",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Linux-man-pages-copyleft-var",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Linux-OpenIB",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "LOOP",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "LPD-document",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "LPL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "LPL-1.02",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "LPPL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "LPPL-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "LPPL-1.2",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "LPPL-1.3a",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "LPPL-1.3c",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "lsof",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Lucida-Bitmap-Fonts",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "LZMA-SDK-9.11-to-9.20",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "LZMA-SDK-9.22",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Mackerras-3-Clause",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Mackerras-3-Clause-acknowledgment",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "magaz",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "mailprio",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MakeIndex",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "man2html",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Martin-Birgmeier",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "McPhee-slideshow",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "metamail",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Minpack",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MIPS",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MirOS",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "MIT",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "MIT-0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "MIT-advertising",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MIT-Click",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MIT-CMU",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MIT-enna",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MIT-feh",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MIT-Festival",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MIT-kdevelop-ideal",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MIT-Khronos-old",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MIT-Modern-Variant",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "MIT-open-group",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MIT-STK",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MIT-testregex",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MIT-Wu",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MITNFA",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MMIXware",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MMPL-1.0.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Motosoto",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "MPEG-SSG",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "mpi-permissive",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "mpich2",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MPL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "MPL-1.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "MPL-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "MPL-2.0-no-copyleft-exception",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "mplus",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MS-LPL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MS-PL",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "MS-RL",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "MTLL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MulanPSL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MulanPSL-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Multics",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Mup",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "MVT-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NAIST-2003",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NASA-1.3",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Naumen",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "NBPL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NCBI-PD",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NCGL-UK-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NCL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NCSA",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Net-SNMP",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "NetCDF",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Newsletr",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NGPL",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "ngrep",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NICTA-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NIST-PD",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NIST-PD-fallback",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NIST-PD-TNT",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NIST-Software",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NLOD-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NLOD-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NLPL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Nokia",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "NOSL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Noweb",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NPL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NPL-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NPOSL-3.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "NRL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NTIA-PD",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "NTP",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "NTP-0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Nunit",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "O-UDA-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OAR",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OCCT-PL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OCLC-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "ODbL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ODC-By-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OFFIS",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OFL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OFL-1.0-no-RFN",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OFL-1.0-RFN",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OFL-1.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "OFL-1.1-no-RFN",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "OFL-1.1-RFN",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "OGC-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OGDL-Taiwan-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OGL-Canada-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OGL-UK-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OGL-UK-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OGL-UK-3.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OGTSL",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-1.2",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-1.3",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-1.4",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-2.0.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-2.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-2.2",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-2.2.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-2.2.2",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-2.3",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-2.4",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-2.5",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-2.6",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-2.7",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OLDAP-2.8",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "OLFL-1.3",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "OML",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OpenMDW-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OpenPBS-2.3",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OpenSSL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OpenSSL-standalone",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OpenVision",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OPL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OPL-UK-3.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OPUBL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OSC-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "OSET-PL-2.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "OSL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "OSL-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "OSL-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "OSL-2.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "OSL-3.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "OSSP",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "PADL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ParaType-Free-Font-1.3",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Parity-6.0.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Parity-7.0.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "PDDL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "PHP-3.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "PHP-3.01",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Pixar",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "pkgconf",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Plexus",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "pnmstitch",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "PolyForm-Noncommercial-1.0.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "PolyForm-Small-Business-1.0.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "PostgreSQL",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "PPL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "PSF-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "psfrag",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "psutils",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Python-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Python-2.0.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "python-ldap",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Qhull",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "QPL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "QPL-1.0-INRIA-2004",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "radvd",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Rdisc",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "RHeCos-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "RPL-1.1",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "RPL-1.5",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "RPSL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "RSA-MD",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "RSCPL",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Ruby",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Ruby-pty",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SAX-PD",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SAX-PD-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Saxpath",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SCEA",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SchemeReport",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Sendmail",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Sendmail-8.23",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Sendmail-Open-Source-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SGI-B-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SGI-B-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SGI-B-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SGI-OpenGL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SGMLUG-PM",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SGP4",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SHL-0.5",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SHL-0.51",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SimPL-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "SISSL",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "SISSL-1.2",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Sleepycat",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "SMAIL-GPL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SMLNJ",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SMPPL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SNIA",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "snprintf",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SOFA",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "softSurfer",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Soundex",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Spencer-86",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Spencer-94",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Spencer-99",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SPL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "ssh-keyscan",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SSH-OpenSSH",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SSH-short",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SSLeay-standalone",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SSPL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "StandardML-NJ",
+      "osi": false,
+      "deprecated": true
+    },
+    {
+      "id": "SugarCRM-1.1.3",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SUL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Sun-PPP",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Sun-PPP-2000",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SunPro",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "SWL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "swrule",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Symlinks",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TAPR-OHL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TCL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TCP-wrappers",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TekHVC",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TermReadKey",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TGPPL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ThirdEye",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "threeparttable",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TMate",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TORQUE-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TOSL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TPDL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TPL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TrustedQSL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TTWL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TTYP0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TU-Berlin-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "TU-Berlin-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Ubuntu-font-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "UCAR",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "UCL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "ulem",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "UMich-Merit",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Unicode-3.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Unicode-DFS-2015",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Unicode-DFS-2016",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Unicode-TOU",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "UnixCrypt",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Unlicense",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Unlicense-libtelnet",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Unlicense-libwhirlpool",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "UnRAR",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "UPL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "URT-RLE",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Vim",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Vixie-Cron",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "VOSTROM",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "VSL-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "W3C",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "W3C-19980720",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "W3C-20150513",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "w3m",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Watcom-1.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Widget-Workshop",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "WordNet",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "Wsuipa",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "WTFNMFPL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "WTFPL",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "wwl",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "wxWindows",
+      "osi": true,
+      "deprecated": true
+    },
+    {
+      "id": "X11",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "X11-distribute-modifications-variant",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "X11-no-permit-persons",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "X11-swapped",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Xdebug-1.03",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Xerox",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Xfig",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "XFree86-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "xinetd",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "xkeyboard-config-Zinoviev",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "xlock",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Xnet",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "xpp",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "XSkat",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "xzoom",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "YPL-1.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "YPL-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Zed",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Zeeff",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Zend-2.0",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Zimbra-1.3",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Zimbra-1.4",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "Zlib",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "zlib-acknowledgement",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ZPL-1.1",
+      "osi": false,
+      "deprecated": false
+    },
+    {
+      "id": "ZPL-2.0",
+      "osi": true,
+      "deprecated": false
+    },
+    {
+      "id": "ZPL-2.1",
+      "osi": true,
+      "deprecated": false
+    }
+  ],
+  "excepciones": [
+    "389-exception",
+    "Asterisk-exception",
+    "Asterisk-linking-protocols-exception",
+    "Autoconf-exception-2.0",
+    "Autoconf-exception-3.0",
+    "Autoconf-exception-generic",
+    "Autoconf-exception-generic-3.0",
+    "Autoconf-exception-macro",
+    "Bison-exception-1.24",
+    "Bison-exception-2.2",
+    "Bootloader-exception",
+    "CGAL-linking-exception",
+    "Classpath-exception-2.0",
+    "Classpath-exception-2.0-short",
+    "CLISP-exception-2.0",
+    "cryptsetup-OpenSSL-exception",
+    "Digia-Qt-LGPL-exception-1.1",
+    "DigiRule-FOSS-exception",
+    "eCos-exception-2.0",
+    "erlang-otp-linking-exception",
+    "Fawkes-Runtime-exception",
+    "FLTK-exception",
+    "fmt-exception",
+    "Font-exception-2.0",
+    "freertos-exception-2.0",
+    "GCC-exception-2.0",
+    "GCC-exception-2.0-note",
+    "GCC-exception-3.1",
+    "Gmsh-exception",
+    "GNAT-exception",
+    "GNOME-examples-exception",
+    "GNU-compiler-exception",
+    "gnu-javamail-exception",
+    "Google-Patent-WebM",
+    "GPL-3.0-389-ds-base-exception",
+    "GPL-3.0-interface-exception",
+    "GPL-3.0-linking-exception",
+    "GPL-3.0-linking-source-exception",
+    "GPL-CC-1.0",
+    "GStreamer-exception-2005",
+    "GStreamer-exception-2008",
+    "harbour-exception",
+    "i2p-gpl-java-exception",
+    "Independent-modules-exception",
+    "KiCad-libraries-exception",
+    "kvirc-openssl-exception",
+    "LGPL-3.0-linking-exception",
+    "libpri-OpenH323-exception",
+    "Libtool-exception",
+    "Linux-syscall-note",
+    "LLGPL",
+    "LLVM-exception",
+    "LZMA-exception",
+    "mif-exception",
+    "mxml-exception",
+    "Nokia-Qt-exception-1.1",
+    "OCaml-LGPL-linking-exception",
+    "OCCT-exception-1.0",
+    "OpenJDK-assembly-exception-1.0",
+    "openvpn-openssl-exception",
+    "PCRE2-exception",
+    "polyparse-exception",
+    "PS-or-PDF-font-exception-20170817",
+    "QPL-1.0-INRIA-2004-exception",
+    "Qt-GPL-exception-1.0",
+    "Qt-LGPL-exception-1.1",
+    "Qwt-exception-1.0",
+    "romic-exception",
+    "RRDtool-FLOSS-exception-2.0",
+    "rsync-linking-exception",
+    "SANE-exception",
+    "SHL-2.0",
+    "SHL-2.1",
+    "Simple-Library-Usage-exception",
+    "Spelling-Provider-LGPL-exception",
+    "sqlitestudio-OpenSSL-exception",
+    "stunnel-exception",
+    "SWI-exception",
+    "Swift-exception",
+    "Texinfo-exception",
+    "u-boot-exception-2.0",
+    "UBDL-exception",
+    "Universal-FOSS-exception-1.0",
+    "vsftpd-openssl-exception",
+    "WxWindows-exception-3.1",
+    "x11vnc-openssl-exception"
+  ],
+  "osi_ids": [
+    "0BSD",
+    "AAL",
+    "AFL-3.0",
+    "AGPL-3.0",
+    "APL-1.0",
+    "APSL-2.0",
+    "Apache-1.1",
+    "Apache-2.0",
+    "Artistic-1.0",
+    "Artistic-1.0-Perl",
+    "Artistic-2.0",
+    "BSD-1-Clause",
+    "BSD-2-Clause",
+    "BSD-2-Clause-Patent",
+    "BSD-3-Clause",
+    "BSD-3-Clause-LBNL",
+    "BSD-3-Clause-Open-MPI",
+    "BSL-1.0",
+    "BlueOak-1.0.0",
+    "CAL-1.0",
+    "CATOSL-1.1",
+    "CDDL-1.0",
+    "CDDL-1.1",
+    "CECILL-2.1",
+    "CERN-OHL-P-2.0",
+    "CERN-OHL-S-2.0",
+    "CERN-OHL-W-2.0",
+    "CNRI-Python",
+    "CNRI-Python-GPL-Compatible",
+    "CPAL-1.0",
+    "CPL-1.0",
+    "CUA-OPL-1.0",
+    "ECL-1.0",
+    "ECL-2.0",
+    "EFL-1.0",
+    "EFL-2.0",
+    "EPL-1.0",
+    "EPL-2.0",
+    "EUDatagrid",
+    "EUPL-1.1",
+    "EUPL-1.2",
+    "Entessa",
+    "Fair",
+    "Frameworx-1.0",
+    "GPL-1.0",
+    "GPL-2.0",
+    "GPL-3.0",
+    "HPND",
+    "ICU",
+    "IPA",
+    "IPL-1.0",
+    "ISC",
+    "Intel",
+    "Jam",
+    "LGPL-2.0",
+    "LGPL-2.1",
+    "LGPL-3.0",
+    "LPL-1.0",
+    "LPL-1.02",
+    "LPPL-1.3c",
+    "LiLiQ-P-1.1",
+    "LiLiQ-R-1.1",
+    "LiLiQ-Rplus-1.1",
+    "MIT",
+    "MIT-0",
+    "MIT-CMU",
+    "MPL-1.0",
+    "MPL-1.1",
+    "MPL-2.0",
+    "MS-PL",
+    "MS-RL",
+    "MirOS",
+    "Motosoto",
+    "MulanPSL-2.0",
+    "Multics",
+    "NASA-1.3",
+    "NCSA",
+    "NGPL",
+    "NIST-Software",
+    "NOKIA",
+    "NPOSL-3.0",
+    "NTP",
+    "Naumen",
+    "OCLC-2.0",
+    "OFL-1.1",
+    "OGTSL",
+    "OLDAP-2.8",
+    "OLFL-1.3",
+    "OSC-1.0",
+    "OSET-PL-2.1",
+    "OSL-1.0",
+    "OSL-2.1",
+    "OSL-3.0",
+    "PHP-3.0",
+    "PHP-3.01",
+    "PostgreSQL",
+    "Python-2.0",
+    "Python-2.0.1",
+    "QPL-1.0",
+    "RPL-1.1",
+    "RPL-1.5",
+    "RPSL-1.0",
+    "RSCPL",
+    "SISSL",
+    "SPL-1.0",
+    "SimPL-2.0",
+    "Sleepycat",
+    "UCL-1.0",
+    "UPL-1.0",
+    "Unicode-3.0",
+    "Unicode-DFS-2016",
+    "Unlicense",
+    "VSL-1.0",
+    "W3C-20150513",
+    "Watcom-1.0",
+    "WordNet",
+    "Xnet",
+    "ZPL-2.0",
+    "ZPL-2.1",
+    "Zlib",
+    "curl",
+    "eCos-2.0",
+    "wxWindows"
+  ],
+  "urls": [
+    {
+      "url": "https://adoptium.net/docs/faq",
+      "final": "https://adoptium.net/docs/faq",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:25.653386+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://github.com/Blacktempel/RAMSPDToolkit/blob/3b47b96/LICENSE",
+      "final": "https://github.com/Blacktempel/RAMSPDToolkit/blob/3b47b96/LICENSE",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:24.954079+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://github.com/namazso/PawnIO.Setup/releases/tag/2.2.0",
+      "final": "https://github.com/namazso/PawnIO.Setup/releases/tag/2.2.0",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:24.788985+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://github.com/openjdk/jfx/",
+      "final": "https://github.com/openjdk/jfx/",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:24.863730+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://go.microsoft.com/fwlink/?linkid=869050",
+      "final": "https://github.com/mono/mono/blob/main/LICENSE",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:25.780337+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://jrsoftware.org/inno-setup/documentation/topic_setup_usesetupldr.htm",
+      "final": "https://jrsoftware.org/inno-setup/documentation/topic_setup_usesetupldr.htm",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:24.308479+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://learn.microsoft.com/cpp/windows/redistributing-visual-cpp-files",
+      "final": "https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files?view=msvc-170",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:24.663309+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://nsis.sourceforge.io/License",
+      "final": "https://nsis.sourceforge.io/License",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:26.365991+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://opensource.org/license/MPL-2.0",
+      "final": "https://opensource.org/license/MPL-2.0",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:25.652998+00:00",
+      "autoridad": "LICENCIAS"
+    },
+    {
+      "url": "https://opensource.org/license/mit",
+      "final": "https://opensource.org/license/mit",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:25.591356+00:00",
+      "autoridad": "LICENCIAS"
+    },
+    {
+      "url": "https://opensource.org/licenses",
+      "final": "https://opensource.org/licenses",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:25.813238+00:00",
+      "autoridad": "LICENCIAS"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Blacktempel/RAMSPDToolkit/3b47b96/LICENSE",
+      "final": "https://raw.githubusercontent.com/Blacktempel/RAMSPDToolkit/3b47b96/LICENSE",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:25.984741+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/LibreHardwareMonitor/LibreHardwareMonitor/v0.9.6/LICENSE",
+      "final": "https://raw.githubusercontent.com/LibreHardwareMonitor/LibreHardwareMonitor/v0.9.6/LICENSE",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:26.171337+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/jrsoftware/issrc/main/license.txt",
+      "final": "https://raw.githubusercontent.com/jrsoftware/issrc/main/license.txt",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:26.048770+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/mkpaz/atlantafx/v2.0.1/LICENSE",
+      "final": "https://raw.githubusercontent.com/mkpaz/atlantafx/v2.0.1/LICENSE",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:26.049181+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/mono/mono/main/LICENSE",
+      "final": "https://raw.githubusercontent.com/mono/mono/main/LICENSE",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:26.172080+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/namazso/PawnIO.Modules/main/IntelMSR.p",
+      "final": "https://raw.githubusercontent.com/namazso/PawnIO.Modules/main/IntelMSR.p",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:26.303546+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/namazso/PawnIO/master/README.md",
+      "final": "https://raw.githubusercontent.com/namazso/PawnIO/master/README.md",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:26.428806+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/spdx/license-list-data/main/json/exceptions.json",
+      "final": "https://raw.githubusercontent.com/spdx/license-list-data/main/json/exceptions.json",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:26.491586+00:00",
+      "autoridad": "LICENCIAS"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json",
+      "final": "https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:26.615257+00:00",
+      "autoridad": "LICENCIAS"
+    },
+    {
+      "url": "https://signpath.org/terms",
+      "final": "https://signpath.org/terms",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:26.490907+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://spdx.org/licenses/CC0-1.0.json",
+      "final": "https://spdx.org/licenses/CC0-1.0.json",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:26.840145+00:00",
+      "autoridad": "LICENCIAS"
+    },
+    {
+      "url": "https://spdx.org/licenses/InnoSetup.json",
+      "final": "https://spdx.org/licenses/InnoSetup.json",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:26.809435+00:00",
+      "autoridad": "LICENCIAS"
+    },
+    {
+      "url": "https://spdx.org/licenses/libpng-2.0.json",
+      "final": "https://spdx.org/licenses/libpng-2.0.json",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:26.869937+00:00",
+      "autoridad": "LICENCIAS"
+    },
+    {
+      "url": "https://www.nuget.org/packages/Mono.Posix.NETStandard/1.0.0",
+      "final": "https://www.nuget.org/packages/Mono.Posix.NETStandard/1.0.0",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:27.727221+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    },
+    {
+      "url": "https://www.oracle.com/downloads/licenses/no-fee-license.html",
+      "final": "https://www.oracle.com/downloads/licenses/no-fee-license.html",
+      "estado": "CONSULTADA",
+      "http": 200,
+      "fecha": "2026-11-23",
+      "consultado_utc": "2026-11-24T04:28:26.666807+00:00",
+      "autoridad": "TITULAR_O_PROYECTO"
+    }
+  ],
+  "muestras": {
+    "ndd": {
+      "licencia": "MPL-2.0",
+      "url": "https://raw.githubusercontent.com/Blacktempel/RAMSPDToolkit/3b47b96/LICENSE"
+    },
+    "mono_enlace": {
+      "destino": "https://github.com/mono/mono/blob/main/LICENSE",
+      "correspondencia_paquete_1_0_0": "NO VERIFICADO"
+    },
+    "lhm": {
+      "licencia": "MPL-2.0",
+      "url": "https://raw.githubusercontent.com/LibreHardwareMonitor/LibreHardwareMonitor/v0.9.6/LICENSE"
+    },
+    "inno": {
+      "licencia": "InnoSetup",
+      "url": "https://raw.githubusercontent.com/jrsoftware/issrc/main/license.txt"
+    },
+    "pawnio_modulo_actual": {
+      "licencia": "LGPL-2.1-or-later",
+      "url": "https://raw.githubusercontent.com/namazso/PawnIO.Modules/main/IntelMSR.p",
+      "correspondencia_binarios": "NO VERIFICADO"
+    },
+    "pawnio_driver_actual": {
+      "licencia": "GPL-2.0-or-later",
+      "excepcion_ioctl": true,
+      "alternativa": true,
+      "url": "https://raw.githubusercontent.com/namazso/PawnIO/master/README.md",
+      "correspondencia_setup": "NO VERIFICADO"
+    }
+  }
+}
