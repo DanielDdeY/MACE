@@ -1,5 +1,13 @@
 # Diffs de propuesta — no aplicados
 
+**Estado actualizado 2026-11-25:** JDK-JAVAFX.patch es histórico/superado;
+**no aplicar**, JavaFX no elegida. Temurin 25 aprobado solo como línea.
+MONO-EXCLUSION.patch se ensayó únicamente en copia autorizada; el nuevo
+[MONO-EXPERIMENTO-COMPLETO.patch](MONO-EXPERIMENTO-COMPLETO.patch) incluye los
+dos locks y se comprueba con --check --unidiff-zero. Integración pendiente.
+Los comandos y preguntas anteriores se conservan como registro histórico;
+éxito textual no autoriza ejecutar ninguno sin --check sobre producto.
+
 Fecha: 2026-11-25. Base de archivos de producto: 9a0ee8f.
 Estos archivos .patch son documentación revisable, no configuración activa.
 

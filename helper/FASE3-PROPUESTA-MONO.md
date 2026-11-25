@@ -1,5 +1,11 @@
 # Propuesta: excluir Mono del payload Windows
 
+**Actualización 2026-11-25:** ExcludeAssets=all aprobado **solo para experimento
+separado**, ya realizado: [resultado B](FASE3-EXPERIMENTO-MONO.md).
+202 entradas publicadas/199 runtime; imagen de referencia conserva 370.
+El diff completo de tres archivos y locks está propuesto, **no integrado**.
+No volver a pedir aprobación del experimento ya autorizado. Licencia abierta.
+
 Fecha: **2026-11-25**, America/Lima. Base local **9a0ee8f**.
 **Cambio de producto propuesto, NO aplicado.** No se borran DLL ni se
 restaura, compila o ejecuta helper/MACE. La licencia sigue investigándose.

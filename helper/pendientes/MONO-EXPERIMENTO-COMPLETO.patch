@@ -1,0 +1,28 @@
+--- a/helper/Mace.Lhm.Helper/Mace.Lhm.Helper.csproj
++++ b/helper/Mace.Lhm.Helper/Mace.Lhm.Helper.csproj
+@@ -9,0 +10 @@
++    <PackageReference Include="Mono.Posix.NETStandard" Version="[1.0.0]" ExcludeAssets="all" />
+--- a/helper/Mace.Lhm.Helper/packages.lock.json
++++ b/helper/Mace.Lhm.Helper/packages.lock.json
+@@ -39 +39,2 @@
+-        "type": "Transitive",
++        "type": "Direct",
++        "requested": "[1.0.0, 1.0.0]",
+@@ -202 +203,2 @@
+-        "type": "Transitive",
++        "type": "Direct",
++        "requested": "[1.0.0, 1.0.0]",
+@@ -309 +311 @@
+-}
+\ No newline at end of file
++}
+--- a/helper/Mace.Lhm.Tests/packages.lock.json
++++ b/helper/Mace.Lhm.Tests/packages.lock.json
+@@ -184 +184,2 @@
+-          "Mace.Lhm.Protocol": "[1.0.0, )"
++          "Mace.Lhm.Protocol": "[1.0.0, )",
++          "Mono.Posix.NETStandard": "[1.0.0, 1.0.0]"
+@@ -314 +315 @@
+-}
+\ No newline at end of file
++}
