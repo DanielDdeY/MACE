@@ -1,5 +1,12 @@
 # Propuesta: runtime libre antes del instalador 3.3
 
+**Actualización 2026-11-25:** usuario aprueba **Temurin 25 LTS como línea**.
+JavaFX **no seleccionada**: ver [comparación A](FASE3-COMPARACION-JAVAFX.md),
+que verifica 27.0.1.1 y 25.0.5.1 públicas y concreta Mockito/Byte Buddy propuestos.
+Las preguntas históricas de abajo sobre aprobar la línea JDK ya están
+respondidas. El parche JDK-JAVAFX anterior es un ejemplo **superado**, no aplicar
+ni interpretar como JavaFX elegida. Migración/diff completo siguen pendientes.
+
 Fecha: **2026-11-25**, America/Lima. **Sin migración aplicada**. No se instala
 JDK/JavaFX, cambia JAVA_HOME del equipo, compila ni regenera imagen.
 La aprobación recibida autoriza presentar esta propuesta, no aplicarla.
