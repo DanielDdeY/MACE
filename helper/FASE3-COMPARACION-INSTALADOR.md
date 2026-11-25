@@ -1,5 +1,9 @@
 # Inno y NSIS: comparación acotada, sin cambio de herramienta
 
+**Actualización 2026-11-25:** se mantiene **Inno sujeto a consulta SignPath**.
+Ver [evidencia pública nueva](FASE3-EVIDENCIA-INNO-SIGNPATH.md); precedentes
+no garantizan admisión de MACE y no autorizan contactar, instalar ni implementar.
+
 Fecha: **2026-11-25**. **Inno se mantiene elegido y sujeto a consulta a
 SignPath.** No hay .iss/.nsi en este checkout: existe diseño, no un instalador
 Inno implementado que pueda portarse y probarse hoy. No se instaló ni ejecutó
