@@ -1,0 +1,258 @@
+{
+  "date": "2026-11-25",
+  "downloaded_now": false,
+  "entries": [
+    {
+      "component": "BlackSharp.Core",
+      "version": "1.0.7",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/blacksharp.core/1.0.7/blacksharp.core.1.0.7.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "DiskInfoToolkit",
+      "version": "1.1.2",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/diskinfotoolkit/1.1.2/diskinfotoolkit.1.1.2.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "HidSharp",
+      "version": "2.6.4",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/hidsharp/2.6.4/hidsharp.2.6.4.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "LibreHardwareMonitorLib",
+      "version": "0.9.6",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/librehardwaremonitorlib/0.9.6/librehardwaremonitorlib.0.9.6.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "Mono.Posix.NETStandard",
+      "version": "1.0.0",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/mono.posix.netstandard/1.0.0/mono.posix.netstandard.1.0.0.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "RAMSPDToolkit-NDD",
+      "version": "1.4.2",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/ramspdtoolkit-ndd/1.4.2/ramspdtoolkit-ndd.1.4.2.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "System.CodeDom",
+      "version": "10.0.2",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.codedom/10.0.2/system.codedom.10.0.2.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "System.IO.FileSystem.AccessControl",
+      "version": "5.0.0",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.io.filesystem.accesscontrol/5.0.0/system.io.filesystem.accesscontrol.5.0.0.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.io.ports/10.0.3/system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "System.Management",
+      "version": "10.0.2",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.management/10.0.2/system.management.10.0.2.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.android-arm.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.android-arm.runtime.native.system.io.ports/10.0.3/runtime.android-arm.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.android-arm64.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.android-arm64.runtime.native.system.io.ports/10.0.3/runtime.android-arm64.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.android-x64.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.android-x64.runtime.native.system.io.ports/10.0.3/runtime.android-x64.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.android-x86.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.android-x86.runtime.native.system.io.ports/10.0.3/runtime.android-x86.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.linux-arm.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.linux-arm.runtime.native.system.io.ports/10.0.3/runtime.linux-arm.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.linux-arm64.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.linux-arm64.runtime.native.system.io.ports/10.0.3/runtime.linux-arm64.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.linux-bionic-arm64.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.linux-bionic-arm64.runtime.native.system.io.ports/10.0.3/runtime.linux-bionic-arm64.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.linux-bionic-x64.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.linux-bionic-x64.runtime.native.system.io.ports/10.0.3/runtime.linux-bionic-x64.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.linux-musl-arm.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.linux-musl-arm.runtime.native.system.io.ports/10.0.3/runtime.linux-musl-arm.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.linux-musl-arm64.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.linux-musl-arm64.runtime.native.system.io.ports/10.0.3/runtime.linux-musl-arm64.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.linux-musl-x64.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.linux-musl-x64.runtime.native.system.io.ports/10.0.3/runtime.linux-musl-x64.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.linux-x64.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.linux-x64.runtime.native.system.io.ports/10.0.3/runtime.linux-x64.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.maccatalyst-arm64.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.maccatalyst-arm64.runtime.native.system.io.ports/10.0.3/runtime.maccatalyst-arm64.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.maccatalyst-x64.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.maccatalyst-x64.runtime.native.system.io.ports/10.0.3/runtime.maccatalyst-x64.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.native.system.io.ports/10.0.3/runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.osx-arm64.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.osx-arm64.runtime.native.system.io.ports/10.0.3/runtime.osx-arm64.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "runtime.osx-x64.runtime.native.System.IO.Ports",
+      "version": "10.0.3",
+      "kind": "nuget_lock",
+      "url": "https://api.nuget.org/v3-flatcontainer/runtime.osx-x64.runtime.native.system.io.ports/10.0.3/runtime.osx-x64.runtime.native.system.io.ports.10.0.3.nupkg",
+      "verification": "NuGet locked restore contentHash + package signature policy; metadata alone not legal clearance",
+      "location": "deps/nuget",
+      "condition": "only if missing from verified cache; Mono remains in restore graph in both variants"
+    },
+    {
+      "component": "Microsoft.NETCore.App.Runtime.win-x64",
+      "version": "10.0.12",
+      "kind": "nuget_runtime",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.netcore.app.runtime.win-x64/10.0.12/microsoft.netcore.app.runtime.win-x64.10.0.12.nupkg",
+      "verification": "NuGet integrity and SDK pinned runtime; verify published runtimeconfig",
+      "location": "deps/nuget",
+      "condition": "SDK-resolved runtime pack; closure must be verified before binary approval"
+    }
+  ]
+}

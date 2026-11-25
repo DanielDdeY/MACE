@@ -1,0 +1,102 @@
+--- a/app/pom.xml
++++ b/app/pom.xml
+@@ -17,0 +18,8 @@
++    <licenses>
++        <license>
++            <name>MIT License</name>
++            <url>https://opensource.org/license/mit</url>
++            <distribution>repo</distribution>
++        </license>
++    </licenses>
++
+@@ -19 +27 @@
+-        <maven.compiler.release>22</maven.compiler.release>
++        <maven.compiler.release>25</maven.compiler.release>
+@@ -22 +30 @@
+-        <javafx.version>22.0.2</javafx.version>
++        <javafx.version>27.0.1.1</javafx.version>
+@@ -25 +33 @@
+-        <mockito.version>5.12.0</mockito.version>
++        <mockito.version>5.20.0</mockito.version>
+@@ -99 +107 @@
+-                    <release>22</release>
++                    <release>25</release>
+@@ -100,0 +109,14 @@
++            </plugin>
++
++            <!-- Candidate: explicit test agent, preserving native-access permission. -->
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-dependency-plugin</artifactId>
++                <version>3.8.1</version>
++                <executions>
++                    <execution>
++                        <id>test-agent-path</id>
++                        <phase>initialize</phase>
++                        <goals><goal>properties</goal></goals>
++                    </execution>
++                </executions>
+@@ -108 +130 @@
+-                    <argLine>--enable-native-access=ALL-UNNAMED</argLine>
++                    <argLine>--enable-native-access=ALL-UNNAMED -javaagent:"${org.mockito:mockito-core:jar}"</argLine>
+--- a/helper/Mace.Lhm.Helper/Mace.Lhm.Helper.csproj
++++ b/helper/Mace.Lhm.Helper/Mace.Lhm.Helper.csproj
+@@ -2,0 +3,3 @@
++    <PackageLicenseExpression>MIT</PackageLicenseExpression>
++    <Copyright>Copyright (c) 2026 DanielDdeY</Copyright>
++    <Authors>DanielDdeY</Authors>
+@@ -9,0 +13 @@
++    <PackageReference Include="Mono.Posix.NETStandard" Version="[1.0.0]" ExcludeAssets="all" />
+--- a/helper/Mace.Lhm.Protocol/Mace.Lhm.Protocol.csproj
++++ b/helper/Mace.Lhm.Protocol/Mace.Lhm.Protocol.csproj
+@@ -1 +1,7 @@
+-<Project Sdk="Microsoft.NET.Sdk" />
++<Project Sdk="Microsoft.NET.Sdk">
++  <PropertyGroup>
++    <PackageLicenseExpression>MIT</PackageLicenseExpression>
++    <Copyright>Copyright (c) 2026 DanielDdeY</Copyright>
++    <Authors>DanielDdeY</Authors>
++  </PropertyGroup>
++</Project>
+--- a/helper/Mace.Lhm.Tests/Mace.Lhm.Tests.csproj
++++ b/helper/Mace.Lhm.Tests/Mace.Lhm.Tests.csproj
+@@ -2 +2,7 @@
+-  <PropertyGroup><OutputType>Exe</OutputType><SelfContained>true</SelfContained></PropertyGroup>
++  <PropertyGroup>
++    <PackageLicenseExpression>MIT</PackageLicenseExpression>
++    <Copyright>Copyright (c) 2026 DanielDdeY</Copyright>
++    <Authors>DanielDdeY</Authors>
++    <OutputType>Exe</OutputType>
++    <SelfContained>true</SelfContained>
++  </PropertyGroup>
+--- a/packaging/stage-runtime.ps1
++++ b/packaging/stage-runtime.ps1
+@@ -59,0 +60,2 @@
++$ownLicense=Join-Path $repoRoot 'LICENSE'
++if (-not (Test-Path -LiteralPath $ownLicense -PathType Leaf)) { throw 'Falta LICENSE propio.' }
+@@ -83,0 +86 @@
++Copy-Item -LiteralPath $ownLicense -Destination (Join-Path $legalStage 'MACE-LICENSE.txt')
+--- a/helper/Mace.Lhm.Helper/packages.lock.json
++++ b/helper/Mace.Lhm.Helper/packages.lock.json
+@@ -39 +39,2 @@
+-        "type": "Transitive",
++        "type": "Direct",
++        "requested": "[1.0.0, 1.0.0]",
+@@ -202 +203,2 @@
+-        "type": "Transitive",
++        "type": "Direct",
++        "requested": "[1.0.0, 1.0.0]",
+@@ -309 +311 @@
+-}
+\ No newline at end of file
++}
+--- a/helper/Mace.Lhm.Tests/packages.lock.json
++++ b/helper/Mace.Lhm.Tests/packages.lock.json
+@@ -184 +184,2 @@
+-          "Mace.Lhm.Protocol": "[1.0.0, )"
++          "Mace.Lhm.Protocol": "[1.0.0, )",
++          "Mono.Posix.NETStandard": "[1.0.0, 1.0.0]"
+@@ -314 +315 @@
+-}
+\ No newline at end of file
++}
