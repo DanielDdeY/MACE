@@ -1,64 +1,65 @@
-# Auditoría del Paso A — resumen
+# Paso A: base provisional y aclaración para el B parcial
 
-Fecha: 2026-11-23. Revisión propia, no auditoría externa ni asesoría legal.
+Actualizado: **2026-11-25**, America/Lima. No es respaldo legal ni evidencia suficiente para SignPath.
+El usuario aprueba la auditoría **solo como base provisional** y confirma publicar MACE bajo MIT, incluidos derivados cerrados.
+LICENSE se verificó en GitHub/main, con copyright 2026 DanielDdeY; no existe en este checkout. No se copia ni modifica.
 
-## a. Veredicto y cifras
+## a. Cifras históricas, sin promoverlas a cumplimiento
 
-**Informe corregido; todavía no listo para solicitar firma a SignPath.**
-Se encontraron **9 hallazgos: 1 error, 1 afirmación desactualizada y 7 carencias**, con 9 correcciones documentadas.
-Inventario: **103 filas** (34 principales + 23 avisos Java + 46 avisos .NET); incluye agregaciones.
-Fuentes por fila: local **74 (71,84 %)**; metadato **8 (7,77 %)**;
-URL oficial **5 (4,85 %)**; sin evidencia suficiente **16 (15,53 %)**.
-Esos porcentajes describen fuentes, no cumplimiento legal del conjunto.
-Imagen: **370/370 intactos, 0 sin componente**; helper **202/202** y publicado **205/205**.
-Corrección principal: **10 JAR, no 11**. Runtime: **11 módulos**.
-Versiones: **45 cotejos coinciden, 0 discrepancias; 58 filas NO VERIFICADAS**.
-Muestreo de 13: **9 cotejos sin contradicción en alcance limitado, 4 NO VERIFICADOS**.
-Once columnas: **103/103**; conflictos completos: **9/9**; datos locales y lenguaje dubitativo: **0**.
-Fuentes: **26 URLs abiertas y 1 intento fallido**, fechado y no usado como evidencia.
-MIT sigue **confirmada por el usuario**; no se reabre C1 ni se crea LICENSE.
-Commits: arnés `b71dc07`; corrección separada titulada `docs: corrección tras auditoría`.
+Auditoría del 23/11: 103 filas; 74 con texto local, 8 con metadatos, 5 con URL y 16 sin evidencia suficiente del artefacto.
+Los porcentajes 71,84 % / 7,77 % / 4,85 % / 15,53 % clasifican fuentes, no derechos ni admisión.
+370 archivos de imagen, helper 202/205 según conjunto, 10 JAR y 11 módulos; 45 cotejos de versión y 58 filas NV.
+Muestreo: 9 cotejos limitados y 4 NO VERIFICADOS. No se recalifica todo el inventario por la nueva publicación de LICENSE.
 
-## b. Bloqueos para la solicitud a SignPath
+## b. Las 16 filas: componente, motivo y destino
 
-| Componente | Motivo | Evidencia | Opción recomendada |
-|---|---|---|---|
-| Inno Setup | No listado OSI; admisión no acreditada | [SPDX](https://spdx.org/licenses/InnoSetup.json) y [OSI](https://opensource.org/licenses) | Consultar; conservar elección hasta decisión |
-| Oracle Java 22.0.2 | Runtime NFTC, no acreditado para el programa | LICENSE empaquetado y [NFTC](https://www.oracle.com/downloads/licenses/no-fee-license.html) | Concretar migración OpenJDK ya aprobada aparte |
-| Mono.Posix 1.0.0 | Enlace abre main de Mono, sin correspondencia histórica acreditada | Nuspec y [enlace](https://go.microsoft.com/fwlink/?linkid=869050) | Acreditar términos/fuentes; exclusión solo con propuesta aprobada |
-| PawnIO y módulos | Licencias/fuentes exactas del setup y recursos pendientes; alternativas anunciadas | Paquete fijado y [fuente actual](https://raw.githubusercontent.com/namazso/PawnIO/master/README.md) | Completar dossier, conservar bytes/firma ajenos |
-| IGCL, CRT y dependencias del sistema | Restricciones/excepción de bibliotecas de sistema sin resolver | Cabecera local y [Microsoft](https://learn.microsoft.com/cpp/windows/redistributing-visual-cpp-files) | Revisión cualificada y consulta de alcance |
-| Otros componentes de runtimes | Avisos/identificadores no prueban todas las porciones binarias | Textos locales y listas | Completar correspondencia y obligaciones |
-| Preparación de MACE | Licencia formal, política, release y metadatos firmables aún pendientes | Estado del repositorio/diseño | Avanzar por gates B–E y Fase 3 tras aprobación |
+**(a)** binario actual en imagen, previsto en el instalador; el instalador definitivo aún NO está construido/verificado.
+**(b)** binario de imagen excluido del instalador: ninguno identificado en estas filas.
+**(c)** aviso/metadato; **(c*)** fila documental sobre binario externo del sistema que no se copia: no confundir con (b).
+Los avisos agregados no prueban qué código está enlazado. Las filas propias conservan MIT confirmado; componentes ajenos siguen separados.
 
-## c. Riesgos no bloqueantes para revisar el Paso A
+| Fila / componente | Tipo | Motivo que sigue abierto |
+|---|---|---|
+| R001 · JAR MACE | (a) | MIT pública; falta sincronización local y materialización en paquete/metadatos |
+| R002 · MACE.exe / Preview | (a) | Stubs jpackage y CRT tienen términos propios además del código MACE |
+| R003 · mace_native.dll | (a) | MIT propia no acredita cabecera IGCL/CRT enlazado |
+| R004 · Helper exe/DLL | (a) | MIT propia; apphost/runtime y avisos requieren alcance separado |
+| R005 · Protocol.dll | (a) | MIT pública; falta materialización local/de paquete, no una nueva elección |
+| R011 · Mono.Posix.NETStandard.dll | (a) | Licencia/fuente histórica de los bytes 1.0.0 no acreditadas |
+| R012 · Dos DLL nativas Mono | (a) | Mismo vacío histórico; firma Xamarin no concede redistribución |
+| R019 · Siete nativos OpenJFX | (a), en JAR | No se acreditó licencia/composición exacta de todas sus porciones |
+| R021 · Cinco VC de JavaFX | (a), en JAR | Términos Microsoft y excepción del programa pendientes |
+| R022 · 42 UCRT/API sets de JavaFX | (a), en JAR | Redistribución/encaje no acreditados por la licencia del JAR |
+| R023 · Tres VC del runtime Java | (a) | Términos y encaje de los binarios exactos pendientes |
+| R025 · PawnIO_setup.exe | (a), intacto | No acreditada la licencia/fuente de todo su contenido |
+| R032 · CRT MSVC estático | (a), en DLL propia | Código enlazado, no archivo adicional; derechos/encaje pendientes |
+| R029 · Runtime IGCL | (c*), externo | Lo aporta el driver; versión/términos concretos y encaje pendientes |
+| R030 · NVML | (c*), externo | Lo aporta el driver NVIDIA; no se redistribuye, contrato/encaje pendientes |
+| R031 · APIs/DLL Windows | (c*), externo | Dependencias del SO, no binarios copiados; excepción por concretar |
 
-- W3C: [SPDX](https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json) lo marca aprobado; el ID exacto no figura en la tabla OSI actual. No implica revocación.
-- Los avisos .NET/Java son agregados: no prueban carga de cada componente en Windows.
-- La búsqueda propia de HTTP/socket dio 0; actividad dinámica/terceros sigue sin comprobarse.
-- El código 0 del arnés acredita comprobaciones mecánicas, no aprobación legal ni del programa.
+Son 13 filas (a), 3 filas documentales externas (c*) y 0 (b); no 16 archivos distintos.
 
-## d. Decisiones necesarias — máximo cinco
+## c. Los cuatro cotejos del muestreo NO VERIFICADOS
 
-1. Aprobar el inventario corregido o pedir otra revisión; el Paso B sigue detenido.
-2. Inno: mantenerlo sujeto a consulta o autorizar estudiar NSIS; no se cambia automáticamente.
-3. Mono: priorizar acreditar licencia histórica o autorizar una propuesta separada de exclusión.
-4. JDK: concretar distribución/build/JavaFX mediante propuesta separada; no modificar la imagen actual.
-5. Encargar/completar revisión cualificada de redistribución antes de publicar; no equivale a comprar certificados.
+| Componente | Tipo | Qué faltó acreditar |
+|---|---|---|
+| PawnIO_setup.exe | (a) | Términos/fuentes correspondientes al instalador completo |
+| Módulos PawnIO de LHM | (a), recursos de DLL | Correspondencia entre doce binarios y fuentes/licencias exactas |
+| Mono.Posix.NETStandard | (a) | Correspondencia histórica; fuente Unix identificada no prueba exclusión ejecutada |
+| musl, aviso de .NET | (c) | Evidencia disponible: aviso agregado; presencia/versión/porciones binarias no acreditadas |
 
-## e. Preguntas para SignPath — no enviadas
+## d. Decisiones vigentes y entregas
 
-- ¿Admiten motor/desinstalador Inno y cómo califican ese código redistribuido?
-- ¿Admiten setup PawnIO intacto y qué requieren de fuentes, excepción y licencias alternativas?
-- ¿Qué consideran bibliotecas de sistema: CRT/VC/UCRT, cabecera IGCL y NVML/IGCL externos?
-- ¿Cómo tratan los subcomponentes de runtimes no listados por OSI?
-- ¿Aceptan un único responsable para autoría/revisión/aprobación y qué MFA exigen?
-- ¿Qué release previa, metadatos comunes y aprobaciones multietapa necesitan, excluyendo firmas ajenas?
+- Inno se mantiene sujeto a consulta; solo comparación documental con NSIS, sin migración ni instalación.
+- Mono: propuesta de exclusión priorizada; carga por reflexión bajo IsUnix en la fuente fijada. Cambio sin aplicar.
+- JDK: propuesta de Temurin 25 LTS y JavaFX compatible antes de 3.3; sin cambiar host ni imagen.
+- Revisión cualificada antes de publicar: dossier acotado preparado, no enviado.
+- B parcial: CONTRIBUTING y plantillas; DCO pendiente de decisión, no obligatorio; metadatos como diff sin aplicar.
+- Avisos conservan PENDING/no legal clearance; no finalizados. C, D y E no autorizados.
 
-## f. NO VERIFICADO y parada
+## e. Bloqueos y NO VERIFICADO
 
-Licencias/alcances sin acreditar; ausencia de doble licencia comercial (103 filas);
-58 versiones; carga/exclusión Mono; fuentes exactas PawnIO/recursos; actividad dinámica;
-admisión, firma y MFA SignPath; nuevo JDK/instalador y verificaciones físicas pendientes.
-No se ejecutó ni compiló el producto ni se alteraron imagen, manifiestos o avisos.
-**Detenido: sin Paso B, sin envíos y sin publicación.**
+Persisten derechos/fuentes exactos PawnIO/Mono, bibliotecas del sistema, encaje Inno/SignPath y subcomponentes de runtimes.
+No se confunde MIT elegida/publicada con admisión del paquete. No hay solicitud, firma ni aprobación de SignPath.
+Exclusión Mono ejecutada, regresión JDK/JavaFX nuevos, builds concretas, VM y hardware: NO VERIFICADO.
+**Detenerse tras B parcial y las cuatro propuestas; esperar aprobación de cada diff de producto.**

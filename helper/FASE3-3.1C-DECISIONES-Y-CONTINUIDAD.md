@@ -1,5 +1,15 @@
 # Fase 3 — registro de decisiones 3.1c y requisitos para continuar
 
+**Actualización prioritaria, 2026-11-25:** el usuario aprueba la auditoría A
+solo como base provisional, no como respaldo legal ni evidencia suficiente
+para SignPath. Confirma MIT y derivados cerrados; LICENSE existe en GitHub/main,
+pero no en este checkout. Se entrega [B parcial](FASE3-B-PARCIAL.md): resumen
+con las 16 filas/cuatro cotejos, contribución/plantillas y cuatro propuestas.
+Inno se mantiene sujeto a consulta; se prioriza proponer exclusión Mono y
+migración JDK antes de 3.3. Ningún diff de producto está autorizado para aplicar.
+No se finalizan avisos ni se avanza a C/D/E. Esta nota actualiza las referencias
+históricas inferiores a «A sin aprobar» sin convertirla en aprobación legal.
+
 Fecha: **2026-11-23**, America/Lima. Partida local: **cd96559**,
 rama `LHM_implementado`. Al iniciar había dos documentos propios de entregas
 anteriores sin seguimiento: `GUIA-RELEVO-AGENTE.md` e
