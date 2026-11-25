@@ -68,3 +68,16 @@ No hay un comodín para cualquier archivo del helper: se usa deps y casos
 de configuración/host explícitos. El runtime jlink se inventaría como
 distribución junto con sus legales, sin fingir analizar código comprimido
 de cada módulo como si fuese un componente independiente.
+
+
+## Entrega A–D, 2026-11-25
+
+- `auditar-repositorio.py --repo <clon-o-mirror> --out <JSON>` lee Git y escribe
+  solo un informe saneado; no red, fetch, checkout, configuración ni refs.
+- `probar-mono-manual.ps1` **no es un comprobador de solo lectura**: es un
+  ensayo físico que debe ejecutar el usuario. Carga la DLL de desarrollo y
+  lanza el helper aislado; Reconnect pide confirmación y termina exclusivamente
+  su propio hijo verificado. El agente no ejecutó este script. No instala,
+  eleva ni altera servicios. Comandos/precondiciones en FASE3-EXPERIMENTO-MONO.md.
+- Manifiestos operativos y salidas privadas quedan ignorados en native/build;
+  no adjuntar copias con hashes completos, rutas o logs brutos de compilador.

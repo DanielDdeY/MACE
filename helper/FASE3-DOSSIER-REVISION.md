@@ -1,5 +1,10 @@
 # Dossier acotado para revisión cualificada
 
+**Actualización 2026-11-25:** el usuario aprueba el contenido de este dossier;
+no tiene revisor designado. Regla 5 confirmada: no publicar nuevas releases
+con binarios de terceros hasta cerrar revisión legal; fuente pública no afectada.
+Ver [guía D](FASE3-GUIA-REVISION-SIN-REVISOR.md). No se envió ni contrató nada.
+
 Fecha: **2026-11-25**. Preparado para el usuario/revisor que este designe;
 **no enviado**, no asesoría legal y no sustituto de revisión cualificada.
 No es el dossier de solicitud a SignPath del Paso E ni una política del Paso C.

@@ -258,3 +258,37 @@ del inventario, no como aceptación anticipada de un servicio.
 esperar aprobación. Esta consolidación histórica no lo sustituye ni avanza al 3.2.
 Un commit documental propio; solo los cuatro archivos indicados, sin los
 dos documentos previos sin seguimiento ni los tres TXT locales excluidos.
+
+
+## Actualización A–D del 25/11/2026: decisiones posteriores
+
+- Base d563cbc; MIT confirmada, LICENSE correctamente implementado en main
+  según el usuario y lectura pública; aún falta en rama de trabajo local.
+- Temurin 25 LTS aprobado como línea, JavaFX sin elegir; comparación A nueva.
+- ExcludeAssets aprobado solo como experimento aislado: 105 checks pasados
+  con token normal, publicación 202/runtime 199. Producto/imagen no sustituidos.
+- Inno sigue sujeto a consulta; evidencia pública nueva, ninguna solicitud.
+- Dossier aprobado en contenido; sin revisor ni representación contratada.
+- **Regla 5 confirmada expresamente por el usuario:** no nuevas releases con
+  binarios de terceros hasta cerrar revisión legal; fuente pública no afectada.
+- Auditoría C detecta releases binarias históricas: tratamiento requiere decisión
+  separada; no se borraron, modificaron ni descargaron sus assets binarios.
+- A–D de la nueva tarea no autorizan C/D/E del prompt original de firma ni 3.2/3.3.
+  Esperar resultados manuales y aprobación, sin fijar JavaFX, tocar imagen o firmar.
+
+### Comprobaciones de esta entrega A–D
+
+| Comprobación realizada | Resultado y alcance |
+|---|---|
+| Tests .NET de la copia experimental, sin argumentos | 105 checks, código 0, token normal; primer intento aislado falló por acceso a tubería y se conserva en informe B |
+| Locks del experimento | Restore locked aprobado; 0 cambios de versión resuelta/contentHash; diff propuesto incluye ambos locks |
+| Publicación aislada | 202 entradas y runtime 199, hashes operativos coincidentes; sin construir imagen nueva |
+| Referencia congelada, Windows PowerShell 5.1 | 370/370 pins, 0 extras; publicado 205/205 y runtime 202/202 conservados |
+| verify-image | PASS: 370 archivos, 11 JAR de imagen; dos excepciones NDD en ruta/pin/offsets aprobados |
+| Protección y auditoría de proveedores | PASS, 181 aceptadas y 0 inesperadas |
+| Auditor de licencias, snapshot de fuentes anterior | 103 filas; 16 SIN_EVIDENCIA; 0 discrepancias en 45 versiones comprobadas; no acredita legalidad global |
+| Script manual nuevo | Parser PS 5.1 correcto; puente C# compilado sin invocar nativos. Ejecución física NO VERIFICADA |
+| CTest, Java y CPU/GPU físicos | No repetidos en esta entrega; no atribuir sus cifras históricas a pruebas nuevas |
+
+Solo documentos, scripts de ensayo/auditoría y diff pendiente se versionan.
+Sin cambios en código de producto, imagen, pins o manifiestos de referencia.
