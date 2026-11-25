@@ -1,0 +1,53 @@
+--- a/app/pom.xml
++++ b/app/pom.xml
+@@ -14,6 +14,14 @@
+         Sistema de telemetria de hardware pasivo y gestor de procesos interactivo para Windows,
+         con arquitectura hexagonal (dominio Java puro + puente FFM + UI JavaFX).
+     </description>
++
++    <licenses>
++        <license>
++            <name>MIT License</name>
++            <url>https://opensource.org/license/mit</url>
++            <distribution>repo</distribution>
++        </license>
++    </licenses>
+ 
+     <properties>
+         <maven.compiler.release>22</maven.compiler.release>
+--- a/helper/Mace.Lhm.Helper/Mace.Lhm.Helper.csproj
++++ b/helper/Mace.Lhm.Helper/Mace.Lhm.Helper.csproj
+@@ -1,5 +1,9 @@
+ <Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
++    <PackageLicenseExpression>MIT</PackageLicenseExpression>
++    <Copyright>Copyright (c) 2026 DanielDdeY</Copyright>
++    <Authors>DanielDdeY</Authors>
++
+     <OutputType>Exe</OutputType>
+     <SelfContained>true</SelfContained>
+     <AssemblyName>Mace.Lhm.Helper</AssemblyName>
+--- a/helper/Mace.Lhm.Protocol/Mace.Lhm.Protocol.csproj
++++ b/helper/Mace.Lhm.Protocol/Mace.Lhm.Protocol.csproj
+@@ -1 +1,7 @@
+-<Project Sdk="Microsoft.NET.Sdk" />
++<Project Sdk="Microsoft.NET.Sdk">
++  <PropertyGroup>
++    <PackageLicenseExpression>MIT</PackageLicenseExpression>
++    <Copyright>Copyright (c) 2026 DanielDdeY</Copyright>
++    <Authors>DanielDdeY</Authors>
++  </PropertyGroup>
++</Project>
+--- a/helper/Mace.Lhm.Tests/Mace.Lhm.Tests.csproj
++++ b/helper/Mace.Lhm.Tests/Mace.Lhm.Tests.csproj
+@@ -1,5 +1,9 @@
+ <Project Sdk="Microsoft.NET.Sdk">
+-  <PropertyGroup><OutputType>Exe</OutputType><SelfContained>true</SelfContained></PropertyGroup>
++  <PropertyGroup>
++    <PackageLicenseExpression>MIT</PackageLicenseExpression>
++    <Copyright>Copyright (c) 2026 DanielDdeY</Copyright>
++    <Authors>DanielDdeY</Authors>
++<OutputType>Exe</OutputType><SelfContained>true</SelfContained></PropertyGroup>
+   <ItemGroup>
+     <ProjectReference Include="..\Mace.Lhm.Helper\Mace.Lhm.Helper.csproj" />
+   </ItemGroup>
