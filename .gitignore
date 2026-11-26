@@ -28,6 +28,9 @@ Makefile
 *.ninja
 .ninja_deps
 .ninja_log
+# Caché y archivos compilados de Python
+__pycache__/
+*.py[cod]
 
 # Objetos y artefactos generados por MSVC
 *.obj
