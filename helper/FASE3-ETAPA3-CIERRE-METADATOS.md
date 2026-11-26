@@ -155,6 +155,50 @@ y solicitudes de POM/checksums, sin requests de JAR/NuGet u otros tipos.
 
 ## Reproducción local y parada
 
+### Adenda 2026-11-26: dominios de las Etapas 2 y 3
+
+El usuario acepta el cierre y reitera la regla **literal**, también para leer
+documentación: antes de cualquier solicitud fuera de los dominios/tipos
+autorizados, detenerse y preguntar. La aceptación del aviso no autoriza nuevas
+consultas de documentación ni convierte la desviación anterior en cumplimiento.
+Se confirma nuevamente su declaración: los cuatro ensayos Mono dieron 0 en
+su equipo y la primera candidata **EXCLUYE Mono**; sin nuevos datos de hardware,
+token individual o acciones autorizadas en las laptops.
+
+La tabla reconstruye los destinos identificables en las llamadas de esta
+conversación, incluidas consultas fallidas. No es una captura de tráfico DNS/TLS
+ni permite acreditar todos los saltos internos de los proveedores de herramientas.
+
+| Dominio solicitado | Etapa | Motivo / alcance observado |
+|---|---|---|
+| www.nuget.org | 2 | Ficha histórica Mono 1.0.0; lectura pública, sin nupkg nuevo. |
+| github.com | 2 y 3 | Fuentes/tags/licencias de Mono, PawnIO, LHM, JavaFX; en 3, URL de descarga del ZIP Temurin y sidecar autorizados. |
+| api.github.com | 2 | Árboles, tags y contenido de repositorios; metadatos del release Temurin fijado. |
+| raw.githubusercontent.com | 2 | Textos/fuentes oficiales de repositorios; algunos paths devolvieron 404/no accesibles. |
+| softwarefreedom.org | 2 | Servicios, portada pro bono y tentativa de página about. |
+| fsfe.org | 2 | FAQ de orientación; tentativa adicional de página de preguntas. |
+| sfconservancy.org | 2 | Servicios para miembros, admisión y costo publicado. |
+| learn.microsoft.com | 2 | Condiciones de redistribución VC y despliegue UCRT. |
+| visualstudio.microsoft.com | 2 | Directorio público de términos del runtime; no aceptación de EULA. |
+| docs.nvidia.com | 2 | Referencia NVML y tentativa de notices. |
+| www.nvidia.com | 2 | Acuerdo público del driver; no aceptación ni instalación. |
+| git.musl-libc.org | 2 | Tentativa de leer COPYRIGHT; el acceso falló/no aportó evidencia utilizable. |
+| maven.apache.org | 2 y 3 | En 2, página de versiones/descarga Maven. En 3, cinco guías técnicas: desviación de dominio ya registrada, sin parada inmediata. |
+| dlcdn.apache.org | 3 | ZIP exacto Maven 3.9.16 aprobado. |
+| downloads.apache.org | 3 | Sidecar SHA-512 del ZIP Maven aprobado. |
+| repo.maven.apache.org | 2 y 3 | En 2, tentativa de consultar el POM JavaFX fijado; en 3, POM/checksums del plugin y el cierre de metadatos autorizado. |
+| api.nuget.org | 3, ampliación del 26/11 | Lote cerrado de 28 nupkg autorizado posteriormente; no pertenecía a las consultas de metadatos del 25/11. |
+
+Los dominios `go.microsoft.com` y `pawnio.eu` aparecen como referencias en
+documentos leídos; no consta una solicitud nueva a ellos en estas dos etapas.
+El descargador inicial permitió redirects de GitHub a
+`release-assets.githubusercontent.com` u `objects.githubusercontent.com`, pero
+no guardó el host final: **NO VERIFICADO cuál se usó**, no se inventa un acceso
+confirmado a ambos. El enlace embebido de Office en la página de Visual Studio
+no se abrió; no se afirma haber leído ese documento.
+La lista no amplía el permiso actual. No se realizaron contactos ni envíos a
+los autores/servicios; las consultas públicas son distintas de esos contactos.
+
 Pruebas sin red ni Maven:
 
 ```powershell
