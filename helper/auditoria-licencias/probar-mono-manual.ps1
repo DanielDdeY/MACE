@@ -10,6 +10,15 @@ $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $saved=@{}; $envScoped=$false; $initialized=$false; $code=2
 $diagStage='PREFLIGHT'; $diagReason='PREFLIGHT_NOT_COMPLETED'
+$discovery=@{queries=0;rows=0;path_missing=0;prefix_match=0;birth_rejected=0}
+function Same-MonoHelperPath([string]$actual,[string]$expected) {
+    if (-not $actual -or -not $expected) { return $false }
+    # GetFinalPathNameByHandleW (DLL) adds this DOS prefix; Resolve-Path does not.
+    # Strip ONLY the extended DOS prefix. No basename, suffix or relative matching.
+    if ($actual -match '^\\\\\?\\[A-Za-z]:\\') { $actual=$actual.Substring(4) }
+    if ($expected -match '^\\\\\?\\[A-Za-z]:\\') { $expected=$expected.Substring(4) }
+    return [string]::Equals($actual,$expected,[StringComparison]::OrdinalIgnoreCase)
+}
 try {
     if ([IntPtr]::Size -ne 8) { throw 'X64_REQUIRED' }
     $diagStage='DLL_PREFLIGHT'
@@ -70,9 +79,17 @@ public static class MonoManualProbe {
 '@
     $birth=[DateTime]::UtcNow
     function Own-Helpers {
+        $discovery.queries++
         @(Get-CimInstance Win32_Process -Filter "ParentProcessId=$PID" | Where-Object {
-            $_.ExecutablePath -and [string]::Equals($_.ExecutablePath,$helper,[StringComparison]::OrdinalIgnoreCase) -and
-            $_.CreationDate.ToUniversalTime() -ge $birth.AddSeconds(-1)
+            $discovery.rows++
+            if (-not $_.ExecutablePath) { $discovery.path_missing++ }
+            $matches=Same-MonoHelperPath $_.ExecutablePath $helper
+            if ($matches) {
+                if (-not [string]::Equals($_.ExecutablePath,$helper,[StringComparison]::OrdinalIgnoreCase)) { $discovery.prefix_match++ }
+                $recent=$_.CreationDate.ToUniversalTime() -ge $birth.AddSeconds(-1)
+                if (-not $recent) { $discovery.birth_rejected++ }
+                $recent
+            } else { $false }
         })
     }
     $diagStage='BRIDGE_LOAD'
@@ -103,7 +120,7 @@ public static class MonoManualProbe {
         if($Scenario -eq 'Reconnect' -and -not $killed -and $baseline -and $childId -and (-not $RequireCpu -or ($s[1] -eq 0 -and $s[2] -eq 0))){
             $diagStage='OWN_HELPER_TERMINATION'
             $target=Get-Process -Id $childId -ErrorAction Stop
-            if(-not [string]::Equals($target.MainModule.FileName,$helper,[StringComparison]::OrdinalIgnoreCase) -or $target.StartTime.ToUniversalTime() -lt $birth.AddSeconds(-1)){throw 'IDENTITY_CHANGED'}
+            if(-not (Same-MonoHelperPath $target.MainModule.FileName $helper) -or $target.StartTime.ToUniversalTime() -lt $birth.AddSeconds(-1)){throw 'IDENTITY_CHANGED'}
             $priorT=$s[1];$priorP=$s[2];$oldId=$childId
             # Held Process object, exact executable + birth + direct parent discovery above.
             $target.Kill(); $killed=$true
@@ -151,6 +168,7 @@ public static class MonoManualProbe {
         foreach($key in $saved.Keys){Set-Item -LiteralPath ('Env:'+$key) -Value $saved[$key]}
     }
 }
+Write-Host ('DISCOVERY queries='+$discovery.queries+' rows='+$discovery.rows+' path_missing='+$discovery.path_missing+' prefix_match='+$discovery.prefix_match+' birth_rejected='+$discovery.birth_rejected)
 if($code -eq 2){
     Write-Host ('DETAIL reason='+$diagReason+' stage='+$diagStage+' baseline='+[int][bool]$baseline+' cpu_valid='+[int][bool]$valid+' not_elevated='+[int][bool]$notElevated+' saw_helper='+[int][bool]$sawHelper+' killed='+[int][bool]$killed+' invalid_after='+[int][bool]$invalidAfter+' new_pid='+[int][bool]$newId+' recovered='+[int][bool]$recovered+' close_empty='+[int]($null -ne $left -and $left.Count -eq 0))
 }
