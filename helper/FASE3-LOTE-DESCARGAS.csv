@@ -1,0 +1,221 @@
+url,bytes,kind,verification,weak_only,lock_comparison,publisher_signature_trust
+https://api.nuget.org/v3-flatcontainer/blacksharp.core/1.0.7/blacksharp.core.1.0.7.nupkg,167241,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/diskinfotoolkit/1.1.2/diskinfotoolkit.1.1.2.nupkg,4333121,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/hidsharp/2.6.4/hidsharp.2.6.4.nupkg,1175217,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/librehardwaremonitorlib/0.9.6/librehardwaremonitorlib.0.9.6.nupkg,7161119,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/microsoft.netcore.app.runtime.win-x64/10.0.12/microsoft.netcore.app.runtime.win-x64.10.0.12.nupkg,39968868,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,NO_CONTENTHASH_IN_LOCK,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/mono.posix.netstandard/1.0.0/mono.posix.netstandard.1.0.0.nupkg,2841603,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/ramspdtoolkit-ndd/1.4.2/ramspdtoolkit-ndd.1.4.2.nupkg,543375,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.android-arm.runtime.native.system.io.ports/10.0.3/runtime.android-arm.runtime.native.system.io.ports.10.0.3.nupkg,51509,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.android-arm64.runtime.native.system.io.ports/10.0.3/runtime.android-arm64.runtime.native.system.io.ports.10.0.3.nupkg,52566,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.android-x64.runtime.native.system.io.ports/10.0.3/runtime.android-x64.runtime.native.system.io.ports.10.0.3.nupkg,52828,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.android-x86.runtime.native.system.io.ports/10.0.3/runtime.android-x86.runtime.native.system.io.ports.10.0.3.nupkg,52800,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.linux-arm.runtime.native.system.io.ports/10.0.3/runtime.linux-arm.runtime.native.system.io.ports.10.0.3.nupkg,51546,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.linux-arm64.runtime.native.system.io.ports/10.0.3/runtime.linux-arm64.runtime.native.system.io.ports.10.0.3.nupkg,52597,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.linux-bionic-arm64.runtime.native.system.io.ports/10.0.3/runtime.linux-bionic-arm64.runtime.native.system.io.ports.10.0.3.nupkg,52594,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.linux-bionic-x64.runtime.native.system.io.ports/10.0.3/runtime.linux-bionic-x64.runtime.native.system.io.ports.10.0.3.nupkg,52848,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.linux-musl-arm.runtime.native.system.io.ports/10.0.3/runtime.linux-musl-arm.runtime.native.system.io.ports.10.0.3.nupkg,51487,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.linux-musl-arm64.runtime.native.system.io.ports/10.0.3/runtime.linux-musl-arm64.runtime.native.system.io.ports.10.0.3.nupkg,52643,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.linux-musl-x64.runtime.native.system.io.ports/10.0.3/runtime.linux-musl-x64.runtime.native.system.io.ports.10.0.3.nupkg,52805,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.linux-x64.runtime.native.system.io.ports/10.0.3/runtime.linux-x64.runtime.native.system.io.ports.10.0.3.nupkg,52801,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.maccatalyst-arm64.runtime.native.system.io.ports/10.0.3/runtime.maccatalyst-arm64.runtime.native.system.io.ports.10.0.3.nupkg,57171,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.maccatalyst-x64.runtime.native.system.io.ports/10.0.3/runtime.maccatalyst-x64.runtime.native.system.io.ports.10.0.3.nupkg,57192,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.native.system.io.ports/10.0.3/runtime.native.system.io.ports.10.0.3.nupkg,44515,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.osx-arm64.runtime.native.system.io.ports/10.0.3/runtime.osx-arm64.runtime.native.system.io.ports.10.0.3.nupkg,57133,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/runtime.osx-x64.runtime.native.system.io.ports/10.0.3/runtime.osx-x64.runtime.native.system.io.ports.10.0.3.nupkg,57160,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/system.codedom/10.0.2/system.codedom.10.0.2.nupkg,514051,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/system.io.filesystem.accesscontrol/5.0.0/system.io.filesystem.accesscontrol.5.0.0.nupkg,309442,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/system.io.ports/10.0.3/system.io.ports.10.0.3.nupkg,423907,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://api.nuget.org/v3-flatcontainer/system.management/10.0.2/system.management.10.0.2.nupkg,801592,nupkg,NuGet SDK ValidateIntegrityAsync; CMS math; GetContentHash,,MATCH,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/aopalliance/aopalliance/1.0/aopalliance-1.0.jar,4467,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/asm/asm/3.3.1/asm-3.3.1.jar,43581,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/cglib/cglib/2.2.2/cglib-2.2.2.jar,287192,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/com/github/cliftonlabs/json-simple/3.0.2/json-simple-3.0.2.jar,35059,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/com/github/luben/zstd-jni/1.5.6-3/zstd-jni-1.5.6-3.jar,6650280,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/com/github/luben/zstd-jni/1.5.7-6/zstd-jni-1.5.7-6.jar,7404108,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/com/google/code/findbugs/jsr305/1.3.9/jsr305-1.3.9.jar,33015,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar,19936,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/com/google/errorprone/error_prone_annotations/2.1.3/error_prone_annotations-2.1.3.jar,13704,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/com/google/guava/guava/10.0.1/guava-10.0.1.jar,1501575,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/com/google/guava/guava/25.1-android/guava-25.1-android.jar,2591373,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/com/google/inject/guice/4.2.1/guice-4.2.1-no_aop.jar,520662,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.jar,8782,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/com/thoughtworks/qdox/qdox/2.0-M9/qdox-2.0-M9.jar,317269,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/com/thoughtworks/qdox/qdox/2.0.3/qdox-2.0.3.jar,334163,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar,246918,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.17.0/commons-codec-1.17.0.jar,372608,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.19.0/commons-codec-1.19.0.jar,374716,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar,588337,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar,327135,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.jar,508826,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/commons-io/commons-io/2.21.0/commons-io-2.21.0.jar,585274,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar,214788,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar,61829,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/io/airlift/aircompressor/0.27/aircompressor-0.27.jar,254937,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/io/github/mkpaz/atlantafx-base/2.0.1/atlantafx-base-2.0.1.jar,710348,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/javax/annotation/jsr250-api/1.0/jsr250-api-1.0.jar,5848,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/javax/enterprise/cdi-api/1.0/cdi-api-1.0.jar,44908,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar,2497,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy-agent/1.17.7/byte-buddy-agent-1.17.7.jar,366248,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy/1.17.7/byte-buddy-1.17.7.jar,9015334,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.16.1/commons-compress-1.16.1.jar,559533,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.26.2/commons-compress-1.26.2.jar,1083634,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.28.0/commons-compress-1.28.0.jar,1117221,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/commons/commons-digester3/3.2/commons-digester3-3.2.jar,241614,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/commons/commons-exec/1.3/commons-exec-1.3.jar,54423,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar,673587,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.18.0/commons-lang3-3.18.0.jar,702952,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.20.0/commons-lang3-3.20.0.jar,713862,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.jar,501879,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/commons/commons-text/1.12.0/commons-text-1.12.0.jar,251227,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/doxia/doxia-core/2.0.0/doxia-core-2.0.0.jar,168106,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/doxia/doxia-integration-tools/2.0.0/doxia-integration-tools-2.0.0.jar,50040,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/doxia/doxia-module-apt/2.0.0/doxia-module-apt-2.0.0.jar,53877,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/doxia/doxia-module-xdoc/2.0.0/doxia-module-xdoc-2.0.0.jar,35212,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/doxia/doxia-module-xhtml5/2.0.0/doxia-module-xhtml5-2.0.0.jar,17036,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/doxia/doxia-sink-api/2.0.0/doxia-sink-api-2.0.0.jar,11330,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/doxia/doxia-site-model/2.0.0/doxia-site-model-2.0.0.jar,85941,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/doxia/doxia-site-renderer/2.0.0/doxia-site-renderer-2.0.0.jar,43622,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/doxia/doxia-skin-model/2.0.0/doxia-skin-model-2.0.0.jar,16392,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-aether-provider/3.1.0/maven-aether-provider-3.1.0.jar,60050,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.jar,26804,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-archiver/3.6.5/maven-archiver-3.6.5.jar,28346,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-artifact/3.1.0/maven-artifact-3.1.0.jar,52173,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-artifact/3.6.0/maven-artifact-3.6.0.jar,55051,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-builder-support/3.6.0/maven-builder-support-3.6.0.jar,14585,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-core/3.1.0/maven-core-3.1.0.jar,562575,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-core/3.6.0/maven-core-3.6.0.jar,632318,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-model-builder/3.1.0/maven-model-builder-3.1.0.jar,159442,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-model-builder/3.6.0/maven-model-builder-3.6.0.jar,177882,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-model/3.1.0/maven-model-3.1.0.jar,163733,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-model/3.6.0/maven-model-3.6.0.jar,165965,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-plugin-api/3.1.0/maven-plugin-api-3.1.0.jar,49820,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-plugin-api/3.6.0/maven-plugin-api-3.6.0.jar,47798,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-repository-metadata/3.1.0/maven-repository-metadata-3.1.0.jar,30094,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-repository-metadata/3.6.0/maven-repository-metadata-3.6.0.jar,27483,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-resolver-provider/3.6.0/maven-resolver-provider-3.6.0.jar,66621,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-settings-builder/3.1.0/maven-settings-builder-3.1.0.jar,41427,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-settings-builder/3.6.0/maven-settings-builder-3.6.0.jar,43165,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-settings/3.1.0/maven-settings-3.1.0.jar,46708,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/maven-settings/3.6.0/maven-settings-3.6.0.jar,44579,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.13.0/maven-compiler-plugin-3.13.0.jar,82525,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-dependency-plugin/3.8.1/maven-dependency-plugin-3.8.1.jar,207950,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-jar-plugin/3.5.0/maven-jar-plugin-3.5.0.jar,35082,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-resources-plugin/3.4.0/maven-resources-plugin-3.4.0.jar,30835,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.2.5/maven-surefire-plugin-3.2.5.jar,44571,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/reporting/maven-reporting-api/4.0.0/maven-reporting-api-4.0.0.jar,9763,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/reporting/maven-reporting-impl/4.0.0/maven-reporting-impl-4.0.0.jar,20961,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.3.1/maven-resolver-api-1.3.1.jar,148951,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.4.1/maven-resolver-api-1.4.1.jar,148983,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-impl/1.3.1/maven-resolver-impl-1.3.1.jar,182262,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-spi/1.3.1/maven-resolver-spi-1.3.1.jar,36882,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.3.1/maven-resolver-util-1.3.1.jar,160074,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.4.1/maven-resolver-util-1.4.1.jar,167529,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/shared/file-management/3.2.0/file-management-3.2.0.jar,25912,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-artifact-transfer/0.13.1/maven-artifact-transfer-0.13.1.jar,159293,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.1.1/maven-common-artifact-filters-3.1.1.jar,60844,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.4.0/maven-common-artifact-filters-3.4.0.jar,58459,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-dependency-analyzer/1.15.0/maven-dependency-analyzer-1.15.0.jar,44959,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-dependency-tree/3.3.0/maven-dependency-tree-3.3.0.jar,42883,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-filtering/3.4.0/maven-filtering-3.4.0.jar,56038,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.jar,13538,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.2.1/maven-shared-utils-3.2.1.jar,166562,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.3/maven-shared-utils-3.3.3.jar,154022,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar,151103,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/surefire/common-java5/3.2.5/common-java5-3.2.5.jar,17555,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.2.5/maven-surefire-common-3.2.5.jar,307901,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-api/3.2.5/surefire-api-3.2.5.jar,170506,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-booter/3.2.5/surefire-booter-3.2.5.jar,117600,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.2.5/surefire-extensions-api-3.2.5.jar,25852,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.2.5/surefire-extensions-spi-3.2.5.jar,8177,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-junit-platform/3.2.5/surefire-junit-platform-3.2.5.jar,27152,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.2.5/surefire-logger-api-3.2.5.jar,13588,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.2.5/surefire-shared-utils-3.2.5.jar,2438463,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/velocity/tools/velocity-tools-generic/3.1/velocity-tools-generic-3.1.jar,216933,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apache/velocity/velocity-engine-core/2.4/velocity-engine-core-2.4.jar,510500,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar,6806,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/checkerframework/checker-compat-qual/2.0.0/checker-compat-qual-2.0.0.jar,31547,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14.jar,3482,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-archiver/3.6.0/plexus-archiver-3.6.0.jar,191298,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-archiver/4.10.0/plexus-archiver-4.10.0.jar,225201,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-archiver/4.10.4/plexus-archiver-4.10.4.jar,227161,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-classworlds/2.4.2/plexus-classworlds-2.4.2.jar,46969,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-classworlds/2.5.2/plexus-classworlds-2.5.2.jar,52684,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.jar,52873,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.jar,29072,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.jar,25708,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.jar,5232,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-component-annotations/1.5.5/plexus-component-annotations-1.5.5.jar,4211,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-component-annotations/1.7.1/plexus-component-annotations-1.7.1.jar,4288,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-component-annotations/2.0.0/plexus-component-annotations-2.0.0.jar,4227,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-i18n/1.0-beta-10/plexus-i18n-1.0-beta-10.jar,11931,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.16/plexus-interpolation-1.16.jar,61308,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.25/plexus-interpolation-1.25.jar,85327,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.jar,85874,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.28/plexus-interpolation-1.28.jar,87143,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-io/3.0.1/plexus-io-3.0.1.jar,74012,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-io/3.5.1/plexus-io-3.5.1.jar,79942,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-io/3.6.0/plexus-io-3.6.0.jar,80290,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-java/0.9.11/plexus-java-0.9.11.jar,50222,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-java/1.2.0/plexus-java-1.2.0.jar,57542,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.0.10/plexus-utils-3.0.10.jar,230883,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.1.0/plexus-utils-3.1.0.jar,261617,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.0/plexus-utils-4.0.0.jar,192368,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.jar,192527,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.2/plexus-utils-4.0.2.jar,192537,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-velocity/2.2.0/plexus-velocity-2.2.0.jar,5671,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-xml/3.0.0/plexus-xml-3.0.0.jar,93014,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.jar,94331,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-xml/3.0.2/plexus-xml-3.0.2.jar,94331,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-api/1.0.0.v20140518/aether-api-1.0.0.v20140518.jar,136299,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-impl/0.9.0.M2/aether-impl-0.9.0.M2.jar,144866,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-spi/0.9.0.M2/aether-spi-0.9.0.M2.jar,17703,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-util/1.0.0.v20140518/aether-util-1.0.0.v20140518.jar,145829,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/eclipse/sisu/org.eclipse.sisu.inject/0.0.0.M2a/org.eclipse.sisu.inject-0.0.0.M2a.jar,202137,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/eclipse/sisu/org.eclipse.sisu.inject/0.3.3/org.eclipse.sisu.inject-0.3.3.jar,379175,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M3/org.eclipse.sisu.inject-0.9.0.M3.jar,433639,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/eclipse/sisu/org.eclipse.sisu.plexus/0.0.0.M2a/org.eclipse.sisu.plexus-0.0.0.M2a.jar,202339,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/eclipse/sisu/org.eclipse.sisu.plexus/0.3.3/org.eclipse.sisu.plexus-0.3.3.jar,205307,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M3/org.eclipse.sisu.plexus-0.9.0.M3.jar,216303,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.jar,57954,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/5.10.2/junit-jupiter-api-5.10.2.jar,210956,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-engine/5.10.2/junit-jupiter-engine-5.10.2.jar,244690,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-params/5.10.2/junit-jupiter-params-5.10.2.jar,586027,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/5.10.2/junit-jupiter-5.10.2.jar,6359,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/1.10.2/junit-platform-commons-1.10.2.jar,106232,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/1.9.3/junit-platform-commons-1.9.3.jar,102989,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/1.10.2/junit-platform-engine-1.10.2.jar,204821,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/1.9.3/junit-platform-engine-1.9.3.jar,189226,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/1.10.2/junit-platform-launcher-1.10.2.jar,183814,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/1.9.3/junit-platform-launcher-1.9.3.jar,169237,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/mockito/mockito-core/5.20.0/mockito-core-5.20.0.jar,710508,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/mockito/mockito-junit-jupiter/5.20.0/mockito-junit-jupiter-5.20.0.jar,9429,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/objenesis/objenesis/2.6/objenesis-2.6.jar,55684,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/objenesis/objenesis/3.3/objenesis-3.3.jar,49423,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-base/27.0.1.1/javafx-base-27.0.1.1-win.jar,752539,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-base/27.0.1.1/javafx-base-27.0.1.1.jar,302,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-controls/27.0.1.1/javafx-controls-27.0.1.1-win.jar,2639751,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-controls/27.0.1.1/javafx-controls-27.0.1.1.jar,306,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-fxml/27.0.1.1/javafx-fxml-27.0.1.1-win.jar,126951,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-fxml/27.0.1.1/javafx-fxml-27.0.1.1.jar,302,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-graphics/27.0.1.1/javafx-graphics-27.0.1.1-win.jar,6233738,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-graphics/27.0.1.1/javafx-graphics-27.0.1.1.jar,306,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-maven-plugin/0.0.8/javafx-maven-plugin-0.0.8.jar,35708,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar,7653,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar,14304,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/ow2/asm/asm/7.0-beta/asm-7.0-beta.jar,113586,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.6/asm-9.6.jar,123598,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7/asm-9.7.jar,125428,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.jar,41203,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar,41125,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar,8482,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-cipher/1.4/plexus-cipher-1.4.jar,13494,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-sec-dispatcher/1.3/plexus-sec-dispatcher-1.3.jar,28555,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-sec-dispatcher/1.4/plexus-sec-dispatcher-1.4.jar,27703,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/sonatype/sisu/sisu-guice/2.1.7/sisu-guice-2.1.7-noaop.jar,471737,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/sonatype/sisu/sisu-guice/3.1.0/sisu-guice-3.1.0-no_aop.jar,357425,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/sonatype/sisu/sisu-inject-bean/1.4.2/sisu-inject-bean-1.4.2.jar,152989,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/sonatype/sisu/sisu-inject-plexus/1.4.2/sisu-inject-plexus-1.4.2.jar,201716,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/tukaani/xz/1.10/xz-1.10.jar,168569,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/tukaani/xz/1.8/xz-1.8.jar,108555,jar,"sha1,md5",True,NOT_APPLICABLE,NO_VERIFICADO
+https://repo.maven.apache.org/maven2/org/tukaani/xz/1.9/xz-1.9.jar,116013,jar,"sha512,sha256,sha1,md5",False,NOT_APPLICABLE,NO_VERIFICADO

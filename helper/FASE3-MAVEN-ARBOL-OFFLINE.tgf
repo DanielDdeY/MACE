@@ -1,0 +1,46 @@
+663925782 com.mace.audit:resolution-only:pom:1.0
+1194710757 org.openjfx:javafx-controls:jar:27.0.1.1:compile
+2043889470 org.openjfx:javafx-controls:jar:win:27.0.1.1:compile
+1976503781 org.openjfx:javafx-graphics:jar:27.0.1.1:compile
+1353756631 org.openjfx:javafx-graphics:jar:win:27.0.1.1:compile
+1182888954 org.openjfx:javafx-base:jar:27.0.1.1:compile
+1651923692 org.openjfx:javafx-base:jar:win:27.0.1.1:compile
+1868288866 org.openjfx:javafx-fxml:jar:27.0.1.1:compile
+977278793 org.openjfx:javafx-fxml:jar:win:27.0.1.1:compile
+2006166872 io.github.mkpaz:atlantafx-base:jar:2.0.1:compile
+669132924 org.junit.jupiter:junit-jupiter:jar:5.10.2:test
+370356001 org.junit.jupiter:junit-jupiter-api:jar:5.10.2:test
+752060661 org.opentest4j:opentest4j:jar:1.3.0:test
+1178605914 org.junit.platform:junit-platform-commons:jar:1.10.2:test
+1893169190 org.apiguardian:apiguardian-api:jar:1.1.2:test
+2133998394 org.junit.jupiter:junit-jupiter-params:jar:5.10.2:test
+1326878729 org.junit.jupiter:junit-jupiter-engine:jar:5.10.2:test
+165337720 org.junit.platform:junit-platform-engine:jar:1.10.2:test
+1107789101 org.mockito:mockito-core:jar:5.20.0:test
+746757564 net.bytebuddy:byte-buddy:jar:1.17.7:test
+1475331837 net.bytebuddy:byte-buddy-agent:jar:1.17.7:test
+138010466 org.objenesis:objenesis:jar:3.3:test
+1994984869 org.mockito:mockito-junit-jupiter:jar:5.20.0:test
+#
+1194710757 2043889470 compile
+1976503781 1353756631 compile
+1182888954 1651923692 compile
+1976503781 1182888954 compile
+1194710757 1976503781 compile
+663925782 1194710757 compile
+1868288866 977278793 compile
+663925782 1868288866 compile
+663925782 2006166872 compile
+370356001 752060661 test
+370356001 1178605914 test
+370356001 1893169190 test
+669132924 370356001 test
+669132924 2133998394 test
+1326878729 165337720 test
+669132924 1326878729 test
+663925782 669132924 test
+1107789101 746757564 test
+1107789101 1475331837 test
+1107789101 138010466 test
+663925782 1107789101 test
+663925782 1994984869 test

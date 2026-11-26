@@ -1,0 +1,10 @@
+url,bytes,status,gpg_exit,issuer_fingerprints_declared,key_ids_declared,authenticated_publisher
+https://repo.maven.apache.org/maven2/io/github/mkpaz/atlantafx-base/2.0.1/atlantafx-base-2.0.1.jar.asc,488,NO_VERIFICADO,2,12ED17B48803C23BE8B1DE9179DD1EB96702CC23,79DD1EB96702CC23,False
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-base/27.0.1.1/javafx-base-27.0.1.1-win.jar.asc,455,NO_VERIFICADO,2,,6A9FBE152D4C64D1,False
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-base/27.0.1.1/javafx-base-27.0.1.1.jar.asc,455,NO_VERIFICADO,2,,6A9FBE152D4C64D1,False
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-controls/27.0.1.1/javafx-controls-27.0.1.1-win.jar.asc,455,NO_VERIFICADO,2,,6A9FBE152D4C64D1,False
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-controls/27.0.1.1/javafx-controls-27.0.1.1.jar.asc,455,NO_VERIFICADO,2,,6A9FBE152D4C64D1,False
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-fxml/27.0.1.1/javafx-fxml-27.0.1.1-win.jar.asc,455,NO_VERIFICADO,2,,6A9FBE152D4C64D1,False
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-fxml/27.0.1.1/javafx-fxml-27.0.1.1.jar.asc,455,NO_VERIFICADO,2,,6A9FBE152D4C64D1,False
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-graphics/27.0.1.1/javafx-graphics-27.0.1.1-win.jar.asc,455,NO_VERIFICADO,2,,6A9FBE152D4C64D1,False
+https://repo.maven.apache.org/maven2/org/openjfx/javafx-graphics/27.0.1.1/javafx-graphics-27.0.1.1.jar.asc,455,NO_VERIFICADO,2,,6A9FBE152D4C64D1,False
