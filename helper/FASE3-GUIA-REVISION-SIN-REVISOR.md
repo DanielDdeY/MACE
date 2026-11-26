@@ -46,11 +46,19 @@ al agente a abrir solicitudes, subir archivos o contratar representación.
 
 ## Vías públicas verificadas; no se contactó a ninguna
 
+**Reconsulta en Etapa 2, 2026-11-25:** las fuentes siguientes se volvieron
+a abrir. No se infiere disponibilidad de un profesional por existir la página.
+El estado técnico actualizado y la ruta crítica están en
+[FASE3-ETAPA2-EVIDENCIA.md](FASE3-ETAPA2-EVIDENCIA.md); LICENSE ya se incorporó
+en 7be9ab0 y los cuatro ensayos físicos Mono fueron comunicados con código 0.
+Eso no cierra la revisión legal. Las releases históricas a borrador están
+**VERIFICADAS POR EL USUARIO**, no por una nueva consulta remota.
+
 | Vía oficial | Qué acredita la fuente | Límites/costo para MACE |
 |---|---|---|
 | [SFLC](https://softwarefreedom.org/), [servicios](https://softwarefreedom.org/services/) | Publica servicios pro bono para desarrolladores FOSS y ayuda de licencias; asesoramiento y análisis de copyright | Admisión, capacidad actual, jurisdicción y aceptación de este encargo: **NO VERIFICADO**. No se promete atención gratuita automática; las páginas no fijan plazo |
-| [FSFE Licence Questions/FAQ](https://fsfe.org/freesoftware/legal/faq.en.html) | Recursos públicos gratuitos y equipo voluntario de preguntas de licencias | Orientación general; no se acredita representación, dictamen individual ni garantía de revisión de un setup completo. No sustituye profesional habilitado |
-| [Conservancy servicios](https://sfconservancy.org/projects/services/), [admisión](https://sfconservancy.org/projects/apply/) | Asistencia jurídica básica para proyectos que **ya son miembros**; selección y requisitos publicados | No es ventanilla gratuita inmediata ni membresía concedida. Admisión selectiva puede durar meses; impacto económico/encaje concreto: **NO VERIFICADO** |
+| [FSFE Licence Questions/FAQ](https://fsfe.org/freesoftware/legal/faq.en.html) | Recursos públicos y equipo voluntario; la FAQ indica expresamente que FSFE no puede dar asesoría legal y puede orientar hacia profesionales | No se publica tarifa para esa orientación ni se garantiza respuesta o admisión; recomiendan consultas en inglés. No representación ni dictamen sobre el setup |
+| [Conservancy servicios](https://sfconservancy.org/projects/services/), [admisión](https://sfconservancy.org/projects/apply/) | Asistencia jurídica básica para proyectos que **ya son miembros**; selección y requisitos publicados | No es consulta gratuita inmediata. Admisión puede durar meses; la página exige a nuevos miembros el **10 % de ingresos procesados por Conservancy**, sin cuota mensual fija acreditada. Admisión/encaje y acuerdo concreto de MACE: **NO VERIFICADO** |
 
 Las páginas se abrieron por lectura el 25/11/2026. SFLC anuncia pro bono en su
 portada, pero ello no prueba que esté aceptando nuevos asuntos hoy. Conservancy
