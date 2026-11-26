@@ -24,6 +24,11 @@ Could you point us to:
    Modules 0.1.6, but the source tree of that tag does not include
    `IsaBridgeEC.p`, while the LHM resources include `IsaBridgeEC.bin`.
    What source revision/build should be used for that module and the set?
+   Specifically, the LHM source revision declared by the restored package is
+   `3d331e3`; its adjacent README and COPYING are the references we checked.
+   Could the README apply to only part of the set, or is a different module
+   release/source revision intended? We are not assuming an inconsistency in
+   licensing from this difference alone.
 4. Any additional notices or conditions we should preserve when bundling the
    installer alongside an independent application using LHM, particularly the
    distinction between the IOCTL exception and modules using the Pawn interface?
@@ -35,5 +40,10 @@ or a license exception. Thank you for clarifying the appropriate references.
 
 Alcance exacto de los doce recursos y fuentes consultadas:
 [informe Etapa 2](FASE3-ETAPA2-EVIDENCIA.md).
+Referencias para que el usuario revise antes de publicar:
+[README junto a los recursos](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/blob/3d331e3/LibreHardwareMonitorLib/Resources/PawnIo/README),
+[árbol Modules 0.1.6](https://github.com/namazso/PawnIO.Modules/tree/0.1.6).
+Se preparó además una [consulta separada a LHM](FASE3-CONSULTA-LHM-BORRADOR.md),
+también sin enviar. No se pide al autor que certifique licencias de MACE.
 Una respuesta del autor podría aportar evidencia; no sustituye la revisión
 cualificada del conjunto ni la decisión de admisión de SignPath.
