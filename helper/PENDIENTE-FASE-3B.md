@@ -136,3 +136,30 @@ Solo se añade este registro documental. Ningún informe histórico, README,
 política, plantilla, workflow, metadato, fuente o artefacto de producto se
 modifica. No tests ni builds nuevos. Revisar dudas antes de redactar C;
 después completar C y detenerse para aprobación, sin avanzar a D/E ni 3.2/3.3.
+
+## Actualización del Paso C, 25/11/2026
+
+El usuario aportó README.md como borrador, autorizó crear CODE_SIGNING desde
+cero, confirmó docs/index.html como página de descargas y aprobó las tres
+sugerencias de estado/atribución, alcance de artefactos y marcas NO VERIFICADO.
+**Las dos dudas previas quedan resueltas**; los apartados anteriores conservan
+su contexto de preflight y no son solicitudes todavía pendientes.
+
+Se redacta CODE_SIGNING_POLICY.md, se adapta README.md y se prepara localmente
+docs/index.html a partir de main, sin merge ni publicación. Ver
+[entrega C](FASE3-PASOC.md). La atribución al servicio es condicional y los
+enlaces de la política en la web requieren integración posterior por el usuario.
+
+Los pendientes B01–B21 no se cierran por esa redacción. En particular, no se
+aplicaron metadatos MIT/Mono/JDK, no se resolvieron los cuatro códigos 2 de Mono,
+no se eligió/recomendó una variante y no se probaron comandos en clon limpio.
+Continúan la revisión cualificada, avisos borrador, consultas y admisión pendientes.
+No se acredita firma, solicitud presentada, nueva release ni cambio de las
+releases históricas a borrador. No avanzar a D/E del prompt de firma ni 3.2/3.3.
+
+**Pendiente adicional detectado por inspección en C:** el workflow CI local
+solo contiene tests Java y build nativo básico; no publica el helper ni pasa
+el manifiesto requerido por producción. El workflow de instalador citado en
+el README aportado no existe en esta rama. No se ejecutó Actions ni se
+corrigió CI. Alinear configuración y acreditar su cobertura queda fuera de C;
+no presentar el borrador del README como evidencia de pipeline operativo.
