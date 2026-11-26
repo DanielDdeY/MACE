@@ -1,0 +1,7 @@
+file,url,bytes,verification,signature
+downloads/apache-maven-3.9.16-bin.zip,https://dlcdn.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.zip,9395475,sha512,NOT_VERIFIED
+downloads/apache-maven-3.9.16-bin.zip.sha512,https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.zip.sha512,128,official_checksum_metadata,NOT_VERIFIED
+downloads/OpenJDK25U-jdk_x64_windows_hotspot_25.0.5.1_2.zip,https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.5.1%2B2/OpenJDK25U-jdk_x64_windows_hotspot_25.0.5.1_2.zip,141295462,sha256,NOT_VERIFIED
+downloads/OpenJDK25U-jdk_x64_windows_hotspot_25.0.5.1_2.zip.sha256,https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.5.1%2B2/OpenJDK25U-jdk_x64_windows_hotspot_25.0.5.1_2.zip.sha256.txt,116,official_checksum_metadata,NOT_VERIFIED
+deps/m2/org/apache/maven/plugins/maven-dependency-plugin/3.8.1/maven-dependency-plugin-3.8.1.pom,https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-dependency-plugin/3.8.1/maven-dependency-plugin-3.8.1.pom,17998,sha1,NOT_VERIFIED
+deps/m2/org/apache/maven/plugins/maven-dependency-plugin/3.8.1/maven-dependency-plugin-3.8.1.pom.sha1,https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-dependency-plugin/3.8.1/maven-dependency-plugin-3.8.1.pom.sha1,40,official_checksum_metadata,NOT_VERIFIED
