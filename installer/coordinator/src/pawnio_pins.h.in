@@ -1,0 +1,10 @@
+/* Generado por CMake desde packaging/pawnio-2.2.0.json. No editar. */
+#pragma once
+
+#define MACE_COORDINATOR_VERSION "@PROJECT_VERSION@"
+#define MACE_PAWNIO_SHA256 "@PAWNIO_SHA256@"
+#define MACE_PAWNIO_V0 @PAWNIO_V0@
+#define MACE_PAWNIO_V1 @PAWNIO_V1@
+#define MACE_PAWNIO_V2 @PAWNIO_V2@
+#define MACE_PAWNIO_V3 @PAWNIO_V3@
+#define MACE_PAWNIO_SIGNER L"@MACE_PAWNIO_SIGNER@"

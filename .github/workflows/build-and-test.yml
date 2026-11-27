@@ -2,7 +2,7 @@ name: MACE CI - Build & Test Suite
 
 on:
   push:
-    branches: [ main, develop, LHM_implementado, 'ci/**' ]
+    branches: [ main, develop, LHM_implementado, 'ci/**', 'feat/**' ]
   pull_request:
     branches: [ main, develop ]
   # El flujo de entrega (release-installer.yml) lo reutiliza como compuerta.
@@ -19,6 +19,45 @@ permissions:
 # app/pom.xml). Los parches de la candidata Fase 3 (helper/pendientes/) no se
 # aplican aqui: un check verde no acredita Temurin 25 / JavaFX 27.
 jobs:
+  # Coordinador del requisito PawnIO (installer/coordinator). Pruebas con un
+  # setup simulado; el setup oficial solo se verifica (hash y firma), nunca se
+  # ejecuta ni se instala ningun driver en el runner.
+  coordinador-pawnio:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: powershell
+
+    steps:
+      - name: Descargar codigo fuente
+        uses: actions/checkout@v4
+
+      - name: Compilar coordinador
+        run: |
+          cmake -S installer\coordinator -B installer\coordinator\build -A x64
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake --build installer\coordinator\build --config Release
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      # Misma politica fijada que usa el empaquetado; se rechaza si el hash no coincide.
+      - name: Descargar setup oficial de PawnIO (solo para verificarlo)
+        run: |
+          $policy = Get-Content -LiteralPath packaging\pawnio-2.2.0.json -Raw | ConvertFrom-Json
+          $dir = Join-Path $env:RUNNER_TEMP 'pawnio-oficial'
+          New-Item -ItemType Directory -Force -Path $dir | Out-Null
+          $file = Join-Path $dir $policy.file
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          Invoke-WebRequest -Uri $policy.url -OutFile $file -UseBasicParsing
+          $hash = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash
+          if ($hash -ne $policy.sha256) { Write-Error "Hash de PawnIO inesperado: $hash"; exit 1 }
+          "PAWNIO_OFICIAL=$file" | Out-File -Append -Encoding ascii $env:GITHUB_ENV
+
+      - name: Probar coordinador
+        run: |
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\installer\coordinator\tests\test-coordinator.ps1 -BuildDirectory .\installer\coordinator\build -RealPawnIoSetup $env:PAWNIO_OFICIAL
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
   # Herramientas de auditoria/candidata de Fase 3: solo pruebas offline y
   # sintaxis. Nunca descarga lotes, ejecuta Maven/dotnet ni el producto.
   herramientas-auditoria:

@@ -123,3 +123,6 @@ CMakeUserPresets.json
 .env.*
 !.env.example
 !.env.sample
+
+# Compilacion del coordinador PawnIO del instalador
+installer/coordinator/build/
