@@ -29,8 +29,11 @@ jobs:
         shell: powershell
 
     steps:
+      # Historial completo: test-mono-discovery.ps1 compara contra el commit 808d3bc.
       - name: Descargar codigo fuente
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # comprobar.ps1 exige Python 3.10 o posterior; se fija una version estable.
       - name: Configurar Python
