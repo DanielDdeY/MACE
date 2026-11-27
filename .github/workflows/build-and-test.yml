@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Descargar codigo fuente
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Compilar coordinador
         run: |
@@ -70,7 +70,7 @@ jobs:
     steps:
       # Historial completo: test-mono-discovery.ps1 compara contra el commit 808d3bc.
       - name: Descargar codigo fuente
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -122,12 +122,12 @@ jobs:
     steps:
       # Historial completo: check-protected-telemetry compara contra un commit de respaldo.
       - name: Descargar codigo fuente
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Configurar Java 22
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '22'
@@ -135,7 +135,7 @@ jobs:
 
       # El helper fija el SDK exacto en helper/global.json (rollForward=disable).
       - name: Configurar .NET SDK del helper LHM
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           global-json-file: helper/global.json
 
