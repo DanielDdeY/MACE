@@ -2,16 +2,74 @@ name: MACE CI - Build & Test Suite
 
 on:
   push:
-    branches: [ main, develop , 'ci/**' ]
+    branches: [ main, develop, LHM_implementado, 'ci/**' ]
   pull_request:
     branches: [ main, develop ]
   # El flujo de entrega (release-installer.yml) lo reutiliza como compuerta.
   workflow_call:
 
+permissions:
+  contents: read
+
 # Sigue el orden de verificacion de la rama LHM (helper -> nativo dev -> nativo
 # prod -> Java -> auditorias). No instala PawnIO, no se eleva y no publica
 # binarios: solo sube informes de pruebas.
+#
+# Compila la fuente tal como esta en la rama (Java 22 / JavaFX 22.0.2 segun
+# app/pom.xml). Los parches de la candidata Fase 3 (helper/pendientes/) no se
+# aplican aqui: un check verde no acredita Temurin 25 / JavaFX 27.
 jobs:
+  # Herramientas de auditoria/candidata de Fase 3: solo pruebas offline y
+  # sintaxis. Nunca descarga lotes, ejecuta Maven/dotnet ni el producto.
+  herramientas-auditoria:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: powershell
+
+    steps:
+      - name: Descargar codigo fuente
+        uses: actions/checkout@v4
+
+      # comprobar.ps1 exige Python 3.10 o posterior; se fija una version estable.
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Sintaxis de scripts Python
+        run: |
+          python -I -B -c "import ast,pathlib,sys; files=sorted(pathlib.Path('helper/auditoria-licencias').glob('*.py')); [ast.parse(f.read_text(encoding='utf-8'),str(f)) for f in files]; print('PY_SYNTAX_OK', len(files))"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      # Windows PowerShell 5.1, como exigen los scripts de manifiesto y payload.
+      - name: Sintaxis de scripts PowerShell 5.1
+        run: |
+          $failed = 0
+          $files = Get-ChildItem helper\auditoria-licencias -Filter *.ps1
+          foreach ($f in $files) {
+            $tokens = $null; $errors = $null
+            [Management.Automation.Language.Parser]::ParseFile($f.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count) { $failed++; Write-Host "::error file=$($f.Name)::$($errors[0].Message)" }
+          }
+          "PS_SYNTAX files=$($files.Count) failed=$failed"
+          if ($failed) { exit 1 }
+
+      - name: Pruebas offline de compuertas de descarga y metadatos
+        run: |
+          foreach ($t in 'test-descargas-etapa3.py', 'test-lote-cerrado.py', 'test-metadatos-maven.py') {
+            Write-Host "== $t"
+            python -I -B "helper\auditoria-licencias\$t"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      # Sintetica: no carga la DLL, no arranca el helper ni termina procesos.
+      - name: Prueba sintetica del arnes Mono
+        run: |
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\helper\auditoria-licencias\test-mono-discovery.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
   build-and-verify:
     runs-on: windows-latest
     timeout-minutes: 60

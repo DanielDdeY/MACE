@@ -112,15 +112,32 @@ No se presentan los dos comandos aislados del borrador como receta completa.
 
 ## CI y contribuciones
 
-La [configuración CI de esta rama](.github/workflows/build-and-test.yml) contiene
-tests Java con JDK 22 y un build nativo básico. No acredita una regresión LHM
-completa: su configuración nativa no publica el helper ni proporciona el
-manifiesto exigido por producción. Esa observación estática no es una ejecución
-nueva de Actions. La corrección del workflow queda fuera del Paso C.
+[`build-and-test.yml`](.github/workflows/build-and-test.yml) se ejecuta en cada
+push a `main`, `develop`, `LHM_implementado` y `ci/**`, y en cada pull request a
+`main`/`develop`, en Windows con MSVC, JDK 22 (el `maven.compiler.release` del
+POM actual) y el SDK .NET fijado en `helper/global.json`:
 
-El archivo `release-installer.yml` citado en el borrador no está en este
-checkout. No se da por implementado un pipeline SignPath ni publicación
-automática de una release nueva. No se cambian workflows ni se crean tags aquí.
+| Job / paso | Script | Comprueba |
+|---|---|---|
+| build-and-verify 1 | `helper/Build-Helper.ps1` | Restore bloqueado, pruebas y publicación sin firma del helper LHM |
+| build-and-verify 2 | `native/scripts/test-lhm1b.ps1` | DLL perfil desarrollo y CTest |
+| build-and-verify 3 | `native/scripts/build-native.ps1` | DLL perfil producción ligada al manifiesto del helper publicado y CTest |
+| build-and-verify 4 | `native/scripts/test-java-regression.ps1` | JUnit contra la DLL de desarrollo |
+| build-and-verify 5–6 | `check-protected-telemetry.ps1`, `audit-retired-providers.ps1` | Telemetría protegida y proveedores retirados |
+| herramientas-auditoria | `helper/auditoria-licencias/test-*.py`, `test-mono-discovery.ps1` | Pruebas offline de las compuertas de descarga/metadatos y del arnés Mono, sintaxis Python y Windows PowerShell 5.1 |
+
+El CI no instala PawnIO, no se eleva, no usa hardware físico ni publica
+binarios: solo sube informes de pruebas. Un check verde **no acredita** la
+candidata Temurin 25/JavaFX 27 (sus parches de `helper/pendientes/` no están
+aplicados a esta rama), UI, administrador, hardware nuevo, licencias ni firma.
+
+[`release-installer.yml`](.github/workflows/release-installer.yml) construye el
+instalador sin firma desde un tag `v*` tras pasar el CI. **No publica GitHub
+Releases** mientras la variable de repositorio `MACE_PUBLICAR_RELEASES` no valga
+`true`; hasta entonces deja el resultado como artefacto de prueba del run, con
+retención corta. Activar esa variable corresponde al mantenedor después de la
+revisión legal. No hay pipeline SignPath implementado.
+
 Para aportar cambios, ver [CONTRIBUTING.md](CONTRIBUTING.md) y las plantillas
 del repositorio. DCO no adoptado por ahora. La integración a main la decide
 el mantenedor; no se presume configuración de protecciones o checks obligatorios.

@@ -1,14 +1,19 @@
 name: Entrega continua - Instalador de Windows
 
-# Publica una version de MACE en GitHub Releases al subir un tag:
+# Construye el instalador de MACE (sin firma) al subir un tag:
 #
 #     git tag v1.1.0-rc1 ; git push origin v1.1.0-rc1   -> pre-release (pruebas)
 #     git tag v1.1.0     ; git push origin v1.1.0       -> version estable
 #
 # Flujo: CI completo (compuerta) -> helper LHM -> DLL de produccion ligada al
 # helper -> paquete verificado (hash, ABI, payload) -> instalador -> Release.
-# La pagina de descarga (docs/, GitHub Pages) ofrece siempre la ultima version
-# estable; las pre-release solo aparecen en la lista de versiones.
+#
+# PUBLICACION BLOQUEADA: no se publican releases nuevas con binarios de
+# terceros hasta cerrar la revision legal (ver helper/PENDIENTE-FASE-3B.md).
+# Mientras la variable de repositorio MACE_PUBLICAR_RELEASES no valga 'true'
+# (Settings > Secrets and variables > Actions > Variables), el flujo NO crea ni
+# actualiza GitHub Releases: deja el resultado como artefacto de prueba del run,
+# con retencion corta. Activarla es decision del mantenedor tras esa revision.
 #
 # PawnIO: se incluye el instalador OFICIAL 2.2.0 intacto (hash y firma
 # verificados) en app\prerequisites. MACE no lo ejecuta: instalarlo es
@@ -140,7 +145,22 @@ jobs:
           } | Set-Content "$dist\SHA256SUMS-MACE.txt" -Encoding utf8
           Get-Content "$dist\SHA256SUMS-MACE.txt"
 
+      # Publicacion bloqueada por defecto (ver cabecera). Artefacto solo de
+      # prueba interna: sin firma y con retencion corta, no es una release.
+      - name: Guardar instalador como artefacto de prueba (publicacion bloqueada)
+        if: vars.MACE_PUBLICAR_RELEASES != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mace-instalador-prueba-${{ github.ref_name }}
+          retention-days: 3
+          if-no-files-found: error
+          path: |
+            packaging/dist/MACE-Setup.exe
+            packaging/dist/MACE-native-report.txt
+            packaging/dist/SHA256SUMS-MACE.txt
+
       - name: Publicar en GitHub Releases
+        if: vars.MACE_PUBLICAR_RELEASES == 'true'
         run: |
           $files = @(
             'packaging\dist\MACE-Setup.exe',
