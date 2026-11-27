@@ -2,6 +2,15 @@
 
 Describe el problema concreto y qué cambia para el usuario.
 
+Closes #
+
+## Tipo
+
+- [ ] Error (`fix/…`)
+- [ ] Funcionalidad (`feat/…`)
+- [ ] Documentación (`docs/…`)
+- [ ] CI/CD (`ci/…`)
+
 ## Alcance y origen
 
 - Archivos/componentes afectados:
@@ -11,14 +20,16 @@ Describe el problema concreto y qué cambia para el usuario.
 
 ## Validación
 
+- [ ] El CI pasa en verde
 - Comprobaciones ejecutadas, resultados/códigos:
-- Contexto normal/admin; desarrollo/producción; simulado/físico:
+- Contexto normal/admin; desarrollo/producción; simulado/físico (CPU/GPU si es real):
 - NO VERIFICADO y riesgos pendientes:
 
 ## Revisión
 
+- [ ] Se asignó un revisor del equipo y el issue tiene etiqueta, responsable e hito.
 - [ ] El diff se limita al alcance explicado y conserva atribuciones.
-- [ ] La evidencia está saneada, sin TXT locales ni secretos.
+- [ ] No incluye binarios, instaladores, SDK, logs, TXT locales ni secretos.
 - [ ] Se identifican cambios sujetos a aprobación; no se alteró la imagen
       congelada como efecto implícito.
 

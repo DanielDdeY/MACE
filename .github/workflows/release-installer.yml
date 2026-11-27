@@ -1,0 +1,173 @@
+name: Entrega continua - Instalador de Windows
+
+# Publica una version de MACE en GitHub Releases al subir un tag:
+#
+#     git tag v1.1.0-rc1 ; git push origin v1.1.0-rc1   -> pre-release (pruebas)
+#     git tag v1.1.0     ; git push origin v1.1.0       -> version estable
+#
+# Flujo: CI completo (compuerta) -> helper LHM -> DLL de produccion ligada al
+# helper -> paquete verificado (hash, ABI, payload) -> instalador -> Release.
+# La pagina de descarga (docs/, GitHub Pages) ofrece siempre la ultima version
+# estable; las pre-release solo aparecen en la lista de versiones.
+#
+# PawnIO: se incluye el instalador OFICIAL 2.2.0 intacto (hash y firma
+# verificados) en app\prerequisites. MACE no lo ejecuta: instalarlo es
+# opcional y decision del usuario. Sin PawnIO, MACE muestra igualmente
+# uso de CPU, RAM, procesos y GPU NVIDIA/Intel.
+#
+# Tambien se puede lanzar a mano: Actions > este flujo > Run workflow,
+# eligiendo un TAG en "Use workflow from".
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: entrega-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  # 1. Compuerta: no se publica nada si falla alguna prueba del CI.
+  ci:
+    uses: ./.github/workflows/build-and-test.yml
+
+  # 2. Empaquetado y publicacion.
+  instalador:
+    needs: ci
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      TAG: ${{ github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    # pwsh (PowerShell 7) para los pasos propios: escribe GITHUB_ENV sin BOM y
+    # redirige la salida de gh sin errores. Los scripts del repositorio se siguen
+    # ejecutando con Windows PowerShell 5.1 (powershell.exe -File), como pide la guia.
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Comprobar que se lanzo desde un tag
+        if: github.ref_type != 'tag'
+        run: |
+          Write-Error 'Lanza este flujo desde un tag de version (v1.2.3 o v1.2.3-rc1).'
+          exit 1
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '22'
+          cache: maven
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: helper/global.json
+
+      # jpackage exige version numerica: v1.1.0-rc1 -> 1.1.0 y se marca pre-release.
+      - name: Version desde el tag
+        run: |
+          if ($env:TAG -notmatch '^[vV](\d+(\.\d+){0,2})(-[0-9A-Za-z.]+)?$') {
+            Write-Error "El tag '$env:TAG' debe tener la forma v1.2.3 o v1.2.3-rc1."
+            exit 1
+          }
+          "MACE_APP_VERSION=$($Matches[1])" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+          $pre = if ($Matches[3]) { '1' } else { '0' }
+          "MACE_PRERELEASE=$pre" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+
+      - name: Publicar helper LHM
+        run: |
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\helper\Build-Helper.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      # Compila la DLL de produccion ligada al manifiesto del helper recien publicado.
+      - name: Paquete nativo de produccion
+        run: |
+          $helper = (Get-Content -LiteralPath .\helper\artifacts\latest.txt -Raw).Trim()
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\native\scripts\package-native.ps1 -HelperDirectory $helper
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $pkg = Get-ChildItem native\dist -Directory -Filter 'mace-native-*' | Sort-Object Name -Descending | Select-Object -First 1
+          if (-not $pkg) { Write-Error 'package-native.ps1 no genero el paquete.'; exit 1 }
+          "MACE_NATIVE_LIB=$($pkg.FullName)\bin\mace_native.dll" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+          "MACE_HELPER_PUBLISH=$helper" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+
+      # Descarga oficial; stage-runtime.ps1 rechaza el archivo si el SHA-256 o la firma no coinciden.
+      - name: Instalador oficial de PawnIO (no se ejecuta)
+        run: |
+          $policy = Get-Content -LiteralPath packaging\pawnio-2.2.0.json -Raw | ConvertFrom-Json
+          $dir = Join-Path $env:RUNNER_TEMP 'pawnio'
+          New-Item -ItemType Directory -Force -Path $dir | Out-Null
+          $file = Join-Path $dir $policy.file
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          Invoke-WebRequest -Uri $policy.url -OutFile $file -UseBasicParsing
+          $hash = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash
+          if ($hash -ne $policy.sha256) { Write-Error "Hash de PawnIO inesperado: $hash"; exit 1 }
+          "MACE_PAWNIO_INSTALLER=$file" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+
+      - name: WiX Toolset 3 (requisito de jpackage para .exe)
+        run: |
+          $wix = Get-ChildItem 'C:\Program Files (x86)' -Directory -Filter 'WiX Toolset v3*' -ErrorAction SilentlyContinue |
+              Sort-Object Name -Descending | Select-Object -First 1
+          if (-not $wix) {
+            choco install wixtoolset --no-progress -y
+            $wix = Get-ChildItem 'C:\Program Files (x86)' -Directory -Filter 'WiX Toolset v3*' | Select-Object -First 1
+          }
+          if (-not $wix) { Write-Error 'No se pudo instalar WiX Toolset 3.'; exit 1 }
+          Join-Path $wix.FullName 'bin' | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
+
+      # Verifica hash/ABI de la DLL, payload (helper, PawnIO, licencias) e imagen antes del instalador.
+      - name: Empaquetar
+        shell: cmd
+        run: call packaging\package-windows.bat exe
+
+      - name: Preparar archivos de descarga
+        run: |
+          $dist = 'packaging\dist'
+          $installer = Get-ChildItem $dist -Filter 'MACE-*.exe' | Select-Object -First 1
+          if (-not $installer) { Write-Error "jpackage no genero el instalador en $dist."; exit 1 }
+          Copy-Item $installer.FullName "$dist\MACE-Setup.exe"
+          Compress-Archive -Path "$dist\MACE" -DestinationPath "$dist\MACE-portable.zip" -Force
+          $files = 'MACE-Setup.exe', 'MACE-portable.zip', 'MACE-native-report.txt'
+          $files | ForEach-Object {
+            "{0}  {1}" -f (Get-FileHash -Algorithm SHA256 "$dist\$_").Hash.ToLowerInvariant(), $_
+          } | Set-Content "$dist\SHA256SUMS-MACE.txt" -Encoding utf8
+          Get-Content "$dist\SHA256SUMS-MACE.txt"
+
+      - name: Publicar en GitHub Releases
+        run: |
+          $files = @(
+            'packaging\dist\MACE-Setup.exe',
+            'packaging\dist\MACE-portable.zip',
+            'packaging\dist\MACE-native-report.txt',
+            'packaging\dist\SHA256SUMS-MACE.txt'
+          )
+          $notes = @"
+          ## Instalacion
+          1. Descarga **MACE-Setup.exe** (Windows 10/11 de 64 bits) e instalalo.
+          2. Abre MACE. Uso de CPU, RAM, procesos y GPU NVIDIA/Intel funcionan sin pasos extra.
+
+          ## Temperatura y potencia de CPU (opcional)
+          Requieren el controlador **PawnIO** y abrir MACE como administrador.
+          El instalador oficial va incluido sin modificar en ``app\prerequisites\PawnIO_setup.exe``;
+          MACE nunca lo ejecuta por su cuenta. Sin PawnIO, MACE indica el motivo en lugar de inventar valores.
+
+          ## Verificacion
+          Compara los SHA-256 con ``SHA256SUMS-MACE.txt``. Compilado en GitHub Actions desde el tag ``$env:TAG``
+          tras pasar el CI completo. Los binarios aun no tienen firma de codigo: Windows SmartScreen puede advertir.
+          "@
+          $flags = @('--verify-tag', '--title', "MACE $env:TAG", '--notes', $notes)
+          if ($env:MACE_PRERELEASE -eq '1') { $flags += '--prerelease' }
+          gh release view $env:TAG -R $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $env:TAG -R $env:GITHUB_REPOSITORY --clobber @files
+          } else {
+            gh release create $env:TAG -R $env:GITHUB_REPOSITORY @flags @files
+          }
+          if ($LASTEXITCODE -ne 0) { Write-Error 'No se pudo publicar en la Release.'; exit 1 }

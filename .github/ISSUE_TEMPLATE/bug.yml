@@ -1,0 +1,55 @@
+name: Error
+description: Algo no funciona o muestra un dato incorrecto
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Antes de enviar: agrega la etiqueta de área (`area:native`, `area:java`, `area:ui`, `area:ci-cd`), un responsable y el hito.
+  - type: textarea
+    id: que-pasa
+    attributes:
+      label: Qué pasa
+      description: Qué viste y qué esperabas ver.
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducirlo
+      placeholder: |
+        1. Abrir MACE como administrador
+        2. Ir a la pestaña CPU
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: equipo
+    attributes:
+      label: Equipo
+      description: CPU y GPU (por ejemplo, Intel Core i5-8250U + UHD 620).
+    validations:
+      required: true
+  - type: dropdown
+    id: permisos
+    attributes:
+      label: ¿PawnIO instalado y MACE como administrador?
+      options:
+        - Sí, las dos cosas
+        - Solo administrador
+        - Solo PawnIO
+        - Ninguna
+        - No lo sé
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versión o commit
+      placeholder: v1.1.0 o 3b86014
+  - type: textarea
+    id: evidencia
+    attributes:
+      label: Capturas o registros
+      description: Arrastra capturas o pega la salida de test_mace.exe. Quita rutas o datos personales.

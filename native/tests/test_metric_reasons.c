@@ -3,11 +3,12 @@
 #include <stdio.h>
 #define CHECK(x) do { if (!(x)) { fprintf(stderr,"reason line %d: %s\n",__LINE__,#x); return 1; } } while(0)
 int main(void) {
-    CHECK(MACE_METRIC_VALID==0 && MACE_METRIC_NOT_INITIALIZED==8);
-    CHECK(MACE_METRIC_NOT_ELEVATED==9 && MACE_METRIC_PAWNIO_MISSING==10 && MACE_METRIC_PAWNIO_STOPPED==11);
-    CHECK(MACE_METRIC_REBOOT_REQUIRED==12 && MACE_METRIC_HELPER_UNAVAILABLE==13 && MACE_METRIC_HELPER_RETRYING==14);
-    CHECK(MACE_METRIC_HELPER_UNTRUSTED==15 && MACE_METRIC_HELPER_CONTAINMENT_FAILED==16);
-    CHECK(sizeof(MaceCpuTelemetryV2)==56 && sizeof(MaceGpuTelemetryV2)==104 && sizeof(MaceGpuAdapterInfoV2)==296);
+    /* Constantes de compilacion: _Static_assert evita el aviso C4127 (/W4 /WX) que MSVC 17.14 emite con CHECK. */
+    _Static_assert(MACE_METRIC_VALID==0 && MACE_METRIC_NOT_INITIALIZED==8, "estados 0-8");
+    _Static_assert(MACE_METRIC_NOT_ELEVATED==9 && MACE_METRIC_PAWNIO_MISSING==10 && MACE_METRIC_PAWNIO_STOPPED==11, "estados 9-11");
+    _Static_assert(MACE_METRIC_REBOOT_REQUIRED==12 && MACE_METRIC_HELPER_UNAVAILABLE==13 && MACE_METRIC_HELPER_RETRYING==14, "estados 12-14");
+    _Static_assert(MACE_METRIC_HELPER_UNTRUSTED==15 && MACE_METRIC_HELPER_CONTAINMENT_FAILED==16, "estados 15-16");
+    _Static_assert(sizeof(MaceCpuTelemetryV2)==56 && sizeof(MaceGpuTelemetryV2)==104 && sizeof(MaceGpuAdapterInfoV2)==296, "tamanos ABI V2");
     CHECK(LhmTransport_FailureState(LHM_OPEN_TRUST)==MACE_METRIC_HELPER_UNTRUSTED);
     CHECK(LhmTransport_FailureState(LHM_OPEN_CONTAINMENT)==MACE_METRIC_HELPER_CONTAINMENT_FAILED);
     CHECK(LhmTransport_FailureState(LHM_OPEN_LAUNCH_BLOCKED)==MACE_METRIC_HELPER_UNAVAILABLE);

@@ -1,0 +1,30 @@
+name: Mejora o tarea
+description: Nueva funcionalidad, cambio de documentación o tarea del proyecto
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Antes de enviar: agrega la etiqueta de área (`area:native`, `area:java`, `area:ui`, `area:ci-cd`), un responsable y el hito. Si es solo documentación, cambia `enhancement` por `documentation`.
+  - type: textarea
+    id: objetivo
+    attributes:
+      label: Objetivo
+      description: Qué se quiere lograr y por qué.
+    validations:
+      required: true
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Criterios de aceptación
+      description: Cómo sabremos que está terminado.
+      placeholder: |
+        - [ ] ...
+        - [ ] El CI pasa en verde
+    validations:
+      required: true
+  - type: textarea
+    id: notas
+    attributes:
+      label: Notas técnicas
+      description: Archivos afectados, riesgos o dependencias con otros issues (#N).

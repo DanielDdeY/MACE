@@ -25,8 +25,10 @@ import java.lang.System.Logger.Level;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -75,6 +77,10 @@ public final class MonitoringService implements AutoCloseable {
     private MonitoringSnapshot latest;
     private Set<String> activeLeakKeys = Set.of();
     private Set<ProcessIdentity> activeHangs = Set.of();
+    private final ProcessSamplingPolicy samplingPolicy;
+    private boolean fullSampleTaken;
+    private long lastFullSampleNanos;
+    private final Map<ProcessIdentity, Long> lastAlertedSampleNanos = new HashMap<>();
 
     public MonitoringService(PollSystemMetricsService pollService, ListProcessesService listProcessesService,
                              ProcessInspectionService inspectionService, MemoryLeakDetector leakDetector,
@@ -87,6 +93,18 @@ public final class MonitoringService implements AutoCloseable {
                              ProcessInspectionService inspectionService, MemoryLeakDetector leakDetector,
                              HangDetector hangDetector, BlackboxSinkPort blackbox, MonitoringPublisherPort publisher,
                              Clock clock, LongSupplier nanoTime, Duration period) {
+        this(pollService, listProcessesService, inspectionService, leakDetector, hangDetector, blackbox, publisher,
+                clock, nanoTime, period, ProcessSamplingPolicy.defaults());
+    }
+
+    /**
+     * @param samplingPolicy frecuencia con la que las muestras de procesos se copian a la caja negra
+     */
+    public MonitoringService(PollSystemMetricsService pollService, ListProcessesService listProcessesService,
+                             ProcessInspectionService inspectionService, MemoryLeakDetector leakDetector,
+                             HangDetector hangDetector, BlackboxSinkPort blackbox, MonitoringPublisherPort publisher,
+                             Clock clock, LongSupplier nanoTime, Duration period, ProcessSamplingPolicy samplingPolicy) {
+        this.samplingPolicy = Objects.requireNonNull(samplingPolicy, "samplingPolicy no puede ser null");
         this.pollService = Objects.requireNonNull(pollService, "pollService no puede ser null");
         this.listProcessesService = Objects.requireNonNull(listProcessesService, "listProcessesService no puede ser null");
         this.inspectionService = Objects.requireNonNull(inspectionService, "inspectionService no puede ser null");
@@ -205,9 +223,9 @@ public final class MonitoringService implements AutoCloseable {
     private MonitoringSnapshot publish(HardwarePoll hardware, Optional<ProcessInventory> inventory) {
         Instant now = clock.instant();
         List<LeakAlert> leakAlerts = inventory.map(leakDetector::observe).orElseGet(() -> leakDetector.evaluateAll(now));
-        inventory.ifPresent(this::recordProcessSamples);
         inventory.ifPresent(this::checkResponsiveness);
         List<HangAlert> hangAlerts = hangDetector.activeAlerts(now);
+        inventory.ifPresent(found -> recordProcessSamples(found, leakAlerts, hangAlerts));
         recordNewAlerts(leakAlerts, hangAlerts);
         try {
             blackbox.flush();
@@ -293,14 +311,42 @@ public final class MonitoringService implements AutoCloseable {
         }
     }
 
-    /** Persiste las mismas lecturas del inventario usadas para las tendencias, sin otro sondeo. */
-    private void recordProcessSamples(ProcessInventory inventory) {
+    /**
+     * Persiste las mismas lecturas del inventario usadas para las tendencias, sin otro sondeo:
+     * todos los procesos según {@link ProcessSamplingPolicy#allProcessesInterval()} y los que
+     * tienen alerta activa según {@link ProcessSamplingPolicy#alertedProcessInterval()}.
+     */
+    private void recordProcessSamples(ProcessInventory inventory, List<LeakAlert> leakAlerts,
+                                      List<HangAlert> hangAlerts) {
+        long now = inventory.monotonicNanos();
+        boolean full = !fullSampleTaken
+                || now - lastFullSampleNanos >= samplingPolicy.allProcessesInterval().toNanos();
+        Set<ProcessIdentity> alerted = new HashSet<>();
+        leakAlerts.forEach(alert -> alerted.add(alert.identity()));
+        hangAlerts.forEach(alert -> alerted.add(alert.identity()));
+        lastAlertedSampleNanos.keySet().retainAll(alerted);
+
         for (var entry : inventory.processes()) {
-            try {
-                blackbox.record(ProcessSample.fromInventory(entry, inventory.monotonicNanos()));
-            } catch (RuntimeException e) {
-                LOG.log(Level.WARNING, "No se pudo registrar la muestra de " + entry.identity(), e);
+            ProcessIdentity identity = entry.identity();
+            boolean isAlerted = alerted.contains(identity);
+            Long last = lastAlertedSampleNanos.get(identity);
+            boolean alertDue = isAlerted
+                    && (last == null || now - last >= samplingPolicy.alertedProcessInterval().toNanos());
+            if (!full && !alertDue) {
+                continue;
             }
+            try {
+                blackbox.record(ProcessSample.fromInventory(entry, now));
+            } catch (RuntimeException e) {
+                LOG.log(Level.WARNING, "No se pudo registrar la muestra de " + identity, e);
+            }
+            if (isAlerted) {
+                lastAlertedSampleNanos.put(identity, now);
+            }
+        }
+        if (full) {
+            fullSampleTaken = true;
+            lastFullSampleNanos = now;
         }
     }
 }

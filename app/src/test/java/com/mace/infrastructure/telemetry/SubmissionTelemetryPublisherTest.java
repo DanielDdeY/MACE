@@ -39,6 +39,9 @@ class SubmissionTelemetryPublisherTest {
             publisher.publish(first);
             assertTrue(hud.await());
             hud.cancel();
+            // cancel() es asíncrono en SubmissionPublisher: la suscripción se cierra en el hilo
+            // consumidor. Se espera a que quede cerrada para no depender de la velocidad del equipo.
+            assertTrue(awaitSubscribers(publisher, 1), "la suscripción del HUD no llegó a cerrarse");
 
             publisher.publish(snapshot(2));
             assertTrue(dashboard.await());
@@ -48,6 +51,18 @@ class SubmissionTelemetryPublisherTest {
             assertEquals(List.of(1L, 2L), dashboard.received.stream().map(MonitoringSnapshot::sequence).toList());
             assertEquals(1, hud.received.size(), "el HUD cerrado no recibe más ni genera sondeos");
         }
+    }
+
+    private static boolean awaitSubscribers(SubmissionTelemetryPublisher publisher, int expected)
+            throws InterruptedException {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        while (publisher.monitoringSubscriberCount() != expected) {
+            if (System.nanoTime() > deadline) {
+                return false;
+            }
+            Thread.sleep(5);
+        }
+        return true;
     }
 
     @Test
