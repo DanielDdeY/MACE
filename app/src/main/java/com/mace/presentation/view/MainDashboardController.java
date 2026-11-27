@@ -4,6 +4,7 @@ import com.mace.application.usecase.TerminationResult;
 import com.mace.application.usecase.TerminationStatus;
 import com.mace.domain.model.AlertLevel;
 import com.mace.domain.model.GpuAdapterId;
+import com.mace.domain.model.MetricState;
 import com.mace.domain.model.ProcessIdentity;
 import com.mace.domain.model.ResponsivenessResult;
 import com.mace.presentation.view.component.GpuCard;
@@ -55,6 +56,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /** Vista del único flujo V2: cada tarjeta y gráfico reutiliza datos del mismo sondeo. */
 public final class MainDashboardController {
@@ -141,10 +143,20 @@ public final class MainDashboardController {
             renderChart(gpuTempChart, selectedGpu == null ? null : selectedGpu.temperatureHistory());
     private final ListChangeListener<MetricHistory.Point> selectedUsageListener = change ->
             renderChart(gpuUsageChart, selectedGpu == null ? null : selectedGpu.usageHistory());
+    private final Optional<PawnIoInstallAction> pawnIoInstall;
+    private final List<Button> pawnIoButtons = new ArrayList<>();
+    private boolean pawnIoInstalling;
+
     public MainDashboardController(MainDashboardViewModel dashboardViewModel, Path blackboxDirectory) {
+        this(dashboardViewModel, blackboxDirectory, Optional.empty());
+    }
+
+    public MainDashboardController(MainDashboardViewModel dashboardViewModel, Path blackboxDirectory,
+                                   Optional<PawnIoInstallAction> pawnIoInstall) {
         this.dashboardViewModel = Objects.requireNonNull(dashboardViewModel, "dashboardViewModel no puede ser null");
         this.blackboxHistory = new BlackboxHistoryViewModel(blackboxDirectory,
                 () -> dashboardViewModel.blackboxStatsProperty().get());
+        this.pawnIoInstall = Objects.requireNonNull(pawnIoInstall, "pawnIoInstall no puede ser null");
     }
 
     @FXML
@@ -220,6 +232,7 @@ public final class MainDashboardController {
                         dashboardViewModel.memoryUsedPercentDisplayProperty().map(display ->
                                 "Uso total: " + display.text()))));
         homeMetricsPane.getChildren().addAll(0, metricCards);
+        addPawnIoButton(homeMetricsPane);
         dashboardViewModel.getProcesses().addListener((ListChangeListener<ProcessRow>) change -> updateHomeProcesses());
         dashboardViewModel.processInventoryAvailableProperty().addListener((obs, previous, available) ->
                 updateHomeProcesses());
@@ -251,6 +264,9 @@ public final class MainDashboardController {
                 new MetricCard("Uso CPU", dashboardViewModel.cpuUsageDisplayProperty()));
         metricCards.addAll(cpuCards);
         cpuMetricsPane.getChildren().addAll(cpuCards);
+        addPawnIoButton(cpuMetricsPane);
+        dashboardViewModel.cpuTemperatureDisplayProperty().addListener((obs, oldValue, next) -> updatePawnIoButtons());
+        updatePawnIoButtons();
         dashboardViewModel.cpuTemperaturePoints().points().addListener(
                 (ListChangeListener<MetricHistory.Point>) change -> updateCpuStats());
         dashboardViewModel.cpuTemperatureDisplayProperty().addListener((obs, oldValue, next) -> updateCpuStatus());
@@ -267,6 +283,70 @@ public final class MainDashboardController {
                 new MetricCard("Uso de RAM", dashboardViewModel.memoryUsedPercentDisplayProperty()));
         metricCards.addAll(ramCards);
         ramMetricsPane.getChildren().addAll(ramCards);
+    }
+
+    /** Botón visible solo si la temperatura de CPU falta por PawnIO y hay instalación completa. */
+    private void addPawnIoButton(FlowPane pane) {
+        if (pawnIoInstall.isEmpty()) {
+            return;
+        }
+        Button button = new Button("Instalar PawnIO");
+        button.getStyleClass().add("accent");
+        button.setOnAction(event -> confirmAndInstallPawnIo());
+        pawnIoButtons.add(button);
+        pane.getChildren().add(button);
+    }
+
+    private void updatePawnIoButtons() {
+        var temperature = dashboardViewModel.cpuTemperatureDisplayProperty().get();
+        boolean show = temperature != null && temperature.state() == MetricState.PAWNIO_MISSING;
+        for (Button button : pawnIoButtons) {
+            button.setVisible(show);
+            button.setManaged(show);
+            button.setDisable(pawnIoInstalling);
+            button.setText(pawnIoInstalling ? "Instalando PawnIO…" : "Instalar PawnIO");
+        }
+    }
+
+    private void confirmAndInstallPawnIo() {
+        if (pawnIoInstalling || pawnIoInstall.isEmpty()) {
+            return;
+        }
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("MACE");
+        confirm.setHeaderText("Instalar el controlador PawnIO");
+        confirm.setContentText("MACE necesita PawnIO para leer la temperatura y la potencia de la CPU. "
+                + "Se instalará el setup oficial incluido con MACE, después de comprobar su integridad "
+                + "y su firma digital. Es un controlador del sistema: se conserva aunque desinstales MACE "
+                + "y puede pedir reiniciar Windows.");
+        if (confirm.showAndWait().filter(ButtonType.OK::equals).isEmpty()) {
+            return;
+        }
+        pawnIoInstalling = true;
+        updatePawnIoButtons();
+        PawnIoInstallAction action = pawnIoInstall.get();
+        Thread worker = new Thread(() -> {
+            PawnIoInstallAction.Feedback feedback;
+            try {
+                feedback = action.install();
+            } catch (RuntimeException e) {
+                feedback = new PawnIoInstallAction.Feedback(false, "No se pudo instalar PawnIO.");
+            }
+            PawnIoInstallAction.Feedback result = feedback;
+            Platform.runLater(() -> showPawnIoResult(result));
+        }, "mace-pawnio-install");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    private void showPawnIoResult(PawnIoInstallAction.Feedback feedback) {
+        pawnIoInstalling = false;
+        updatePawnIoButtons();
+        Alert result = new Alert(feedback.succeeded() ? Alert.AlertType.INFORMATION : Alert.AlertType.WARNING);
+        result.setTitle("MACE");
+        result.setHeaderText(feedback.succeeded() ? "PawnIO" : "PawnIO no se instaló");
+        result.setContentText(feedback.message());
+        result.show();
     }
 
     private void updateCpuStatus() {

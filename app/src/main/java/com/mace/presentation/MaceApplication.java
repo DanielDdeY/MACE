@@ -13,9 +13,11 @@ import com.mace.domain.service.SystemProcessGuard;
 import com.mace.domain.service.ThermalAlertEvaluator;
 import com.mace.infrastructure.InfrastructureAdapters;
 import com.mace.infrastructure.nativebridge.NativeLoadProfile;
+import com.mace.infrastructure.pawnio.PawnIoInstaller;
 import com.mace.infrastructure.telemetry.BlackboxSettings;
 import com.mace.infrastructure.telemetry.SubmissionTelemetryPublisher;
 import com.mace.presentation.view.MainDashboardController;
+import com.mace.presentation.view.PawnIoInstallAction;
 import com.mace.presentation.viewmodel.MainDashboardViewModel;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -27,6 +29,7 @@ import javafx.stage.Stage;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /** Punto de composición de MACE. */
 public final class MaceApplication extends Application {
@@ -127,8 +130,15 @@ public final class MaceApplication extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainDashboard.fxml"));
         loader.setControllerFactory(type -> {
             if (type == MainDashboardController.class) {
+                // Instalar PawnIO solo con datos reales y desde una instalacion completa.
+                Optional<PawnIoInstallAction> pawnIo = adapters.isNative()
+                        ? PawnIoInstaller.locate().map(installer -> () -> {
+                            PawnIoInstaller.Result result = installer.install();
+                            return new PawnIoInstallAction.Feedback(result.succeeded(), result.message());
+                        })
+                        : Optional.empty();
                 dashboardController = new MainDashboardController(dashboardViewModel,
-                        BlackboxSettings.defaultDirectory(!adapters.isNative()));
+                        BlackboxSettings.defaultDirectory(!adapters.isNative()), pawnIo);
                 return dashboardController;
             }
             try {
