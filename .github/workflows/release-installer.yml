@@ -6,7 +6,9 @@ name: Entrega continua - Instalador de Windows
 #     git tag v1.1.0     ; git push origin v1.1.0       -> version estable
 #
 # Flujo: CI completo (compuerta) -> helper LHM -> DLL de produccion ligada al
-# helper -> paquete verificado (hash, ABI, payload) -> instalador -> Release.
+# helper -> app-image verificada (hash, ABI, payload) -> coordinador PawnIO ->
+# instalador Inno (installer/inno/mace.iss) -> Release.
+# Un push a feat/instalador-** ejecuta todo y deja solo el artefacto de prueba.
 #
 # PUBLICACION BLOQUEADA: no se publican releases nuevas con binarios de
 # terceros hasta cerrar la revision legal (ver helper/PENDIENTE-FASE-3B.md).
@@ -26,6 +28,8 @@ name: Entrega continua - Instalador de Windows
 on:
   push:
     tags: [ 'v*' ]
+    # Ramas de desarrollo del instalador: solo artefacto de prueba, nunca Release.
+    branches: [ 'feat/instalador-**' ]
   workflow_dispatch:
 
 permissions:
@@ -56,12 +60,6 @@ jobs:
         shell: pwsh
 
     steps:
-      - name: Comprobar que se lanzo desde un tag
-        if: github.ref_type != 'tag'
-        run: |
-          Write-Error 'Lanza este flujo desde un tag de version (v1.2.3 o v1.2.3-rc1).'
-          exit 1
-
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -77,8 +75,14 @@ jobs:
           global-json-file: helper/global.json
 
       # jpackage exige version numerica: v1.1.0-rc1 -> 1.1.0 y se marca pre-release.
+      # Fuera de un tag (ramas del instalador) se usa 1.0.0 y solo hay artefacto.
       - name: Version desde el tag
         run: |
+          if ($env:GITHUB_REF_TYPE -ne 'tag') {
+            "MACE_APP_VERSION=1.0.0" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+            "MACE_PRERELEASE=1" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+            exit 0
+          }
           if ($env:TAG -notmatch '^[vV](\d+(\.\d+){0,2})(-[0-9A-Za-z.]+)?$') {
             Write-Error "El tag '$env:TAG' debe tener la forma v1.2.3 o v1.2.3-rc1."
             exit 1
@@ -116,28 +120,40 @@ jobs:
           if ($hash -ne $policy.sha256) { Write-Error "Hash de PawnIO inesperado: $hash"; exit 1 }
           "MACE_PAWNIO_INSTALLER=$file" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
 
-      - name: WiX Toolset 3 (requisito de jpackage para .exe)
-        run: |
-          $wix = Get-ChildItem 'C:\Program Files (x86)' -Directory -Filter 'WiX Toolset v3*' -ErrorAction SilentlyContinue |
-              Sort-Object Name -Descending | Select-Object -First 1
-          if (-not $wix) {
-            choco install wixtoolset --no-progress -y
-            $wix = Get-ChildItem 'C:\Program Files (x86)' -Directory -Filter 'WiX Toolset v3*' | Select-Object -First 1
-          }
-          if (-not $wix) { Write-Error 'No se pudo instalar WiX Toolset 3.'; exit 1 }
-          Join-Path $wix.FullName 'bin' | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
-
-      # Verifica hash/ABI de la DLL, payload (helper, PawnIO, licencias) e imagen antes del instalador.
-      - name: Empaquetar
+      # Verifica hash/ABI de la DLL, payload (helper, PawnIO, licencias) e imagen.
+      - name: Empaquetar app-image
         shell: cmd
-        run: call packaging\package-windows.bat exe
+        run: call packaging\package-windows.bat app-image
+
+      # Binario de producto del coordinador, sin ganchos de prueba.
+      - name: Compilar coordinador de PawnIO
+        run: |
+          cmake -S installer\coordinator -B installer\coordinator\build-release -A x64 -DMACE_COORDINATOR_TESTS=OFF
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake --build installer\coordinator\build-release --config Release
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      # D1: Inno Setup 6 (motor y desinstalador sin firma propia; ver README de installer/).
+      - name: Inno Setup 6
+        run: |
+          $iscc = 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
+          if (-not (Test-Path -LiteralPath $iscc)) { choco install innosetup --no-progress -y }
+          if (-not (Test-Path -LiteralPath $iscc)) { Write-Error 'No se pudo instalar Inno Setup 6.'; exit 1 }
+          "MACE_ISCC=$iscc" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+
+      # Instala MACE y despues, con consentimiento, PawnIO mediante el coordinador.
+      - name: Crear instalador (Inno)
+        run: |
+          $root = (Get-Location).Path
+          $image = Join-Path $root 'packaging\dist\MACE'
+          $coordinator = Join-Path $root 'installer\coordinator\build-release\Release\mace-pawnio-setup.exe'
+          & $env:MACE_ISCC "/DAppVersion=$env:MACE_APP_VERSION" "/DAppImage=$image" "/DCoordinator=$coordinator" "/O$root\packaging\dist" installer\inno\mace.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Preparar archivos de descarga
         run: |
           $dist = 'packaging\dist'
-          $installer = Get-ChildItem $dist -Filter 'MACE-*.exe' | Select-Object -First 1
-          if (-not $installer) { Write-Error "jpackage no genero el instalador en $dist."; exit 1 }
-          Copy-Item $installer.FullName "$dist\MACE-Setup.exe"
+          if (-not (Test-Path "$dist\MACE-Setup.exe")) { Write-Error "Inno no genero MACE-Setup.exe en $dist."; exit 1 }
           Compress-Archive -Path "$dist\MACE" -DestinationPath "$dist\MACE-portable.zip" -Force
           $files = 'MACE-Setup.exe', 'MACE-portable.zip', 'MACE-native-report.txt'
           $files | ForEach-Object {
@@ -148,7 +164,7 @@ jobs:
       # Publicacion bloqueada por defecto (ver cabecera). Artefacto solo de
       # prueba interna: sin firma y con retencion corta, no es una release.
       - name: Guardar instalador como artefacto de prueba (publicacion bloqueada)
-        if: vars.MACE_PUBLICAR_RELEASES != 'true'
+        if: github.ref_type != 'tag' || vars.MACE_PUBLICAR_RELEASES != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: mace-instalador-prueba-${{ github.ref_name }}
@@ -160,7 +176,7 @@ jobs:
             packaging/dist/SHA256SUMS-MACE.txt
 
       - name: Publicar en GitHub Releases
-        if: vars.MACE_PUBLICAR_RELEASES == 'true'
+        if: github.ref_type == 'tag' && vars.MACE_PUBLICAR_RELEASES == 'true'
         run: |
           $files = @(
             'packaging\dist\MACE-Setup.exe',

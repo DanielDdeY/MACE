@@ -126,3 +126,4 @@ CMakeUserPresets.json
 
 # Compilacion del coordinador PawnIO del instalador
 installer/coordinator/build/
+installer/coordinator/build-release/

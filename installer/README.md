@@ -11,8 +11,8 @@ integrada), MACE lo muestra como **N/D: Sin proveedor**.
 
 | Pieza | Estado |
 |---|---|
-| `coordinator/`: `mace-pawnio-setup.exe` | Implementado; probado en CI con setup simulado y verificación del setup oficial |
-| Script Inno Setup (instala MACE y después llama al coordinador) | Pendiente (paso 2) |
+| `coordinator/`: `mace-pawnio-setup.exe` | Implementado; CI en verde con setup simulado y verificación (hash y firma) del setup oficial |
+| `inno/mace.iss`: instala MACE en Program Files y después, con la casilla marcada (o `/ACCEPT_PAWNIO=1` en silencioso), llama al coordinador | Implementado; el workflow `release-installer.yml` lo compila como artefacto sin firma. **Sin probar en un equipo** |
 | Botón «Instalar/Iniciar PawnIO» en MACE, reutilizando el coordinador | Pendiente (paso 3) |
 | Aviso «reinicia Windows» tras 3010 (D4/D5) | Pendiente (paso 4) |
 
@@ -74,6 +74,24 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\installer\coordinator\
 `mace-pawnio-setup-test.exe` y `stub_setup.exe` existen **solo para pruebas** y
 nunca se empaquetan. El CI ejecuta además `--verify-only` sobre el setup
 oficial descargado con su hash fijado; no lo ejecuta ni instala drivers.
+
+## Instalador Inno
+
+```powershell
+ISCC.exe /DAppVersion=1.0.0 /DAppImage=<ruta absoluta>\packaging\dist\MACE `
+         /DCoordinator=<ruta absoluta>\mace-pawnio-setup.exe /O<salida> installer\inno\mace.iss
+```
+
+- Se instala por máquina en `Program Files\MACE`, sin selector de carpeta (D6).
+- Si MACE está abierto desde esa carpeta, pide cerrarlo y no modifica nada.
+- La página de PawnIO solo aparece si PawnIO no está instalado. La casilla
+  viene marcada y explica qué es el controlador, que se conserva al
+  desinstalar MACE y que puede pedir un reinicio.
+- En modo silencioso, PawnIO solo se instala con `/ACCEPT_PAWNIO=1`.
+- El resultado de PawnIO se muestra en la página final. Si devuelve 3010,
+  Inno ofrece reiniciar; en silencioso, `/NORESTART` lo evita.
+- La desinstalación quita los archivos de MACE y conserva PawnIO y los datos
+  de cada usuario (`%LOCALAPPDATA%\MACE`).
 
 ### NO VERIFICADO
 
