@@ -155,6 +155,7 @@
     .facts { display: grid; gap: 1.5rem; margin-top: 1.25rem; }
     @media (min-width: 52rem) { .facts { grid-template-columns: repeat(3, 1fr); } }
     .facts p { margin: 0; color: var(--ink-soft); }
+    .facts p.platform-status { margin: 0 0 0.35rem; color: var(--ink); font-weight: 700; }
 
     code, .hash { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.9em; overflow-wrap: anywhere; }
     pre { background: var(--paper-raised); border: 1px solid var(--rule); border-radius: 0.4rem; padding: 0.8rem 1rem; overflow-x: auto; }
@@ -201,7 +202,25 @@
           <strong>Distribución nueva pendiente de validación y revisión legal.</strong>
           No se publican nuevas releases con binarios de terceros hasta cerrar esa revisión. El código fuente público sigue disponible.
         </div>
-        <p class="measure">Las releases v1.0.0, v1.1.0-rc3 y v1.1.0 son anteriores a LHM según el mantenedor y no son base validada de la distribución nueva. El mantenedor las pasará a borrador; falta su confirmación de ese cambio.</p>
+        <h3 id="plataformas">Plataformas</h3>
+        <div class="facts">
+          <div>
+            <h3>Windows 10/11 · 64 bits</h3>
+            <p class="platform-status">Instalador en pruebas · aún no publicado</p>
+            <p>MACE-Setup.exe instalará MACE y, si lo aceptas, el controlador PawnIO para la temperatura y la potencia de la CPU. Se publicará aquí cuando superen las pruebas en equipos reales y la revisión legal.</p>
+          </div>
+          <div>
+            <h3>Linux · 64 bits</h3>
+            <p class="platform-status">En planificación · no disponible</p>
+            <p>La lectura de hardware actual usa funciones exclusivas de Windows. Una versión para Linux requiere una capa nativa propia y paquetes nuevos; está prevista en el hito «v1.2 Linux».</p>
+          </div>
+          <div>
+            <h3>macOS</h3>
+            <p class="platform-status">No previsto por ahora</p>
+            <p>No hay trabajo planificado para macOS. Puedes proponerlo en <a href="https://github.com/DanielDdeY/MACE/issues">GitHub Issues</a>.</p>
+          </div>
+        </div>
+        <p class="measure">Las releases v1.0.0, v1.1.0-rc3 y v1.1.0 son anteriores a LHM y no son base validada de la distribución nueva; el mantenedor las pasó a borrador.</p>
         <p class="measure">Este sitio no selecciona automáticamente una versión histórica como nueva candidata ni ofrece un instalador nuevo como si ya estuviera validado.</p>
         <p><a href="https://github.com/DanielDdeY/MACE/releases">Consultar historial en GitHub</a> · <a href="https://github.com/DanielDdeY/MACE">Ver el código fuente</a></p>
       </div>

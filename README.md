@@ -60,7 +60,11 @@ el mantenedor. Esta entrega solo modifica la rama de trabajo.
 
 Las releases `v1.0.0`, `v1.1.0-rc3` y `v1.1.0` son anteriores a LHM según el
 usuario y **no son base validada de la nueva distribución**. El mantenedor
-las pasará a borrador; ese cambio sigue pendiente de su confirmación.
+las pasó a borrador (confirmado por el usuario; B18).
+
+Plataformas: **Windows 10/11 x64** con instalador en pruebas
+([installer/](installer/README.md), aún sin publicar); **Linux** en
+planificación (hito v1.2, requiere una capa nativa propia); macOS no previsto.
 [Historial de releases](https://github.com/DanielDdeY/MACE/releases).
 No se ofrece automáticamente una de ellas como nueva candidata LHM.
 
