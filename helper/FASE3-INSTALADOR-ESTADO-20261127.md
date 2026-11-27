@@ -10,7 +10,7 @@ retomar, leer este archivo, [installer/README.md](../installer/README.md) y
 | Rama | Último commit | CI | Contenido |
 |---|---|---|---|
 | `LHM_implementado` | 73918ec | **Verde** (run 45923697041) | `main` fusionado y CI adaptado a Fase 3: job `herramientas-auditoria`; publicación de releases bloqueada sin `MACE_PUBLICAR_RELEASES=true` |
-| `feat/instalador-pawnio` | 32c1c45 (sale de `LHM_implementado`) | **Verde** CI (run 45927167375) y entrega (run 45927167361) | Coordinador PawnIO, instalador Inno, botón «Instalar PawnIO», guía de pruebas |
+| `feat/instalador-pawnio` | 32c1c45 verificado; después solo documentación, página de plataformas y acciones v5 (ver `git log`) | **Verde** CI (run 45927167375) y entrega (run 45927167361) en 32c1c45 | Coordinador PawnIO, instalador Inno, botón «Instalar PawnIO», guía de pruebas, página con apartados Windows/Linux/macOS |
 
 Instalador de prueba: artefacto `mace-instalador-prueba-7` del run 45927167361,
 68,4 MiB, **sin firma**, retención de 3 días (decisión deliberada mientras la
@@ -56,15 +56,56 @@ Actions → «Entrega continua» → Re-run.
 Avisos menores: `actions/setup-java@v4` y `checkout@v4` emiten avisos de
 deprecación (Node 20). Conviene actualizarlos a v5 en un cambio aparte.
 
-## Cómo retomar en otra PC
+## Continuar en mi PC (paso a paso)
+
+### Qué esperar antes de los PR
+
+1. Tus compañeros prueban el instalador con [PRUEBAS-USUARIO.md](../installer/PRUEBAS-USUARIO.md)
+   y te pasan lo que anotaron.
+2. Se corrige lo que haya fallado en `feat/instalador-pawnio`.
+3. Después, PR `feat/instalador-pawnio` → `LHM_implementado` y luego
+   `LHM_implementado` → `main` (revisión de DanielDdeY). Abrirlos como
+   **borrador** si se crean antes de terminar las pruebas.
+
+La página de descargas (GitHub Pages) solo cambia cuando `docs/` llega a `main`.
+
+### Preparar tu PC (una sola vez)
+
+Necesitas Git y una cuenta de GitHub con acceso al repositorio. En PowerShell:
 
 ```powershell
 git clone https://github.com/DanielDdeY/MACE.git
 cd MACE
 git checkout feat/instalador-pawnio
 git config user.name ALI-SKAN
-git config user.email <tu correo de GitHub>
+git config user.email <el correo de tu cuenta de GitHub>
+git log --oneline -3      # el primero debe ser el último commit de este documento o posterior
 ```
+
+Para compilar y probar Java en local: JDK 22 o posterior y Maven
+(`mvn -f app/pom.xml test`). Lo nativo, el coordinador y el instalador se
+compilan en GitHub Actions; en local harían falta Visual Studio con C++,
+CMake 3.28+ e Inno Setup 6.
+
+### Conseguir un instalador nuevo para las pruebas
+
+El artefacto caduca a los 3 días. Para generar otro: GitHub → pestaña
+**Actions** → «Entrega continua - Instalador de Windows» → último run de
+`feat/instalador-pawnio` → **Re-run all jobs**. Al terminar (~15 min), el ZIP
+`mace-instalador-prueba-<n>` aparece al final de la página del run.
+
+### Retomar con Claude Code
+
+Abre la carpeta `MACE` en VS Code con Claude Code y escribe:
+
+> Lee helper/FASE3-INSTALADOR-ESTADO-20261127.md, installer/README.md e
+> installer/PRUEBAS-USUARIO.md. Estoy en la rama feat/instalador-pawnio.
+> Commits a nombre de ALI-SKAN, sin atribución a Claude. Estos son los
+> resultados de las pruebas de mis compañeros: <pega aquí lo anotado>.
+> Continúa con lo pendiente.
+
+Adjunta también `CONTEXTO.md` y `METODO_ENTREGA.md` (las reglas del proyecto)
+si los tienes: se borraron del repositorio y Claude en tu PC no los verá de otro modo.
 
 Compilar Java en local: JDK 22+ y Maven (`mvn -f app/pom.xml test`). El
 coordinador y el instalador se compilan en Actions; en local requieren MSVC,
