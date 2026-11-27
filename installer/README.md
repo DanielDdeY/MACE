@@ -13,7 +13,7 @@ integrada), MACE lo muestra como **N/D: Sin proveedor**.
 |---|---|
 | `coordinator/`: `mace-pawnio-setup.exe` | Implementado; CI en verde con setup simulado y verificación (hash y firma) del setup oficial |
 | `inno/mace.iss`: instala MACE en Program Files y después, con la casilla marcada (o `/ACCEPT_PAWNIO=1` en silencioso), llama al coordinador | Implementado; el workflow `release-installer.yml` lo compila como artefacto sin firma. **Sin probar en un equipo** |
-| Botón «Instalar/Iniciar PawnIO» en MACE, reutilizando el coordinador | Pendiente (paso 3) |
+| Botón «Instalar PawnIO» en MACE (Inicio y CPU) cuando falta, reutilizando el coordinador | Implementado; pruebas unitarias en verde. **Sin probar en un equipo** |
 | Aviso «reinicia Windows» tras 3010 (D4/D5) | Pendiente (paso 4) |
 
 ## Coordinador de PawnIO
