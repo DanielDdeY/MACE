@@ -406,6 +406,13 @@ static run_state run_setup(const wchar_t *path, DWORD timeout_ms, DWORD *child_c
     }
     ZeroMemory(&startup, sizeof startup);
     startup.cb = (DWORD)sizeof startup;
+    /* Sin stdin/stdout/stderr para el hijo: si quien llama captura nuestra
+     * salida (p. ej. MACE), el setup no debe mantener abiertas sus tuberias
+     * despues de que el coordinador termine por TIMEOUT. */
+    startup.dwFlags = STARTF_USESTDHANDLES;
+    startup.hStdInput = NULL;
+    startup.hStdOutput = NULL;
+    startup.hStdError = NULL;
     ZeroMemory(&process, sizeof process);
 
     started = GetTickCount64();
