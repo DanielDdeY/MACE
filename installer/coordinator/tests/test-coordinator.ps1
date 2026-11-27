@@ -26,9 +26,17 @@ $marker = Join-Path $work 'ejecutado.txt'
 $absentService = 'MACE-PawnIO-Prueba-' + [guid]::NewGuid().ToString('N')
 
 $script:passed = 0
+$script:failed = @()
+# Se ejecutan todos los casos; cada fallo se publica como anotacion de Actions.
 function Assert-Case([bool]$condition, [string]$label, [string]$detail) {
-    if (-not $condition) { throw "TEST_FAILED $label :: $detail" }
-    $script:passed++
+    if ($condition) { $script:passed++; return }
+    $message = ("TEST_FAILED $label :: $detail" -replace "`r?`n", ' | ')
+    Write-Host "::error title=coordinador-pawnio::$message"
+    $script:failed += $label
+}
+trap {
+    Write-Host ("::error title=coordinador-pawnio::EXCEPTION " + ("$_" -replace "`r?`n", ' | '))
+    exit 1
 }
 
 function Invoke-Coordinator([string]$exe, [string[]]$arguments, [hashtable]$stubEnv = @{}) {
@@ -88,10 +96,14 @@ Assert-Case ($r.Code -eq 11 -and -not $r.Ran -and $r.Out -match 'detect=OTHER') 
 $r = Invoke-Coordinator $test ($base + @('--test-timeout-ms', '1500')) ($markerEnv + @{ MACE_STUB_SLEEP_MS = 8000 })
 Assert-Case ($r.Code -eq 40 -and $r.Out -match 'child=running' -and $r.Ms -lt 6000) 'timeout' "$($r.Out) ms=$($r.Ms)"
 $childPid = if ($r.Out -match 'child_pid=(\d+)') { [int]$Matches[1] } else { 0 }
-$alive = Get-Process -Id $childPid -ErrorAction SilentlyContinue
-Assert-Case ($null -ne $alive) 'timeout_no_mata' "pid=$childPid"
-Wait-Process -Id $childPid -Timeout 30 -ErrorAction SilentlyContinue
-Assert-Case ($null -eq (Get-Process -Id $childPid -ErrorAction SilentlyContinue)) 'timeout_hijo_termina_solo' "pid=$childPid"
+if ($childPid -gt 0) {
+    $alive = Get-Process -Id $childPid -ErrorAction SilentlyContinue
+    Assert-Case ($null -ne $alive) 'timeout_no_mata' "pid=$childPid"
+    Wait-Process -Id $childPid -Timeout 30 -ErrorAction SilentlyContinue
+    Assert-Case ($null -eq (Get-Process -Id $childPid -ErrorAction SilentlyContinue)) 'timeout_hijo_termina_solo' "pid=$childPid"
+} else {
+    Assert-Case $false 'timeout_pid' $r.Out
+}
 
 # 10. El registro no incluye rutas ni el hash completo.
 $log = Join-Path $work 'pawnio.log'
@@ -121,4 +133,8 @@ if ($RealPawnIoSetup) {
     Assert-Case ($r.Code -eq 20 -and $r.Out -match 'hash=mismatch') 'pawnio_alterado_rechazado' $r.Out
 }
 
+if ($script:failed.Count) {
+    Write-Host "FAIL failed=$($script:failed.Count) passed=$script:passed cases=$($script:failed -join ',')"
+    exit 1
+}
 Write-Host "PASS checks=$script:passed real_pawnio=$([int][bool]$RealPawnIoSetup) drivers_installed=0 process_termination=0"
