@@ -167,7 +167,8 @@ jobs:
         if: github.ref_type != 'tag' || vars.MACE_PUBLICAR_RELEASES != 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: mace-instalador-prueba-${{ github.ref_name }}
+          # Sin '/' del nombre de rama: no se admite en nombres de artefacto.
+          name: mace-instalador-prueba-${{ github.run_number }}
           retention-days: 3
           if-no-files-found: error
           path: |
